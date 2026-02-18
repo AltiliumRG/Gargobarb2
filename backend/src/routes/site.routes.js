@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { verifyToken, requireRole } = require("../middleware/auth.middleware");
-const ctrl = require("../controllers/SiteBuilder.controller");
+const ctrl = require("../controllers/siteBuilder.controller");
 
 // Obtener builder completo
 router.get(

@@ -5,7 +5,7 @@
 const bcrypt = require("bcryptjs");
 const { OAuth2Client } = require("google-auth-library");
 const authService = require("../services/auth.service");
-const User = require("../models/User");
+const { User } = require("../models");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -14,11 +14,11 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // ============================================================
 const sendAuthCookies = (res, accessToken, refreshToken) => {
   const cookieOptions = {
-  httpOnly: true,
-  secure: false,       // localhost
-  sameSite: "lax",     // 🔥 ESTE ES EL FIX REAL
-  path: "/",
-};
+    httpOnly: true,
+    secure: false,       // localhost
+    sameSite: "lax",     // 🔥 ESTE ES EL FIX REAL
+    path: "/",
+  };
 
 
   res.cookie("access_token", accessToken, {

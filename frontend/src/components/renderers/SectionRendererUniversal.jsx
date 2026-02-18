@@ -41,6 +41,7 @@ export default function SectionRendererUniversal({
           section={section}
           content={content}
           styles={baseStyle}
+          site={site}
           preview={preview}
         />
       );
@@ -86,10 +87,10 @@ export default function SectionRendererUniversal({
 ====================================================== */
 
 function Hero({ section, content, styles, site, preview }) {
-  const builder = useBuilder?.();
+  const builder = useBuilder();
 
   const update = (key, value) => {
-    if (preview) return;
+    if (preview || !builder) return;
     builder.updateSectionContent(section.id, {
       ...content,
       [key]: value,
@@ -108,34 +109,47 @@ function Hero({ section, content, styles, site, preview }) {
         backgroundSize: "cover",
         backgroundPosition: "center",
         position: "relative",
-        padding: "160px 20px",
+        minHeight: "80vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "100px 20px",
       }}
     >
       {/* overlay oscuro profesional */}
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-black/60 z-0" />
 
-      <div className="relative z-10 max-w-6xl mx-auto text-center">
+      <div className="relative z-10 max-w-6xl mx-auto text-center w-full">
+        {!preview ? (
+          <input
+            value={content.title || ""}
+            onChange={(e) => update("title", e.target.value)}
+            className="text-6xl md:text-8xl font-bold mb-6 bg-transparent outline-none w-full text-center text-white placeholder-white/50"
+            placeholder="Título hero"
+          />
+        ) : (
+          <h2 className="text-6xl md:text-8xl font-bold mb-6 text-white leading-tight">
+            {content.title || "Tu estilo empieza aquí"}
+          </h2>
+        )}
 
-        <input
-          disabled={preview}
-          value={content.title || ""}
-          onChange={(e) => update("title", e.target.value)}
-          className="text-6xl font-bold mb-6 bg-transparent outline-none w-full text-center"
-          placeholder="Título hero"
-        />
-
-        <textarea
-          disabled={preview}
-          value={content.subtitle || ""}
-          onChange={(e) => update("subtitle", e.target.value)}
-          className="text-xl mb-8 opacity-90 bg-transparent outline-none w-full text-center"
-          placeholder="Subtítulo"
-        />
+        {!preview ? (
+          <textarea
+            value={content.subtitle || ""}
+            onChange={(e) => update("subtitle", e.target.value)}
+            className="text-xl md:text-2xl mb-8 opacity-90 bg-transparent outline-none w-full text-center text-white placeholder-white/50 resize-none h-auto"
+            placeholder="Subtítulo"
+          />
+        ) : (
+          <p className="text-xl md:text-2xl mb-8 text-white opacity-90 max-w-3xl mx-auto">
+            {content.subtitle || "Cortes profesionales premium"}
+          </p>
+        )}
 
         <button
-          className="px-10 py-4 rounded-xl font-semibold text-black text-lg"
+          className="px-10 py-5 rounded-xl font-bold text-black text-lg uppercase tracking-widest hover:scale-105 transition-transform"
           style={{
-            background: site?.secondary_color || "#facc15",
+            background: site?.primary_color || styles.textColor || "#facc15",
           }}
         >
           {content.buttonText || "Reservar cita"}
@@ -151,12 +165,12 @@ function Hero({ section, content, styles, site, preview }) {
    SERVICES
 ====================================================== */
 
-function Services({ section, content, styles, preview }) {
-  const builder = useBuilder?.();
+function Services({ section, content, styles, site, preview }) {
+  const builder = useBuilder();
   const services = content.items || [];
 
   const updateItems = (items) => {
-    if (preview) return;
+    if (preview || !builder) return;
     builder.updateSectionContent(section.id, {
       ...content,
       items,
@@ -280,7 +294,11 @@ function Services({ section, content, styles, preview }) {
                 {/* CTA */}
                 <a
                   href={srv.buttonLink || "#"}
-                  className="block text-center bg-yellow-500 text-black py-2 rounded font-semibold hover:bg-yellow-400"
+                  className="block text-center py-2 rounded font-semibold transition-colors"
+                  style={{
+                    backgroundColor: site?.primary_color || "#facc15",
+                    color: "#000",
+                  }}
                 >
                   {srv.buttonText || "Reservar"}
                 </a>
@@ -407,7 +425,7 @@ function Contact({ section, content, styles, site, preview }) {
         <button
           className="px-6 py-3 rounded-lg font-semibold"
           style={{
-            background: site?.secondary_color || "#facc15",
+            background: site?.primary_color || "#facc15",
             color: "#000",
           }}
         >

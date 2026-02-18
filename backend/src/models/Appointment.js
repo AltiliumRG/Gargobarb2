@@ -1,8 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../db');
-const User = require('./User');
-const Service = require('./Service');
-const Barbershop = require('./Barbershop');
+const { sequelize } = require('../config/db');
 
 const Appointment = sequelize.define('Appointment', {
   id: {
@@ -58,10 +55,5 @@ const Appointment = sequelize.define('Appointment', {
   timestamps: true,
   underscored: true,
 });
-
-// Relaciones
-Appointment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-Appointment.belongsTo(Barbershop, { foreignKey: 'barbershop_id', as: 'barbershop' });
-Appointment.belongsTo(Service, { foreignKey: 'service_id', as: 'service' });
 
 module.exports = Appointment;

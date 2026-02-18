@@ -83,12 +83,12 @@ export function BuilderProvider({ children }) {
           sections: p.sections.map((s) =>
             s.id === sectionId
               ? {
-                  ...s,
-                  content: {
-                    ...(s.content || {}),
-                    ...newContent,
-                  },
-                }
+                ...s,
+                content: {
+                  ...(s.content || {}),
+                  ...newContent,
+                },
+              }
               : s
           ),
         };
@@ -109,12 +109,12 @@ export function BuilderProvider({ children }) {
           sections: p.sections.map((s) =>
             s.id === sectionId
               ? {
-                  ...s,
-                  styles: {
-                    ...(s.styles || {}),
-                    ...newStyles,
-                  },
-                }
+                ...s,
+                styles: {
+                  ...(s.styles || {}),
+                  ...newStyles,
+                },
+              }
               : s
           ),
         };
@@ -129,9 +129,9 @@ export function BuilderProvider({ children }) {
     const updatedPages = pages.map((p) =>
       p.id === currentPageId
         ? {
-            ...p,
-            sections: p.sections.filter((s) => s.id !== sectionId),
-          }
+          ...p,
+          sections: p.sections.filter((s) => s.id !== sectionId),
+        }
         : p
     );
 
@@ -144,13 +144,16 @@ export function BuilderProvider({ children }) {
   ============================================================ */
   const saveDraft = async () => {
     if (!site) return;
-
-    await api.post("/sites/builder/save", {
-      siteId: site.id,
-      pages,
-    });
-
-    alert("💾 Guardado");
+    try {
+      await api.post("/sites/builder/save", {
+        siteId: site.id,
+        pages,
+      });
+      // toast.success("Borrador guardado"); // lo manejaremos en el componente
+    } catch (err) {
+      console.error("❌ Error saving:", err);
+      throw err;
+    }
   };
 
   /* ============================================================
@@ -158,9 +161,12 @@ export function BuilderProvider({ children }) {
   ============================================================ */
   const publishSite = async () => {
     if (!site) return;
-
-    await api.post(`/sites/builder/publish/${site.id}`);
-    alert("🚀 Publicado");
+    try {
+      await api.post(`/sites/builder/publish/${site.id}`);
+    } catch (err) {
+      console.error("❌ Error publishing:", err);
+      throw err;
+    }
   };
 
   return (

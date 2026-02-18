@@ -1,7 +1,5 @@
-// ✅ backend/src/models/Service.js
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../db');
-const Barbershop = require('./Barbershop');
+const { sequelize } = require('../config/db');
 
 const Service = sequelize.define('Service', {
   id: {
@@ -13,7 +11,7 @@ const Service = sequelize.define('Service', {
     type: DataTypes.BIGINT.UNSIGNED,
     allowNull: false,
     references: {
-      model: Barbershop,
+      model: 'barbershops',
       key: 'id'
     },
     onDelete: 'CASCADE',
@@ -44,9 +42,5 @@ const Service = sequelize.define('Service', {
   timestamps: true,
   underscored: true
 });
-
-// 🔗 Relaciones
-Barbershop.hasMany(Service, { foreignKey: 'barbershop_id' });
-Service.belongsTo(Barbershop, { foreignKey: 'barbershop_id' });
 
 module.exports = Service;

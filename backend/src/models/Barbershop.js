@@ -1,6 +1,6 @@
 // backend/src/models/Barbershop.js
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../db");
+const { sequelize } = require("../config/db");
 
 const Barbershop = sequelize.define(
   "Barbershop",

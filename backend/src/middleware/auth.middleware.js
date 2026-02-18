@@ -3,7 +3,7 @@
 // ============================================================
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const User = require("../models/User");
+const { User } = require("../models");
 
 // ============================================================
 // 🔐 1️⃣ VERIFICAR ACCESS TOKEN (15 min)

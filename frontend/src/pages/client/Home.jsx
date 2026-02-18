@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogOut, Settings, HelpCircle, Info, Phone } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import api from "../../api/api";
 
 const Home = () => {
-  const { user, logout } = useAuth(); // ← AHORA viene del contexto
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [barbershops, setBarbershops] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +20,7 @@ const Home = () => {
         const res = await api.get("/barbershops", {
           withCredentials: true,
         });
-
+        console.log("📥 Barbershops loaded:", res.data);
         setBarbershops(res.data);
       } catch (err) {
         console.error("❌ Error al obtener barberías:", err);
@@ -36,7 +38,7 @@ const Home = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-300 bg-black">
-        <p>Cargando barberías...</p>
+        <p className="animate-pulse">Cargando barberías...</p>
       </div>
     );
   }
@@ -57,7 +59,7 @@ const Home = () => {
         <motion.h1
           className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent cursor-pointer"
           whileHover={{ scale: 1.05 }}
-          onClick={() => (window.location.href = "/client/home")}
+          onClick={() => navigate("/client/home")}
         >
           GargoBarb 💈
         </motion.h1>
@@ -120,9 +122,16 @@ const Home = () => {
                   scale: 1.05,
                   boxShadow: "0px 0px 20px rgba(255, 215, 0, 0.3)",
                 }}
-                onClick={() =>
-                  (window.location.href = `/client/barbershop/${shop.id}`)
-                }
+                onClick={() => {
+                  console.log("🎯 Shop clicked:", shop);
+                  if (shop.site && shop.site.slug) {
+                    console.log("🚀 Redirecting to custom site:", `/b/${shop.site.slug}`);
+                    navigate(`/b/${shop.site.slug}`);
+                  } else {
+                    console.warn("⚠️ No custom site found, going to default view");
+                    navigate(`/client/barbershop/${shop.id}`);
+                  }
+                }}
                 className="cursor-pointer bg-gray-900/70 border border-yellow-500/20 rounded-2xl p-5 hover:border-yellow-500/50 transition-all duration-300"
               >
                 <h3 className="text-xl font-semibold text-yellow-400 mb-2">
@@ -135,6 +144,11 @@ const Home = () => {
                     {shop.owner?.full_name || "Desconocido"}
                   </span>
                 </p>
+                {shop.site && (
+                  <span className="text-[10px] uppercase tracking-widest text-yellow-600/50 block mt-3">
+                    Sitio {shop.site.status === 'published' ? 'Personalizado' : 'En Borrador'}
+                  </span>
+                )}
               </motion.div>
             ))}
           </motion.div>

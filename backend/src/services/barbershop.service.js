@@ -1,4 +1,4 @@
-const BarbershopRepository = require("../repositories/BarbershopRepository");
+const BarbershopRepository = require("../repositories/barbershop.repository");
 
 module.exports = {
   async create(userId, dto) {

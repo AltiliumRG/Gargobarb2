@@ -1,4 +1,4 @@
-const SitePageRepository = require("../repositories/SitePageRepository");
+const SitePageRepository = require("../repositories/sitePage.repository");
 
 exports.create = async (req, res) => {
   const page = await SitePageRepository.create(

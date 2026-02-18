@@ -2,7 +2,7 @@
 // 📁 backend/src/models/User.js
 // ============================================================
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../db");
+const { sequelize } = require("../config/db");
 
 const User = sequelize.define(
   "User",

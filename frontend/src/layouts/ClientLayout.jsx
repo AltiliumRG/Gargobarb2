@@ -8,6 +8,7 @@ const ClientLayout = () => {
       {/* 👉 Por defecto redirige al Home */}
       <Route path="/" element={<Navigate to="home" replace />} />
       <Route path="home" element={<Home />} />
+      <Route path="barbershop/:id" element={<div>Detalle de Barbería (Próximamente)</div>} />
       {/* Cualquier ruta desconocida también lleva al Home */}
       <Route path="*" element={<Navigate to="home" replace />} />
     </Routes>

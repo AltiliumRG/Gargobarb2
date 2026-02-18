@@ -6,17 +6,15 @@
 import api from "./api";
 
 // -----------------------------------------------
-// Obtener TODAS las barberías públicas
-// GET /api/public/barbershops
+// Obtener barbería pública por slug
+// GET /api/b/:slug
 // -----------------------------------------------
-export const getPublicBarbershops = () => {
-  return api.get("/public/barbershops");
+export const getBySlug = (slug) => {
+  return api.get(`/b/${slug}`);
 };
 
-// -----------------------------------------------
-// Obtener barbería pública por slug o id
-// GET /api/public/barbershops/:slug
-// -----------------------------------------------
-export const getPublicBarbershopBySlug = (slug) => {
-  return api.get(`/public/barbershops/${slug}`);
+const barberPublicApi = {
+  getBySlug,
 };
+
+export default barberPublicApi;

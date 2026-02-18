@@ -22,10 +22,7 @@ const barbershopRoutes = require("./routes/barbershop.routes");
 const serviceRoutes = require("./routes/service.routes");
 const appointmentRoutes = require("./routes/appointment.routes");
 const uploadRoutes = require("./routes/upload.routes");
-
 const siteRoutes = require("./routes/site.routes");
-
-
 const barberDesignRoutes = require("./routes/barberDesign.routes");
 const barberPublicRoutes = require("./routes/barberPublic.routes");
 const app = express();
@@ -104,15 +101,6 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true, status: "API funcionando correctamente 🚀" });
 });
 
-// ===============================================
-// 🚀 Rutas principales
-// ===============================================
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/barbershops", barbershopRoutes);
-app.use("/api/services", serviceRoutes);
-app.use("/api/appointments", appointmentRoutes);
-app.use("/api/upload", uploadRoutes);
 // ===============================================
 // 🚀 Rutas principales
 // ===============================================

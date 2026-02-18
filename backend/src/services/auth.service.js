@@ -3,7 +3,7 @@
 // ============================================================
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
-const User = require("../models/User");
+const { User } = require("../models");
 const jwtUtil = require("../utils/jwt"); // signAccessToken, signRefreshToken, verifyRefreshToken
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "12");
@@ -109,13 +109,13 @@ async function login({ usernameOrEmail, password }) {
     throw err;
   }
 
-if (!user.password_hash) {
-  const err = new Error(
-    "Esta cuenta fue creada con Google. Inicia sesión con Google."
-  );
-  err.status = 409; // ❗ no auth error
-  throw err;
-}
+  if (!user.password_hash) {
+    const err = new Error(
+      "Esta cuenta fue creada con Google. Inicia sesión con Google."
+    );
+    err.status = 409; // ❗ no auth error
+    throw err;
+  }
 
 
   const valid = await verifyPassword(password, user.password_hash);

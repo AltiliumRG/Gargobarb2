@@ -3,7 +3,7 @@ const BarbershopSite = require("../models/BarbershopSite");
 const SitePage = require("../models/SitePage");
 const SiteSection = require("../models/SiteSection");
 const slugify = require("../utils/slugify");
-const TemplateService = require("./SiteTemplateService");
+const TemplateService = require("./siteTemplate.service");
 
 exports.createSiteForBarbershop = async ({
   barbershopId,

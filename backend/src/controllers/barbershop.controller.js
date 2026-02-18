@@ -1,6 +1,5 @@
-const Barbershop = require("../models/Barbershop");
-const User = require("../models/User");
-const SiteService = require("../services/SiteService");
+const { Barbershop, User, BarbershopSite } = require("../models");
+const SiteService = require("../services/site.service");
 
 /* ============================================================
    📍 Crear barbería (ADMIN o DUEÑO)
@@ -117,16 +116,25 @@ exports.getAllBarbershops = async (req, res) => {
       where = { is_active: true };
     }
 
+
     const barbershops = await Barbershop.findAll({
       where,
-      include: {
-        model: User,
-        as: "owner",
-        attributes: ["id", "full_name", "email", "username"],
-      },
+      include: [
+        {
+          model: User,
+          as: "owner",
+          attributes: ["id", "full_name", "email", "username"],
+        },
+        {
+          model: BarbershopSite,
+          as: "site",
+          attributes: ["status", "slug"],
+        },
+      ],
       order: [["created_at", "DESC"]],
     });
 
+    console.log(`✅ Enviando ${barbershops.length} barberías. Ejemplo site:`, barbershops[0]?.site);
     res.json(barbershops);
   } catch (error) {
     console.error("❌ Error al obtener barberías:", error);
