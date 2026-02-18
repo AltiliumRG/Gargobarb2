@@ -31,6 +31,18 @@ router.post("/", requireRole(1, 2), barbershopController.createBarbershop);
  */
 router.get("/", barbershopController.getAllBarbershops);
 
+
+/**
+ * 🔹 Obtener barberías del barbero autenticado
+ * - Solo dueños (role_id = 2)
+ */
+
+/**
+ * 🔹 Obtener barberías del dueño autenticado
+ * - Solo dueños (role_id = 2)
+ */
+router.get("/my", requireRole(2), barbershopController.getMyBarbershops);
+
 /**
  * 🔹 Obtener una barbería por ID
  * - Admin puede ver cualquiera

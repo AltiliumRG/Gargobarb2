@@ -109,11 +109,14 @@ async function login({ usernameOrEmail, password }) {
     throw err;
   }
 
-  if (!user.password_hash) {
-    const err = new Error("El usuario no tiene contraseña (login por Google).");
-    err.status = 403;
-    throw err;
-  }
+if (!user.password_hash) {
+  const err = new Error(
+    "Esta cuenta fue creada con Google. Inicia sesión con Google."
+  );
+  err.status = 409; // ❗ no auth error
+  throw err;
+}
+
 
   const valid = await verifyPassword(password, user.password_hash);
   if (!valid) {

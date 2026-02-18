@@ -12,43 +12,42 @@ exports.verifyToken = async (req, res, next) => {
   const token = req.cookies?.access_token;
 
   if (!token) {
-    return res.status(401).json({ message: "No hay token de acceso" });
+    return res.status(401).json({ code: "NO_TOKEN" });
   }
 
   try {
-    // ⚠ Importante: en access token usamos SUB (sub: user.id)
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findByPk(decoded.sub, {
-      attributes: {
-        exclude: ["password_hash", "refresh_token_hash"],
-      },
+      attributes: { exclude: ["password_hash", "refresh_token_hash"] },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+      return res.status(404).json({ code: "USER_NOT_FOUND" });
     }
 
     req.user = user;
     next();
   } catch (err) {
-    console.error("❌ Error verifyToken:", err.message);
-    return res.status(403).json({ message: "Token inválido o expirado" });
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ code: "TOKEN_EXPIRED" });
+    }
+
+    return res.status(401).json({ code: "TOKEN_INVALID" });
   }
 };
 
 // ============================================================
-// 🔄 2️⃣ REFRESH TOKEN
+// 🔄 2️⃣ REFRESH TOKEN (ROTACIÓN REAL)
 // ============================================================
 exports.refreshTokenController = async (req, res) => {
   const refreshToken = req.cookies?.refresh_token;
 
   if (!refreshToken) {
-    return res.status(401).json({ message: "No hay refresh token" });
+    return res.status(401).json({ code: "NO_REFRESH_TOKEN" });
   }
 
   try {
-    // ⚠ Refresh token también usa SUB
     const decoded = jwt.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET
@@ -56,21 +55,20 @@ exports.refreshTokenController = async (req, res) => {
 
     const user = await User.findByPk(decoded.sub);
 
-    if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+    if (!user || !user.refresh_token_hash) {
+      return res.status(403).json({ code: "REFRESH_INVALID" });
     }
 
-    // Verificar hash del refresh token
     const isValid = await bcrypt.compare(
       refreshToken,
       user.refresh_token_hash
     );
 
     if (!isValid) {
-      return res.status(403).json({ message: "Refresh token inválido" });
+      return res.status(403).json({ code: "REFRESH_INVALID" });
     }
 
-    // Crear nuevo access token de 15 min
+    // 🆕 Nuevo ACCESS TOKEN
     const newAccessToken = jwt.sign(
       {
         sub: user.id,
@@ -81,18 +79,38 @@ exports.refreshTokenController = async (req, res) => {
       { expiresIn: "15m" }
     );
 
-    // Setear cookie
-    res.cookie("access_token", newAccessToken, {
+    // 🆕 Nuevo REFRESH TOKEN (ROTACIÓN)
+    const newRefreshToken = jwt.sign(
+      { sub: user.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    user.refresh_token_hash = await bcrypt.hash(newRefreshToken, 10);
+    await user.save();
+
+    // 🍪 Cookies
+    const cookieOptions = {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      path: "/",
+    };
+
+    res.cookie("access_token", newAccessToken, {
+      ...cookieOptions,
       maxAge: 15 * 60 * 1000,
     });
 
-    res.json({ message: "Nuevo access token generado" });
+    res.cookie("refresh_token", newRefreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ message: "Tokens renovados correctamente" });
   } catch (err) {
-    console.error("❌ Error refreshTokenController:", err.message);
-    return res.status(403).json({ message: "Refresh token expirado o inválido" });
+    console.error("❌ Refresh error:", err.message);
+    return res.status(403).json({ code: "REFRESH_EXPIRED" });
   }
 };
 
@@ -111,12 +129,18 @@ exports.logout = async (req, res) => {
       }
     }
 
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
+    const cookieOptions = {
+      path: "/",
+      sameSite: "lax",
+      secure: false
+    };
+
+    res.clearCookie("access_token", cookieOptions);
+    res.clearCookie("refresh_token", cookieOptions);
 
     res.json({ message: "Sesión cerrada correctamente" });
   } catch (err) {
-    console.error("❌ Error logout:", err.message);
+    console.error("❌ Logout error:", err.message);
     res.status(500).json({ message: "Error al cerrar sesión" });
   }
 };
@@ -141,13 +165,9 @@ exports.requireRole = (...allowedRoles) => {
 };
 
 // ============================================================
-// 🔓 5️⃣ PRIVATE ENDPOINT → Devuelve el usuario autenticado
+// 🔓 5️⃣ ENDPOINT PRIVADO
 // ============================================================
 exports.private = (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "No autenticado" });
-  }
-
   res.json({
     message: "Sesión válida",
     user: req.user,

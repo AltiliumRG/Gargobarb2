@@ -23,7 +23,18 @@ const serviceRoutes = require("./routes/service.routes");
 const appointmentRoutes = require("./routes/appointment.routes");
 const uploadRoutes = require("./routes/upload.routes");
 
+const siteRoutes = require("./routes/site.routes");
+
+
+const barberDesignRoutes = require("./routes/barberDesign.routes");
+const barberPublicRoutes = require("./routes/barberPublic.routes");
 const app = express();
+
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+  next();
+});
 
 // ===============================================
 // 🛡️ Middlewares globales de seguridad
@@ -36,7 +47,7 @@ app.use(
     contentSecurityPolicy: false,  // DESACTIVA CSP (también rompe Google)
   })
 );
-
+app.set("trust proxy", 1);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -46,13 +57,11 @@ app.use(cookieParser());
 // ===============================================
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      process.env.FRONTEND_URL,
-    ].filter(Boolean),
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
+
 
 // ===============================================
 // 📜 Logger HTTP
@@ -104,6 +113,28 @@ app.use("/api/barbershops", barbershopRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/upload", uploadRoutes);
+// ===============================================
+// 🚀 Rutas principales
+// ===============================================
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+
+// 🧔‍♂️ BARBERO (creación y diseño de su página)
+app.use("/api/barber/design", barberDesignRoutes);
+
+// 🏪 BARBERÍAS (CRUD general)
+app.use("/api/barbershops", barbershopRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/appointments", appointmentRoutes);
+
+// 🌍 PÚBLICO (clientes ven la barbería por slug)
+app.use("/api/b", barberPublicRoutes);
+
+app.use("/api/upload", uploadRoutes);
+
+// 🧱 SITIOS (builder de barberías)
+app.use("/api/sites", siteRoutes);
+
 
 // ===============================================
 // ⚠️ Error Handler

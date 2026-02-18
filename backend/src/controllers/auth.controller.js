@@ -13,20 +13,25 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // 🍪 Función para enviar cookies seguras (access + refresh)
 // ============================================================
 const sendAuthCookies = (res, accessToken, refreshToken) => {
+  const cookieOptions = {
+  httpOnly: true,
+  secure: false,       // localhost
+  sameSite: "lax",     // 🔥 ESTE ES EL FIX REAL
+  path: "/",
+};
+
+
   res.cookie("access_token", accessToken, {
-    httpOnly: true,
-    secure: true, // cambiar a true en producción con HTTPS
-    sameSite: "none",
-    maxAge: 15 * 60 * 1000, // 15 min
+    ...cookieOptions,
+    maxAge: 15 * 60 * 1000,
   });
 
   res.cookie("refresh_token", refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+    ...cookieOptions,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
+
 
 // ============================================================
 // 🟦 REGISTRO
@@ -102,12 +107,6 @@ exports.refreshTokenController = async (req, res) => {
 
     const result = await authService.refreshTokens(refreshToken);
 
-    // Guardar nuevo hash
-    const hash = await bcrypt.hash(result.refreshToken, 10);
-    await User.update(
-      { refresh_token_hash: hash },
-      { where: { id: result.user.id } }
-    );
 
     // Nuevas cookies
     sendAuthCookies(res, result.accessToken, result.refreshToken);

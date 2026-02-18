@@ -80,8 +80,7 @@ router.post("/google", googleAuth);
 // ==========================================
 // 🔄 REFRESH TOKEN
 // ==========================================
-router.post("/refresh-token", refreshTokenController);
-router.get("/refresh", refreshTokenController); // usado por el frontend
+router.post("/refresh", refreshTokenController);
 
 // ==========================================
 // 🚪 LOGOUT

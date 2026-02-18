@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import api from "../api/api";
 
 const AuthContext = createContext(null);
@@ -8,14 +8,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   /* ============================================================
-     🔍 VALIDAR SESIÓN AL INICIAR LA APP
+     CHECK SESSION AL CARGAR APP
   ============================================================ */
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await api.get("/auth/private", { withCredentials: true });
+        const res = await api.get("/auth/private", {
+          withCredentials: true,
+        });
+
         setUser(res.data.user);
+        console.log("🟢 SESIÓN ACTIVA:", res.data.user);
       } catch (err) {
+        console.log("🔴 NO SESSION");
         setUser(null);
       } finally {
         setLoading(false);
@@ -26,42 +31,24 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /* ============================================================
-     🔄 AUTO-REFRESH DE TOKENS CADA 10 MINUTOS
-  ============================================================ */
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        await api.get("/auth/refresh", { withCredentials: true });
-      } catch (err) {
-        console.log("❌ Refresh falló, cerrando sesión...");
-        setUser(null);
-      }
-    }, 10 * 60 * 1000); // 10 minutos
-
-    return () => clearInterval(interval);
-  }, []);
-
-  /* ============================================================
-     🔐 LOGIN (SETEAR USUARIO EN CONTEXTO)
+     LOGIN
   ============================================================ */
   const login = (userData) => {
     setUser(userData);
   };
 
   /* ============================================================
-     🚪 LOGOUT
+     LOGOUT
   ============================================================ */
   const logout = async () => {
     try {
       await api.post("/auth/logout", {}, { withCredentials: true });
-    } catch (err) {
-      console.log("Error al cerrar sesión:", err);
-    }
+    } catch {}
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

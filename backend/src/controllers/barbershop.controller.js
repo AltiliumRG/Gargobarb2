@@ -1,5 +1,6 @@
 const Barbershop = require("../models/Barbershop");
 const User = require("../models/User");
+const SiteService = require("../services/SiteService");
 
 /* ============================================================
    📍 Crear barbería (ADMIN o DUEÑO)
@@ -10,7 +11,7 @@ exports.createBarbershop = async (req, res) => {
     const user = req.user;
 
     console.log("📥 BODY:", req.body);
-    console.log("👤 USER:", req.user);
+    console.log("👤 USER:", user);
 
     if (!name || !address || !city) {
       return res.status(400).json({ error: "Todos los campos son obligatorios" });
@@ -22,39 +23,51 @@ exports.createBarbershop = async (req, res) => {
 
     let assignedUserId;
 
-    // 👑 ADMIN → puede asignar dueño (rol 2)
+    // 👑 ADMIN
     if (user.role_id === 1) {
       if (!user_id) {
-        return res.status(400).json({ error: "Debe seleccionar un dueño para la barbería" });
+        return res
+          .status(400)
+          .json({ error: "Debe seleccionar un dueño para la barbería" });
       }
 
       const owner = await User.findByPk(user_id);
-      if (!owner) return res.status(404).json({ error: "El usuario asignado no existe" });
+      if (!owner) {
+        return res.status(404).json({ error: "El usuario asignado no existe" });
+      }
 
       if (owner.role_id !== 2) {
-        return res.status(400).json({ error: "El usuario asignado debe tener rol de dueño" });
+        return res
+          .status(400)
+          .json({ error: "El usuario asignado debe tener rol de dueño" });
       }
 
       assignedUserId = owner.id;
     }
 
-    // 👤 DUEÑO → solo puede crear una barbería propia
+    // 👤 DUEÑO
     else if (user.role_id === 2) {
-      const existing = await Barbershop.findOne({ where: { user_id: user.id } });
+      const existing = await Barbershop.findOne({
+        where: { user_id: user.id },
+      });
+
       if (existing) {
         return res.status(400).json({
           error: "Ya tienes una barbería registrada. Solo puedes tener una.",
         });
       }
+
       assignedUserId = user.id;
     }
 
-    // 🚫 Otros roles → sin permisos
+    // 🚫 OTROS ROLES
     else {
-      return res.status(403).json({ error: "No tienes permisos para crear barberías" });
+      return res
+        .status(403)
+        .json({ error: "No tienes permisos para crear barberías" });
     }
 
-    // ✅ Crear barbería
+    // ✅ CREAR BARBERÍA
     const newBarbershop = await Barbershop.create({
       user_id: assignedUserId,
       name,
@@ -62,22 +75,24 @@ exports.createBarbershop = async (req, res) => {
       city,
     });
 
-    // 🔁 Traer con datos del dueño
-    const barbershopWithOwner = await Barbershop.findByPk(newBarbershop.id, {
-      include: {
-        model: User,
-        as: "owner",
-        attributes: ["id", "full_name", "email", "username"],
-      },
+    // 🌐 CREAR SITIO WEB POR DEFECTO
+    await SiteService.createSiteForBarbershop({
+      barbershopId: newBarbershop.id,
+      name,
+      template: "default",
+      primaryColor: "#111827",
+      secondaryColor: "#facc15",
+      fontFamily: "Inter",
     });
 
-    res.status(201).json({
-      message: "Barbería creada con éxito",
-      data: barbershopWithOwner,
+    // ✅ RESPUESTA ÚNICA
+    return res.status(201).json({
+      message: "Barbería y sitio creados correctamente",
+      barbershopId: newBarbershop.id,
     });
   } catch (error) {
     console.error("❌ Error al crear barbería:", error);
-    res.status(500).json({ error: "Error al crear la barbería" });
+    return res.status(500).json({ error: "Error al crear la barbería" });
   }
 };
 
@@ -198,6 +213,29 @@ exports.updateBarbershop = async (req, res) => {
     res.status(500).json({ error: "Error al actualizar la barbería" });
   }
 };
+/* ============================================================
+   📍 Obtener barberías del dueño autenticado
+============================================================ */
+exports.getMyBarbershops = async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (user.role_id !== 2) {
+      return res.status(403).json({ error: "Solo dueños pueden acceder" });
+    }
+
+    const barbershops = await Barbershop.findAll({
+      where: { user_id: user.id },
+      order: [["created_at", "DESC"]],
+    });
+
+    res.json(barbershops);
+  } catch (error) {
+    console.error("❌ Error en getMyBarbershops:", error);
+    res.status(500).json({ error: "Error al obtener barberías" });
+  }
+};
+
 
 /* ============================================================
    🗑️ Eliminar barbería (solo admin)

@@ -1,0 +1,38 @@
+{
+  "pages": [
+    {
+      "title": "Inicio",
+      "slug": "home",
+      "order": 1,
+      "sections": [
+        {
+          "type": "hero",
+          "order": 1,
+          "content": {
+            "title": "Bienvenido a tu barbería",
+            "subtitle": "Cortes profesionales · Estilo moderno",
+            "button": "Reservar cita"
+          },
+          "styles": {
+            "align": "center"
+          }
+        },
+        {
+          "type": "services",
+          "order": 2,
+          "content": {
+            "title": "Nuestros servicios"
+          }
+        },
+        {
+          "type": "contact",
+          "order": 3,
+          "content": {
+            "title": "Contáctanos",
+            "showMap": true
+          }
+        }
+      ]
+    }
+  ]
+}

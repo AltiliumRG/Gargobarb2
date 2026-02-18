@@ -4,21 +4,22 @@ import { useAuth } from "./AuthContext";
 export default function PrivateRoute({ children, role }) {
   const { user, loading } = useAuth();
 
-  // ⏳ IMPORTANTE: NO redirigir hasta que AuthContext termine de validar
   if (loading) {
-    return <div>Cargando...</div>; // o tu spinner
+    return <div>Cargando...</div>;
   }
 
-  // ❌ Si no hay sesión → al login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // 🔒 Validación de rol
-  if (role && user.role_id !== role) {
+  // 🔑 NORMALIZAR ROL
+  const userRole = user.role_id ?? user.role;
+
+  // 🔒 Validación segura
+  if (role && userRole !== role) {
     return <Navigate to="/" replace />;
   }
 
-  // ✔ Usuario válido
   return children;
 }
+
