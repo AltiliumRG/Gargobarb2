@@ -7,10 +7,9 @@ export default function BarberSidebar() {
   const [open, setOpen] = useState(true);
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-      isActive
-        ? "bg-yellow-500 text-black font-semibold"
-        : "text-gray-300 hover:bg-gray-800"
+    `flex items-center gap-2 px-4 py-2 rounded-lg transition ${isActive
+      ? "bg-yellow-500 text-black font-semibold"
+      : "text-gray-300 hover:bg-gray-800"
     }`;
 
   return (

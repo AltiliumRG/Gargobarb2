@@ -24,13 +24,35 @@ const Barbershop = sequelize.define(
       type: DataTypes.STRING(150),
       allowNull: false,
     },
-    address: {
-      type: DataTypes.STRING(255),
+    /* 🌍 CAMPOS DE UBICACIÓN EXTENDIDOS
+       Relacionado con:
+       - StepBasicInfo.jsx (Selector de ubicación)
+       - LocationData.js (Fuente de datos)
+    */
+    country: {
+      type: DataTypes.STRING(100),
       allowNull: false,
+      defaultValue: "Colombia",
+    },
+    department: {
+      type: DataTypes.STRING(100),
     },
     city: {
       type: DataTypes.STRING(100),
       allowNull: false,
+    },
+    address: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    /* 📍 GEOLOCALIZACIÓN
+       Almacenamos coordenadas para el mapa dinámico.
+    */
+    latitude: {
+      type: DataTypes.DECIMAL(10, 8),
+    },
+    longitude: {
+      type: DataTypes.DECIMAL(11, 8),
     },
     is_active: {
       type: DataTypes.BOOLEAN,

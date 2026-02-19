@@ -16,6 +16,22 @@ exports.createBarbershop = async (req, res) => {
       return res.status(400).json({ error: "Todos los campos son obligatorios" });
     }
 
+    /* 🛡️ VALIDACIÓN DE UNICIDAD
+       Evitamos que se creen múltiples barberías con la misma identidad física.
+       Relacionado con:
+       - WizardContext.jsx (Paso 0 envía estos datos)
+       - models/Barbershop.js (Esquema de BD)
+    */
+    const existingShop = await Barbershop.findOne({
+      where: { name, address, city }
+    });
+
+    if (existingShop) {
+      return res.status(400).json({
+        error: "Ya existe una barbería con ese nombre en esta misma dirección y ciudad."
+      });
+    }
+
     if (!user) {
       return res.status(401).json({ error: "No autenticado" });
     }
@@ -70,28 +86,58 @@ exports.createBarbershop = async (req, res) => {
     const newBarbershop = await Barbershop.create({
       user_id: assignedUserId,
       name,
-      address,
+      country: req.body.country || "Colombia",
+      department: req.body.department,
       city,
+      address,
+      latitude: req.body.latitude || null,
+      longitude: req.body.longitude || null,
     });
+
+    // 🛡️ VALIDACIÓN DE SLUG ÚNICO PARA EL SITIO
+    const slugify = require("../utils/slugify");
+    const slug = slugify(name);
+
+    const existingSite = await BarbershopSite.findOne({ where: { slug } });
+    if (existingSite) {
+      // Si el slug existe, podemos borrar la barbería recién creada para evitar inconsistencia
+      // o simplemente avisar. Borrarla es más limpio para reintentar.
+      await newBarbershop.destroy();
+      return res.status(400).json({
+        error: "El nombre de la barbería ya está en uso. Por favor elige uno diferente."
+      });
+    }
 
     // 🌐 CREAR SITIO WEB POR DEFECTO
-    await SiteService.createSiteForBarbershop({
-      barbershopId: newBarbershop.id,
-      name,
-      template: "default",
-      primaryColor: "#111827",
-      secondaryColor: "#facc15",
-      fontFamily: "Inter",
-    });
+    try {
+      await SiteService.createSiteForBarbershop({
+        barbershopId: newBarbershop.id,
+        name,
+        template: "default",
+        primaryColor: "#111827",
+        secondaryColor: "#facc15",
+        fontFamily: "Inter",
+      });
+    } catch (siteError) {
+      console.error("❌ Error al crear el sitio:", siteError);
+      await newBarbershop.destroy();
+      throw siteError;
+    }
 
-    // ✅ RESPUESTA ÚNICA
+    // ✅ RESPUESTA EXITOSA
     return res.status(201).json({
       message: "Barbería y sitio creados correctamente",
       barbershopId: newBarbershop.id,
     });
   } catch (error) {
     console.error("❌ Error al crear barbería:", error);
-    return res.status(500).json({ error: "Error al crear la barbería" });
+
+    // Si es un error de Sequelize de unicidad
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({ error: "Ya existe un sitio con este nombre." });
+    }
+
+    return res.status(500).json({ error: error.message || "Error al crear la barbería" });
   }
 };
 
@@ -253,13 +299,14 @@ exports.deleteBarbershop = async (req, res) => {
     const { id } = req.params;
     const user = req.user;
 
-    if (user.role_id !== 1) {
-      return res.status(403).json({ error: "Solo los administradores pueden eliminar barberías" });
-    }
-
     const barbershop = await Barbershop.findByPk(id);
     if (!barbershop) {
       return res.status(404).json({ error: "Barbería no encontrada" });
+    }
+
+    // 🔒 Permisos: admin o dueño propietario
+    if (user.role_id !== 1 && barbershop.user_id !== user.id) {
+      return res.status(403).json({ error: "No tienes permiso para eliminar esta barbería" });
     }
 
     await barbershop.destroy();

@@ -29,10 +29,10 @@ export default function TopbarBuilder() {
         </h1>
 
         <nav className="hidden lg:flex gap-8 text-[11px] uppercase tracking-widest font-bold opacity-50">
-          <button onClick={() => navigate("/barber/mis-barberias")} className="hover:opacity-100 transition">
+          <button onClick={() => navigate("/barber/my")} className="hover:opacity-100 transition">
             Mis barberías
           </button>
-          <button onClick={() => navigate("/barber/crear")} className="hover:opacity-100 transition">
+          <button onClick={() => navigate("/barber/create")} className="hover:opacity-100 transition">
             Crear barbería
           </button>
           {site?.slug && (

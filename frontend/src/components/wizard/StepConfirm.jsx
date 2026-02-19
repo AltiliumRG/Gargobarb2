@@ -1,43 +1,48 @@
 import { useNavigate } from "react-router-dom";
 import { createBarbershop } from "../../api/barber.api";
 import { useWizard } from "../../context/WizardContext";
+import toast from "react-hot-toast";
 
 export default function StepConfirm() {
   const navigate = useNavigate();
   const { data } = useWizard();
 
   const handleCreate = async () => {
-    // 🛑 Validación defensiva (evita 400 innecesarios)
+    // 🛑 VALIDACIÓN VISIBLE PARA EL USUARIO
     if (!data?.name || !data?.address || !data?.city) {
-      console.error("❌ Datos incompletos para crear la barbería", data);
+      toast.error("Por favor completa el nombre, dirección y ciudad en el paso 1.");
+      console.error("❌ Datos incompletos:", data);
       return;
     }
 
-    // ✅ Payload EXACTO que espera el backend
+    // ✅ Payload ENRIQUECIDO
     const payload = {
       name: data.name.trim(),
-      address: data.address.trim(),
+      country: data.country,
+      department: data.department,
       city: data.city.trim(),
+      address: data.address.trim(),
     };
 
-    console.log("📤 ENVIANDO SOLO BARBERÍA:", payload);
+    const loadingToast = toast.loading("Creando tu barbería...");
 
     try {
       const res = await createBarbershop(payload);
-
       const { barbershopId } = res.data;
 
       if (!barbershopId) {
-        throw new Error("No se recibió barbershopId desde el backend");
+        throw new Error("No se recibió el ID de la barberia");
       }
 
-      // 🚀 Redirigir directo al builder del sitio
-      navigate(`/barber/builder/${barbershopId}`);
+      toast.success("¡Barbería creada con éxito!", { id: loadingToast });
+
+      // 🚀 REDIRIGIR AL EDITOR
+      setTimeout(() => navigate(`/barber/builder/${barbershopId}`), 1500);
+
     } catch (error) {
-      console.error(
-        "❌ Error creando la barbería:",
-        error.response?.data || error.message
-      );
+      const errorMsg = error.response?.data?.error || "Error al conectar con el servidor";
+      toast.error(errorMsg, { id: loadingToast });
+      console.error("❌ Error API:", error);
     }
   };
 

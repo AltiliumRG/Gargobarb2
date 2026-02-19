@@ -10,26 +10,19 @@ export default function BarberHome() {
   const { user, loading } = useAuth(); // 🔥 auth real
 
   useEffect(() => {
-    // ⛔ esperar auth
-    if (loading) return;
-
-    // ⛔ si no hay user → login
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    // 🔥 Pedir barberías (auth ya verificada en PrivateRoute)
 
     // 🔥 ahora sí pedir barberías
     getMyBarbershops()
       .then((res) => {
         if (!res.data.length) {
-          navigate("/barber/crear");
+          navigate("/barber/create");
         } else {
-          navigate("/barber/mis-barberias");
+          navigate("/barber/my");
         }
       })
-      .catch(() => {
-        navigate("/login");
+      .catch((err) => {
+        console.error("❌ Error fetch barberías en Home:", err);
       })
       .finally(() => setLoadingPage(false));
   }, [loading, user]);

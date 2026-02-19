@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation, Outlet } from "react-router-dom";
 import { useState } from "react";
 import BarberSidebar from "../components/barber/BarberSidebar";
 
@@ -48,7 +48,7 @@ function Topbar({ toggleSidebar }) {
 
   return (
     <header className="h-16 border-b border-gray-800 flex items-center justify-between px-6 bg-[#0b0b0b]">
-      
+
       {/* LEFT */}
       <div className="flex items-center gap-4">
         <button
@@ -118,13 +118,7 @@ export default function BarberLayout() {
 
               {/* PAGE */}
               <main className="flex-1 overflow-auto p-6">
-                <Routes>
-                  <Route index element={<BarberHome />} />
-                  <Route path="my" element={<MyBarbershops />} />
-                  <Route path="create" element={<CreateBarbershopWizard />} />
-                  <Route path="builder/:siteId" element={<Builder />} />
-                  <Route path="preview/:siteId" element={<Preview />} />
-                </Routes>
+                <Outlet />
               </main>
 
             </div>

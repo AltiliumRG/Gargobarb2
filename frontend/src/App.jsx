@@ -12,6 +12,8 @@ import BarberLayout from "./layouts/BarberLayout";
 import Builder from "./pages/barber/Builder";
 import MyBarbershops from "./pages/barber/MyBarbershops";
 import CreateBarbershopWizard from "./pages/barber/CreateBarbershopWizard";
+import BarberHome from "./pages/barber/BarberHome";
+import Preview from "./pages/barber/Preview";
 import { Toaster } from "react-hot-toast";
 
 // import SiteEditor from "./pages/barber/site/SiteEditor";
@@ -48,12 +50,13 @@ const App = () => {
             </PrivateRoute>
           }
         >
-          <Route path="mis-barberias" element={<MyBarbershops />} />
-          <Route path="crear" element={<CreateBarbershopWizard />} />
+          <Route index element={<BarberHome />} />
+          <Route path="my" element={<MyBarbershops />} />
+          <Route path="create" element={<CreateBarbershopWizard />} />
           <Route path="builder/:barbershopId" element={<Builder />} />
-          {/* <Route path="site/editor/:barbershopId" element={<SiteEditor />} /> */}
-
+          <Route path="preview/:siteId" element={<Preview />} />
         </Route>
+
 
         {/* CLIENTE */}
         <Route

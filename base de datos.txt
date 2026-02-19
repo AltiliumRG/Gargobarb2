@@ -48,9 +48,13 @@ CREATE TABLE IF NOT EXISTS barbershops (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     name VARCHAR(150) NOT NULL,
-    slug VARCHAR(150) NOT NULL UNIQUE, -- Requerido por servicios públicos
-    address VARCHAR(255) NOT NULL,
+    slug VARCHAR(150) NOT NULL UNIQUE,
+    country VARCHAR(100) NOT NULL DEFAULT 'Colombia',
+    department VARCHAR(100),
     city VARCHAR(100) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
     is_active BOOLEAN DEFAULT TRUE,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
@@ -150,3 +154,54 @@ CREATE TABLE IF NOT EXISTS barber_schedules (
 
 -- Reactivar llaves foráneas
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- 🛠️ ACTUALIZACIÓN (MIGRACIÓN) - 2026-02-19
+-- ============================================================
+-- 📂 Si tienes errores de "Unknown column", ejecuta estos comandos 
+-- en la consola de PHPMyAdmin (pestaña SQL):
+
+USE gargobarb;
+
+-- 1. Agregar columnas faltantes a barbershops
+ALTER TABLE barbershops 
+ADD COLUMN IF NOT EXISTS slug VARCHAR(150) NOT NULL UNIQUE AFTER name,
+ADD COLUMN IF NOT EXISTS country VARCHAR(100) NOT NULL DEFAULT 'Colombia' AFTER slug,
+ADD COLUMN IF NOT EXISTS department VARCHAR(100) AFTER country,
+ADD COLUMN IF NOT EXISTS latitude DECIMAL(10, 8) AFTER address,
+ADD COLUMN IF NOT EXISTS longitude DECIMAL(11, 8) AFTER latitude;
+
+-- 2. Asegurar que existan las tablas del Site Builder
+CREATE TABLE IF NOT EXISTS barbershop_sites (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    barbershop_id BIGINT UNSIGNED NOT NULL,
+    slug VARCHAR(150) NOT NULL UNIQUE,
+    template VARCHAR(100) NOT NULL,
+    primary_color VARCHAR(20) DEFAULT '#000000',
+    secondary_color VARCHAR(20) DEFAULT '#ffffff',
+    font_family VARCHAR(100) DEFAULT 'Roboto',
+    status ENUM('draft', 'published') DEFAULT 'draft',
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (barbershop_id) REFERENCES barbershops(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS site_pages (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    site_id BIGINT UNSIGNED NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    slug VARCHAR(150) NOT NULL,
+    order_index INT DEFAULT 0,
+    FOREIGN KEY (site_id) REFERENCES barbershop_sites(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS site_sections (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    page_id BIGINT UNSIGNED NOT NULL,
+    type ENUM('hero', 'services', 'gallery', 'about', 'testimonials', 'contact', 'custom') NOT NULL,
+    order_index INT DEFAULT 0,
+    content JSON NOT NULL,
+    styles JSON,
+    is_visible BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (page_id) REFERENCES site_pages(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

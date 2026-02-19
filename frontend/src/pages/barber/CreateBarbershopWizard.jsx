@@ -24,9 +24,8 @@ function WizardSteps() {
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <div
             key={i}
-            className={`flex-1 h-2 mx-1 rounded-full ${
-              i <= step ? "bg-yellow-500" : "bg-gray-700"
-            }`}
+            className={`flex-1 h-2 mx-1 rounded-full ${i <= step ? "bg-yellow-500" : "bg-gray-700"
+              }`}
           />
         ))}
       </div>
@@ -35,13 +34,22 @@ function WizardSteps() {
         {renderStep()}
       </div>
 
-      <div className="flex justify-between mt-6">
-        <button onClick={prevStep} disabled={step === 0}>
+      <div className="flex justify-between mt-8 border-t border-white/5 pt-6">
+        <button
+          onClick={prevStep}
+          disabled={step === 0}
+          className="px-6 py-2 rounded-xl border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+        >
           Atrás
         </button>
-        <button onClick={nextStep}>
-          {step === TOTAL_STEPS - 1 ? "Finalizar" : "Siguiente"}
-        </button>
+        {step < TOTAL_STEPS - 1 && (
+          <button
+            onClick={nextStep}
+            className="px-8 py-2 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-all shadow-lg"
+          >
+            Siguiente
+          </button>
+        )}
       </div>
     </div>
   );

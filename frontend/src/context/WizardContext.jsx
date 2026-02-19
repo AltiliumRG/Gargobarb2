@@ -9,11 +9,20 @@ const TOTAL_STEPS = 4;
 export function WizardProvider({ children }) {
   const [step, setStep] = useState(0);
 
+  /* 🧠 ESTRUCTURA DE DATOS DEL WIZARD
+     Este objeto centraliza toda la información recolectada durante los pasos.
+     Relacionado con:
+     - StepBasicInfo (Paso 0)
+     - StepFeatures (Paso 1)
+     - StepDesign (Paso 2)
+  */
   const [data, setData] = useState({
-    // Paso 1
+    // Paso 0: Identidad y Ubicación
     name: "",
-    address: "",
+    country: "Colombia",
+    department: "",
     city: "",
+    address: "",
 
     // Paso 2
     features: {
@@ -42,7 +51,8 @@ export function WizardProvider({ children }) {
   // -------------------------------
   const isStepValid = () => {
     if (step === 0) {
-      return data.name && data.address && data.city;
+      // ✅ Validamos que los campos obligatorios de la ubicación estén llenos
+      return data.name && data.country && data.department && data.city && data.address;
     }
     return true;
   };
@@ -69,8 +79,10 @@ export function WizardProvider({ children }) {
     setStep(0);
     setData({
       name: "",
-      address: "",
+      country: "Colombia",
+      department: "",
       city: "",
+      address: "",
       features: {
         services: true,
         gallery: true,

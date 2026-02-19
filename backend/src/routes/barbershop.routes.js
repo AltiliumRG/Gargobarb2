@@ -59,8 +59,8 @@ router.put("/:id", requireRole(1, 2), barbershopController.updateBarbershop);
 
 /**
  * 🔹 Eliminar barbería
- * - Solo admin
+ * - Admin o dueño de esa barbería
  */
-router.delete("/:id", requireRole(1), barbershopController.deleteBarbershop);
+router.delete("/:id", requireRole(1, 2), barbershopController.deleteBarbershop);
 
 module.exports = router;
