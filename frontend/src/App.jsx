@@ -14,6 +14,7 @@ import MyBarbershops from "./pages/barber/MyBarbershops";
 import CreateBarbershopWizard from "./pages/barber/CreateBarbershopWizard";
 import BarberHome from "./pages/barber/BarberHome";
 import Preview from "./pages/barber/Preview";
+import Landing from "./pages/Landing";
 import { Toaster } from "react-hot-toast";
 
 // import SiteEditor from "./pages/barber/site/SiteEditor";
@@ -24,7 +25,8 @@ const App = () => {
       <Toaster position="top-right" reverseOrder={false} />
       <Routes>
         {/* ENTRADA */}
-        <Route path="/" element={<AuthRedirect />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/dashboard" element={<AuthRedirect />} />
 
         {/* PÚBLICAS */}
         <Route path="/login" element={<Login />} />
