@@ -205,3 +205,14 @@ CREATE TABLE IF NOT EXISTS site_sections (
     is_visible BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (page_id) REFERENCES site_pages(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- ============================================================
+-- 🧪 DATOS DE PRUEBA (Test Data)
+-- ============================================================
+
+INSERT INTO users (username, full_name, email, password_hash, role_id, created_at, updated_at) VALUES 
+('admin_test', 'Administrador de Pruebas', 'admin@gargobarb.com', '$2b$10$YourHashedPasswordHere', 1, NOW(), NOW()),
+('barber_test', 'Barbero de Pruebas', 'barber@gargobarb.com', '$2b$10$YourHashedPasswordHere', 2, NOW(), NOW()),
+('client_test', 'Cliente de Pruebas', 'client@gargobarb.com', '$2b$10$YourHashedPasswordHere', 3, NOW(), NOW())
+ON DUPLICATE KEY UPDATE updated_at=NOW();
+
