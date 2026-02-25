@@ -1,0 +1,19 @@
+{
+  "theme": {
+    "primaryColor": "#111827",
+    "secondaryColor": "#3b82f6",
+    "font": "Inter"
+  },
+  "pages": [
+    {
+      "title": "Inicio",
+      "slug": "home",
+      "sections": [
+        {
+          "type": "hero",
+          "content": { "title": "Estilo Moderno" }
+        }
+      ]
+    }
+  ]
+}

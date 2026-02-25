@@ -1,0 +1,20 @@
+{
+  "theme": {
+    "primaryColor": "#0f172a",
+    "secondaryColor": "#fbbf24",
+    "font": "Poppins"
+  },
+  "pages": [
+    {
+      "title": "Inicio",
+      "slug": "home",
+      "sections": [
+        {
+          "type": "hero",
+          "content": { "title": "Barbería Premium" },
+          "styles": { "height": "90vh" }
+        }
+      ]
+    }
+  ]
+}
