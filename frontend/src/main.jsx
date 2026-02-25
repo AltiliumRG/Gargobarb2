@@ -4,6 +4,13 @@ import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext.jsx";
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+import { ThemeProvider } from "./context/ThemeContext.jsx";
+=======
+>>>>>>> origin/David
+>>>>>>> Stashed changes
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./index.css";
 
@@ -12,7 +19,17 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <GoogleOAuthProvider clientId="820070306319-o6pmp2mdhrkpdabhd0uh4mb6fjsqn5fu.apps.googleusercontent.com">
       <BrowserRouter>
         <AuthProvider>
+<<<<<<< Updated upstream
           <App />
+=======
+<<<<<<< HEAD
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
+=======
+          <App />
+>>>>>>> origin/David
+>>>>>>> Stashed changes
         </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>

@@ -1,12 +1,27 @@
 // src/pages/Login.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+<<<<<<< Updated upstream
 import { motion, AnimatePresence} from "framer-motion";
+=======
+<<<<<<< HEAD
+import { motion, AnimatePresence } from "framer-motion";
+=======
+import { motion, AnimatePresence} from "framer-motion";
+>>>>>>> origin/David
+>>>>>>> Stashed changes
 import toast, { Toaster } from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 import api from "../api/api";
 import { useAuth } from "../auth/AuthContext";
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+import AuthBackground from "../AuthBackground.jpg";
+=======
+>>>>>>> origin/David
+>>>>>>> Stashed changes
 
 const Login = () => {
   const navigate = useNavigate();
@@ -43,9 +58,21 @@ const Login = () => {
 
   // Contador tiempo real
   useEffect(() => {
+<<<<<<< Updated upstream
      console.log("AUTH LOADING:", authLoading);
   console.log("USER:", user);
   console.log("FORM DATA:", form);
+=======
+<<<<<<< HEAD
+    console.log("AUTH LOADING:", authLoading);
+    console.log("USER:", user);
+    console.log("FORM DATA:", form);
+=======
+     console.log("AUTH LOADING:", authLoading);
+  console.log("USER:", user);
+  console.log("FORM DATA:", form);
+>>>>>>> origin/David
+>>>>>>> Stashed changes
     if (!blockedUntil) return;
 
     const interval = setInterval(() => {
@@ -81,6 +108,81 @@ const Login = () => {
   // 🔐 LOGIN NORMAL
   // ================================
   const handleSubmit = async (e) => {
+<<<<<<< Updated upstream
+  e.preventDefault();
+=======
+<<<<<<< HEAD
+    e.preventDefault();
+>>>>>>> Stashed changes
+
+  if (isBlocked()) {
+    return toast.error(
+      `Demasiados intentos. Intenta en ${remainingSeconds}s`
+    );
+  }
+
+  const validationError = validate();
+  if (validationError) return toast.error(validationError);
+
+  setLoading(true);
+
+  try {
+    const res = await api.post("/auth/login", {
+      email: form.email, // 🔥 CLAVE
+      password: form.password,
+    });
+
+    // Reset bloqueos
+    setAttempts(0);
+    setBlockLevel(0);
+    setBlockedUntil(null);
+    localStorage.removeItem("loginAttempts");
+    localStorage.removeItem("loginBlockLevel");
+    localStorage.removeItem("blockedUntil");
+
+    login(res.data.user);
+    toast.success("Inicio de sesión exitoso 🚀");
+    navigate("/", { replace: true });
+
+  } catch (err) {
+    const status = err.response?.status;
+    const message = err.response?.data?.error || err.response?.data?.message;
+
+    console.log("ERROR LOGIN:", status, message);
+
+    if (status === 409) {
+      toast.info(message || "Esta cuenta usa inicio de sesión con Google");
+      return;
+    }
+
+    if (status === 401) {
+      toast.error("Usuario o contraseña incorrectos");
+
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      localStorage.setItem("loginAttempts", newAttempts);
+
+      if (newAttempts >= 3) {
+        const blockTimes = [30, 60, 120, 240, 300];
+        const blockTime = blockTimes[blockLevel] || 300;
+        const until = Date.now() + blockTime * 1000;
+
+        setBlockedUntil(until);
+        setAttempts(0);
+        setBlockLevel(blockLevel + 1);
+
+        localStorage.setItem("blockedUntil", until);
+        localStorage.setItem("loginBlockLevel", blockLevel + 1);
+        localStorage.setItem("loginAttempts", 0);
+
+        toast.error(`Bloqueado por ${blockTime} segundos`);
+      }
+      return;
+    }
+<<<<<<< Updated upstream
+=======
+  };
+=======
   e.preventDefault();
 
   if (isBlocked()) {
@@ -147,12 +249,17 @@ const Login = () => {
       }
       return;
     }
+>>>>>>> Stashed changes
 
     toast.error(message || "Error al iniciar sesión");
   } finally {
     setLoading(false);
   }
 };
+<<<<<<< Updated upstream
+=======
+>>>>>>> origin/David
+>>>>>>> Stashed changes
 
   // ================================
   // 🔵 LOGIN GOOGLE
@@ -162,11 +269,27 @@ const Login = () => {
     try {
       const res = await api.post("/auth/google", {
         credential: credentialResponse.credential,
+<<<<<<< Updated upstream
         
       });
       login(res.data.user);
       toast.success("Inicio de sesión con Google exitoso 🚀");
       navigate("/", { replace: true });
+=======
+<<<<<<< HEAD
+
+      });
+      login(res.data.user);
+      toast.success("Inicio de sesión con Google exitoso 🚀");
+      navigate("/dashboard", { replace: true });
+=======
+        
+      });
+      login(res.data.user);
+      toast.success("Inicio de sesión con Google exitoso 🚀");
+      navigate("/", { replace: true });
+>>>>>>> origin/David
+>>>>>>> Stashed changes
     } catch (err) {
       toast.error("Error al iniciar sesión con Google");
     }
@@ -176,6 +299,85 @@ const Login = () => {
   // 🧱 UI
   // ================================
   return (
+<<<<<<< Updated upstream
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-gray-950 text-white">
+    <Toaster position="top-center" />
+
+    <motion.form
+      onSubmit={handleSubmit}
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="bg-gray-900/80 backdrop-blur-xl border border-yellow-500/30 p-8 rounded-2xl shadow-2xl w-full max-w-md"
+=======
+<<<<<<< HEAD
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative"
+      style={{ backgroundImage: `url(${AuthBackground})` }}
+>>>>>>> Stashed changes
+    >
+      <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
+        Inicia sesión 💈
+      </h2>
+
+      {/* ✔ Intentos (solo si NO está bloqueado) */}
+      {!isBlocked() && (
+        <div className="mb-4">
+          <p className="text-sm text-gray-300 text-center">
+            Intentos: {attempts} / 3
+          </p>
+          <div className="w-full h-2 bg-gray-800 rounded-full mt-2 overflow-hidden">
+            <div
+              className="h-full bg-yellow-500 transition-all duration-500"
+              style={{ width: `${(attempts / 3) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ✔ Bloqueo */}
+      {isBlocked() && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-red-600/40 border border-red-500 text-red-200 text-center p-3 rounded-lg mb-4"
+        >
+          <p className="font-semibold">⛔ Estás temporalmente bloqueado</p>
+          <p className="text-sm">
+            Reintenta en <b>{remainingSeconds}</b> segundos
+          </p>
+
+          <div className="w-full h-2 bg-red-900 rounded-full mt-2 overflow-hidden">
+            <div
+              className="h-full bg-red-400 transition-all duration-500"
+              style={{
+                width: `${Math.min(
+                  100,
+                  // (remainingSeconds / blockTotalSeconds) * 100
+                )}%`,
+              }}
+            />
+          </div>
+        </motion.div>
+      )}
+
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-yellow-400 text-sm text-center mb-3"
+          >
+<<<<<<< Updated upstream
+=======
+            Regístrate
+          </a>
+        </p>
+      </motion.form>
+    </div>
+  );
+=======
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-gray-950 text-white">
     <Toaster position="top-center" />
 
@@ -239,6 +441,7 @@ const Login = () => {
             exit={{ opacity: 0 }}
             className="text-yellow-400 text-sm text-center mb-3"
           >
+>>>>>>> Stashed changes
             Verificando credenciales...
           </motion.div>
         )}
@@ -326,6 +529,10 @@ const Login = () => {
     </motion.form>
   </div>
 );
+<<<<<<< Updated upstream
+=======
+>>>>>>> origin/David
+>>>>>>> Stashed changes
 
 };
 

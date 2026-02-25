@@ -14,11 +14,26 @@ import MyBarbershops from "./pages/barber/MyBarbershops";
 import CreateBarbershopWizard from "./pages/barber/CreateBarbershopWizard";
 import BarberHome from "./pages/barber/BarberHome";
 import Preview from "./pages/barber/Preview";
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+import Dashboard from "./pages/barber/Dashboard";
+=======
+>>>>>>> origin/David
+>>>>>>> Stashed changes
 import Landing from "./pages/Landing";
 import { Toaster } from "react-hot-toast";
 
 // import SiteEditor from "./pages/barber/site/SiteEditor";
+<<<<<<< Updated upstream
 
+=======
+<<<<<<< HEAD
+//APP
+=======
+
+>>>>>>> origin/David
+>>>>>>> Stashed changes
 const App = () => {
   return (
     <>
@@ -57,6 +72,13 @@ const App = () => {
           <Route path="create" element={<CreateBarbershopWizard />} />
           <Route path="builder/:barbershopId" element={<Builder />} />
           <Route path="preview/:siteId" element={<Preview />} />
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+          <Route path="dashboard/:barbershopId" element={<Dashboard />} />
+=======
+>>>>>>> origin/David
+>>>>>>> Stashed changes
         </Route>
 
 

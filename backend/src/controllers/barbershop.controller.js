@@ -1,5 +1,6 @@
 const { Barbershop, User, BarbershopSite } = require("../models");
 const SiteService = require("../services/site.service");
+<<<<<<< HEAD
 
 /* ============================================================
    📍 Crear barbería (ADMIN o DUEÑO)
@@ -12,10 +13,24 @@ exports.createBarbershop = async (req, res) => {
     console.log("📥 BODY:", req.body);
     console.log("👤 USER:", user);
 
+=======
+const { sequelize } = require("../config/db");
+const slugify = require("../utils/slugify");
+
+/* ============================================================
+   📍 Crear barbería
+============================================================ */
+exports.createBarbershop = async (req, res) => {
+  try {
+    const { name, address, city, user_id, country, department, latitude, longitude } = req.body;
+    const user = req.user;
+
+>>>>>>> origin/David
     if (!name || !address || !city) {
       return res.status(400).json({ error: "Todos los campos son obligatorios" });
     }
 
+<<<<<<< HEAD
     /* 🛡️ VALIDACIÓN DE UNICIDAD
        Evitamos que se creen múltiples barberías con la misma identidad física.
        Relacionado con:
@@ -32,12 +47,15 @@ exports.createBarbershop = async (req, res) => {
       });
     }
 
+=======
+>>>>>>> origin/David
     if (!user) {
       return res.status(401).json({ error: "No autenticado" });
     }
 
     let assignedUserId;
 
+<<<<<<< HEAD
     // 👑 ADMIN
     if (user.role_id === 1) {
       if (!user_id) {
@@ -55,17 +73,32 @@ exports.createBarbershop = async (req, res) => {
         return res
           .status(400)
           .json({ error: "El usuario asignado debe tener rol de dueño" });
+=======
+    if (user.role_id === 1) {
+      if (!user_id) {
+        return res.status(400).json({ error: "Debe seleccionar un dueño" });
+      }
+
+      const owner = await User.findByPk(user_id);
+      if (!owner || owner.role_id !== 2) {
+        return res.status(400).json({ error: "El usuario debe ser dueño" });
+>>>>>>> origin/David
       }
 
       assignedUserId = owner.id;
     }
 
+<<<<<<< HEAD
     // 👤 DUEÑO
     else if (user.role_id === 2) {
       const existing = await Barbershop.findOne({
         where: { user_id: user.id },
       });
 
+=======
+    else if (user.role_id === 2) {
+      const existing = await Barbershop.findOne({ where: { user_id: user.id } });
+>>>>>>> origin/David
       if (existing) {
         return res.status(400).json({
           error: "Ya tienes una barbería registrada. Solo puedes tener una.",
@@ -75,6 +108,7 @@ exports.createBarbershop = async (req, res) => {
       assignedUserId = user.id;
     }
 
+<<<<<<< HEAD
     // 🚫 OTROS ROLES
     else {
       return res
@@ -110,6 +144,35 @@ exports.createBarbershop = async (req, res) => {
 
     // 🌐 CREAR SITIO WEB POR DEFECTO
     try {
+=======
+    else {
+      return res.status(403).json({ error: "No autorizado" });
+    }
+
+    const transaction = await sequelize.transaction();
+
+    try {
+      const baseSlug = slugify(name);
+      let slug = baseSlug;
+      let counter = 1;
+
+      while (await Barbershop.findOne({ where: { slug }, transaction })) {
+        slug = `${baseSlug}-${counter++}`;
+      }
+
+      const newBarbershop = await Barbershop.create({
+        user_id: assignedUserId,
+        name,
+        slug,
+        country: country || "Colombia",
+        department,
+        city,
+        address,
+        latitude: latitude || null,
+        longitude: longitude || null,
+      }, { transaction });
+
+>>>>>>> origin/David
       await SiteService.createSiteForBarbershop({
         barbershopId: newBarbershop.id,
         name,
@@ -117,6 +180,7 @@ exports.createBarbershop = async (req, res) => {
         primaryColor: "#111827",
         secondaryColor: "#facc15",
         fontFamily: "Inter",
+<<<<<<< HEAD
       });
     } catch (siteError) {
       console.error("❌ Error al crear el sitio:", siteError);
@@ -138,17 +202,41 @@ exports.createBarbershop = async (req, res) => {
     }
 
     return res.status(500).json({ error: error.message || "Error al crear la barbería" });
+=======
+      }, transaction);
+
+      await transaction.commit();
+
+      return res.status(201).json({
+        message: "Barbería y sitio creados correctamente",
+        barbershopId: newBarbershop.id,
+      });
+
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+
+  } catch (error) {
+    console.error("❌ Error:", error);
+    return res.status(500).json({ error: error.message || "Error interno" });
+>>>>>>> origin/David
   }
 };
 
 /* ============================================================
+<<<<<<< HEAD
    📍 Obtener todas las barberías (filtradas según rol)
+=======
+   📍 Obtener todas
+>>>>>>> origin/David
 ============================================================ */
 exports.getAllBarbershops = async (req, res) => {
   try {
     const user = req.user;
     let where = {};
 
+<<<<<<< HEAD
     // 👑 ADMIN → ve todas
     if (user.role_id === 1) {
       where = {};
@@ -162,10 +250,15 @@ exports.getAllBarbershops = async (req, res) => {
       where = { is_active: true };
     }
 
+=======
+    if (user.role_id === 2) where = { user_id: user.id };
+    if (user.role_id === 3) where = { is_active: true };
+>>>>>>> origin/David
 
     const barbershops = await Barbershop.findAll({
       where,
       include: [
+<<<<<<< HEAD
         {
           model: User,
           as: "owner",
@@ -176,19 +269,29 @@ exports.getAllBarbershops = async (req, res) => {
           as: "site",
           attributes: ["status", "slug"],
         },
+=======
+        { model: User, as: "owner", attributes: ["id", "full_name", "email", "username"] },
+        { model: BarbershopSite, as: "site", attributes: ["status", "slug"] },
+>>>>>>> origin/David
       ],
       order: [["created_at", "DESC"]],
     });
 
+<<<<<<< HEAD
     console.log(`✅ Enviando ${barbershops.length} barberías. Ejemplo site:`, barbershops[0]?.site);
     res.json(barbershops);
   } catch (error) {
     console.error("❌ Error al obtener barberías:", error);
+=======
+    res.json(barbershops);
+  } catch (error) {
+>>>>>>> origin/David
     res.status(500).json({ error: "Error al obtener barberías" });
   }
 };
 
 /* ============================================================
+<<<<<<< HEAD
    📍 Obtener barbería por ID
 ============================================================ */
 exports.getBarbershopById = async (req, res) => {
@@ -269,15 +372,21 @@ exports.updateBarbershop = async (req, res) => {
 };
 /* ============================================================
    📍 Obtener barberías del dueño autenticado
+=======
+   📍 Obtener barberías del dueño
+>>>>>>> origin/David
 ============================================================ */
 exports.getMyBarbershops = async (req, res) => {
   try {
     const user = req.user;
 
+<<<<<<< HEAD
     if (user.role_id !== 2) {
       return res.status(403).json({ error: "Solo dueños pueden acceder" });
     }
 
+=======
+>>>>>>> origin/David
     const barbershops = await Barbershop.findAll({
       where: { user_id: user.id },
       order: [["created_at", "DESC"]],
@@ -285,11 +394,15 @@ exports.getMyBarbershops = async (req, res) => {
 
     res.json(barbershops);
   } catch (error) {
+<<<<<<< HEAD
     console.error("❌ Error en getMyBarbershops:", error);
+=======
+>>>>>>> origin/David
     res.status(500).json({ error: "Error al obtener barberías" });
   }
 };
 
+<<<<<<< HEAD
 
 /* ============================================================
    🗑️ Eliminar barbería (solo admin)
@@ -300,10 +413,22 @@ exports.deleteBarbershop = async (req, res) => {
     const user = req.user;
 
     const barbershop = await Barbershop.findByPk(id);
+=======
+/* ============================================================
+   📍 Obtener por ID
+============================================================ */
+exports.getBarbershopById = async (req, res) => {
+  try {
+    const barbershop = await Barbershop.findByPk(req.params.id, {
+      include: { model: User, as: "owner" },
+    });
+
+>>>>>>> origin/David
     if (!barbershop) {
       return res.status(404).json({ error: "Barbería no encontrada" });
     }
 
+<<<<<<< HEAD
     // 🔒 Permisos: admin o dueño propietario
     if (user.role_id !== 1 && barbershop.user_id !== user.id) {
       return res.status(403).json({ error: "No tienes permiso para eliminar esta barbería" });
@@ -317,3 +442,41 @@ exports.deleteBarbershop = async (req, res) => {
     res.status(500).json({ error: "Error al eliminar la barbería" });
   }
 };
+=======
+    res.json(barbershop);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener la barbería" });
+  }
+};
+
+/* ============================================================
+   ✏️ Actualizar
+============================================================ */
+exports.updateBarbershop = async (req, res) => {
+  try {
+    const barbershop = await Barbershop.findByPk(req.params.id);
+    if (!barbershop) return res.status(404).json({ error: "No encontrada" });
+
+    await barbershop.update(req.body);
+
+    res.json({ message: "Actualizada", data: barbershop });
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar" });
+  }
+};
+
+/* ============================================================
+   🗑️ Eliminar
+============================================================ */
+exports.deleteBarbershop = async (req, res) => {
+  try {
+    const barbershop = await Barbershop.findByPk(req.params.id);
+    if (!barbershop) return res.status(404).json({ error: "No encontrada" });
+
+    await barbershop.destroy();
+    res.json({ message: "Eliminada correctamente" });
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar" });
+  }
+};
+>>>>>>> origin/David

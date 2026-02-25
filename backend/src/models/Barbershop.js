@@ -24,6 +24,14 @@ const Barbershop = sequelize.define(
       type: DataTypes.STRING(150),
       allowNull: false,
     },
+<<<<<<< HEAD
+=======
+    slug: {
+  type: DataTypes.STRING(160),
+  allowNull: false,
+  unique: true,
+},
+>>>>>>> origin/David
     /* 🌍 CAMPOS DE UBICACIÓN EXTENDIDOS
        Relacionado con:
        - StepBasicInfo.jsx (Selector de ubicación)
