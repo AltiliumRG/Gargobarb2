@@ -1,15 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyBarbershops, deleteBarbershop } from "../../api/barber.api";
-<<<<<<< Updated upstream
-import { Trash2, Edit } from "lucide-react";
-=======
-<<<<<<< HEAD
 import { Trash2, Edit, Layout } from "lucide-react";
-=======
-import { Trash2, Edit } from "lucide-react";
->>>>>>> origin/David
->>>>>>> Stashed changes
 import toast from "react-hot-toast";
 
 export default function MyBarbershops() {
@@ -32,7 +24,7 @@ export default function MyBarbershops() {
     try {
       await deleteBarbershop(id);
       toast.success("Barbería eliminada correctamente");
-      fetchShops(); // Recargar la lista
+      fetchShops();
     } catch (error) {
       console.error("Error deleting barbershop:", error);
       toast.error("Error al eliminar la barbería");
@@ -54,29 +46,22 @@ export default function MyBarbershops() {
               {shop.address} · {shop.city}
             </p>
 
-<<<<<<< Updated upstream
-            <div className="flex gap-3">
-=======
-<<<<<<< HEAD
             <div className="flex flex-col gap-3">
->>>>>>> Stashed changes
               <button
-                onClick={() => navigate(`/barber/builder/${shop.id}`)}
+                onClick={() => navigate(`/barber/dashboard/${shop.id}`)}
                 className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
               >
-                <Edit size={16} />
-                Editar página
+                <Layout size={16} />
+                Panel de Control
               </button>
 
-<<<<<<< Updated upstream
-=======
               <div className="flex gap-3">
                 <button
                   onClick={() => navigate(`/barber/builder/${shop.id}`)}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-white hover:bg-gray-200 text-black py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
                 >
                   <Edit size={16} />
-                  Editar página
+                  Editar sitio
                 </button>
 
                 <button
@@ -87,28 +72,6 @@ export default function MyBarbershops() {
                   <Trash2 size={18} />
                 </button>
               </div>
-=======
-            <div className="flex gap-3">
-              <button
-                onClick={() => navigate(`/barber/builder/${shop.id}`)}
-                className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
-              >
-                <Edit size={16} />
-                Editar página
-              </button>
-
->>>>>>> Stashed changes
-              <button
-                onClick={() => handleDelete(shop.id)}
-                className="w-12 h-10.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20"
-                title="Eliminar barbería"
-              >
-                <Trash2 size={18} />
-              </button>
-<<<<<<< Updated upstream
-=======
->>>>>>> origin/David
->>>>>>> Stashed changes
             </div>
           </div>
         ))}

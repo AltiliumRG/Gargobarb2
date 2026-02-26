@@ -3,20 +3,11 @@ import api from "../../api/api";
 
 export default function MyBarbershop() {
   const [data, setData] = useState(null);
-<<<<<<< Updated upstream
-  useEffect(()=> {
-    (async()=> {
-=======
-<<<<<<< HEAD
+
   useEffect(() => {
     (async () => {
-=======
-  useEffect(()=> {
-    (async()=> {
->>>>>>> origin/David
->>>>>>> Stashed changes
       // si backend tiene ruta propia para "mi barbería" úsala, sino filtrar por owner en frontend
-      const res = await api.get("/barbershop/my"); // opcional: ajusta según backend
+      const res = await api.get("/barbershop/my");
       setData(res.data);
     })();
   }, []);

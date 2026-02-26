@@ -10,21 +10,15 @@ const BarbershopSite = sequelize.define(
       autoIncrement: true,
     },
     barbershop_id: {
-<<<<<<< HEAD
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
+      references: {
+        model: "barbershops",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     },
-=======
-  type: DataTypes.BIGINT.UNSIGNED,
-  allowNull: false,
-  references: {
-    model: "barbershops",
-    key: "id",
-  },
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-},
->>>>>>> origin/David
     slug: {
       type: DataTypes.STRING(150),
       allowNull: false,

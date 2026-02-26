@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-const BarbershopRepository = require("../repositories/barbershop.repository");
-
-module.exports = {
-  async create(userId, dto) {
-    return BarbershopRepository.create({
-      user_id: userId,
-      ...dto
-    });
-=======
 const { sequelize } = require("../config/db");
 const BarbershopRepository = require("../repositories/barbershop.repository");
 const SiteService = require("./site.service");
@@ -44,6 +34,7 @@ module.exports = {
       await SiteService.createSiteForBarbershop(
         {
           barbershopId: barbershop.id,
+          name: dto.name, // Added missing name property which is needed by site service
           slug, // 👈 mismo slug
         },
         transaction
@@ -59,16 +50,10 @@ module.exports = {
       throw error;
 
     }
->>>>>>> origin/David
   },
 
   async getMy(userId) {
     return BarbershopRepository.findByUser(userId);
-<<<<<<< HEAD
-  }
-};
-=======
   },
 
 };
->>>>>>> origin/David

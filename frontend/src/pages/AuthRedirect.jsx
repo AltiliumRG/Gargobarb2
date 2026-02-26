@@ -20,15 +20,7 @@ export default function AuthRedirect() {
 
   // 🔵 CLIENTE
   if (user.role_id === 3) {
-<<<<<<< Updated upstream
-    return <Navigate to="/client" replace />;
-=======
-<<<<<<< HEAD
     return <Navigate to="/" replace />;
-=======
-    return <Navigate to="/client" replace />;
->>>>>>> origin/David
->>>>>>> Stashed changes
   }
 
   // fallback
