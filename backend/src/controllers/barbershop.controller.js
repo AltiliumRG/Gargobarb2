@@ -1,4 +1,12 @@
-const { Barbershop, User, BarbershopSite } = require("../models");
+const {
+  Barbershop,
+  User,
+  BarbershopSite,
+  SitePage,
+  SiteSection,
+  BarberSchedule
+} = require("../models");
+
 const SiteService = require("../services/site.service");
 const { sequelize } = require("../config/db");
 const slugify = require("../utils/slugify");
@@ -40,7 +48,6 @@ exports.createBarbershop = async (req, res) => {
           error: "Ya tienes una barbería registrada. Solo puedes tener una.",
         });
       }
-
       assignedUserId = user.id;
     }
     else {
@@ -69,7 +76,6 @@ exports.createBarbershop = async (req, res) => {
         latitude: latitude || null,
         longitude: longitude || null,
       }, { transaction });
-
 
       await SiteService.createSiteForBarbershop({
         barbershopId: newBarbershop.id,
@@ -106,20 +112,38 @@ exports.getAllBarbershops = async (req, res) => {
     const user = req.user;
     let where = {};
 
-    if (user.role_id === 2) where = { user_id: user.id };
-    if (user.role_id === 3) where = { is_active: true };
+    if (user.role_id === 2) {
+      where = { user_id: user.id };
+    }
 
     const barbershops = await Barbershop.findAll({
       where,
       include: [
-        { model: User, as: "owner", attributes: ["id", "full_name", "email", "username"] },
-        { model: BarbershopSite, as: "site", attributes: ["status", "slug"] },
+        {
+          model: User,
+          as: "owner",
+          attributes: ["id", "full_name", "email", "username"],
+        },
+        {
+          model: BarbershopSite,
+          as: "site",
+          attributes: ["slug", "is_visible", "is_published"],
+          ...(user.role_id === 3 && {
+            required: true,
+            where: {
+              is_visible: true,
+              is_published: true,
+            },
+          }),
+        },
       ],
       order: [["created_at", "DESC"]],
     });
 
     res.json(barbershops);
+
   } catch (error) {
+    console.error("❌ Error al obtener barberías:", error);
     res.status(500).json({ error: "Error al obtener barberías" });
   }
 };
@@ -130,6 +154,7 @@ exports.getAllBarbershops = async (req, res) => {
 exports.getBarbershopById = async (req, res) => {
   try {
     const { id } = req.params;
+
     const barbershop = await Barbershop.findByPk(id, {
       include: {
         model: User,
@@ -143,6 +168,7 @@ exports.getBarbershopById = async (req, res) => {
     }
 
     res.json(barbershop);
+
   } catch (error) {
     console.error("❌ Error al obtener la barbería:", error);
     res.status(500).json({ error: "Error al obtener la barbería" });
@@ -150,7 +176,7 @@ exports.getBarbershopById = async (req, res) => {
 };
 
 /* ============================================================
-   ✏️ Actualizar barbería (admin o dueño)
+   ✏️ Actualizar barbería
 ============================================================ */
 exports.updateBarbershop = async (req, res) => {
   try {
@@ -163,49 +189,34 @@ exports.updateBarbershop = async (req, res) => {
       return res.status(404).json({ error: "Barbería no encontrada" });
     }
 
-    // 🔒 Permisos: admin o dueño propietario
     if (user.role_id !== 1 && barbershop.user_id !== user.id) {
-      return res.status(403).json({ error: "No tienes permiso para modificar esta barbería" });
+      return res.status(403).json({ error: "No tienes permiso" });
     }
 
-    // 🧩 Si el admin cambia el dueño
     if (user.role_id === 1 && user_id) {
       const newOwner = await User.findByPk(user_id);
-      if (!newOwner) {
-        return res.status(404).json({ error: "El nuevo dueño no existe" });
-      }
-      if (newOwner.role_id !== 2) {
-        return res.status(400).json({ error: "El nuevo dueño debe tener rol de dueño" });
+      if (!newOwner || newOwner.role_id !== 2) {
+        return res.status(400).json({ error: "Dueño inválido" });
       }
       barbershop.user_id = newOwner.id;
     }
 
-    // 🔁 Actualizar campos
     await barbershop.update({
       name: name || barbershop.name,
       address: address || barbershop.address,
       city: city || barbershop.city,
-      user_id: barbershop.user_id,
     });
 
-    // 🔄 Devolver con datos del dueño actualizados
-    const updated = await Barbershop.findByPk(id, {
-      include: {
-        model: User,
-        as: "owner",
-        attributes: ["id", "full_name", "email", "username"],
-      },
-    });
+    res.json({ message: "Barbería actualizada correctamente" });
 
-    res.json({ message: "Barbería actualizada con éxito", data: updated });
   } catch (error) {
-    console.error("❌ Error al actualizar la barbería:", error);
-    res.status(500).json({ error: "Error al actualizar la barbería" });
+    console.error("❌ Error al actualizar:", error);
+    res.status(500).json({ error: "Error al actualizar barbería" });
   }
 };
 
 /* ============================================================
-   📍 Obtener barberías del dueño
+   📍 Mis barberías
 ============================================================ */
 exports.getMyBarbershops = async (req, res) => {
   try {
@@ -217,13 +228,14 @@ exports.getMyBarbershops = async (req, res) => {
     });
 
     res.json(barbershops);
+
   } catch (error) {
     res.status(500).json({ error: "Error al obtener barberías" });
   }
 };
 
 /* ============================================================
-   �️ Eliminar barbería (solo admin o dueño)
+   🗑 Eliminar barbería
 ============================================================ */
 exports.deleteBarbershop = async (req, res) => {
   try {
@@ -235,16 +247,118 @@ exports.deleteBarbershop = async (req, res) => {
       return res.status(404).json({ error: "Barbería no encontrada" });
     }
 
-    // 🔒 Permisos: admin o dueño propietario
     if (user.role_id !== 1 && barbershop.user_id !== user.id) {
-      return res.status(403).json({ error: "No tienes permiso para eliminar esta barbería" });
+      return res.status(403).json({ error: "No tienes permiso" });
     }
 
     await barbershop.destroy();
-
     res.json({ message: "Barbería eliminada correctamente" });
+
   } catch (error) {
-    console.error("❌ Error al eliminar barbería:", error);
-    res.status(500).json({ error: "Error al eliminar la barbería" });
+    console.error("❌ Error eliminando:", error);
+    res.status(500).json({ error: "Error eliminando barbería" });
+  }
+};
+
+/* ============================================================
+   HORARIOS
+============================================================ */
+exports.getSchedules = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const schedules = await BarberSchedule.findAll({
+      where: { barbershop_id: id },
+      order: [["day", "ASC"]],
+    });
+
+    res.json(schedules);
+
+  } catch (error) {
+    console.error("❌ Error obteniendo horarios:", error);
+    res.status(500).json({ error: "Error obteniendo horarios" });
+  }
+};
+
+exports.saveSchedules = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const schedules = req.body;
+
+    await BarberSchedule.destroy({ where: { barbershop_id: id } });
+
+    const formatted = schedules.map((s) => ({
+      day: s.day,
+      open_time: s.open_time,
+      close_time: s.close_time,
+      is_closed: s.is_closed,
+      barbershop_id: id,
+    }));
+
+    await BarberSchedule.bulkCreate(formatted);
+
+    res.json({ message: "Horarios guardados correctamente" });
+
+  } catch (error) {
+    console.error("❌ Error guardando horarios:", error);
+    res.status(500).json({ error: "Error guardando horarios" });
+  }
+};
+
+/* ============================================================
+   🌍 PÚBLICO POR SLUG
+============================================================ */
+exports.getPublicBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const barbershop = await Barbershop.findOne({
+      where: { slug },
+      include: [
+        {
+          model: BarbershopSite,
+          as: "site",
+          include: [
+            {
+              model: SitePage,
+              as: "pages",
+              include: [
+                {
+                  model: SiteSection,
+                  as: "sections",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!barbershop) {
+      return res.status(404).json({ error: "Barbería no encontrada" });
+    }
+
+    res.json({
+      id: barbershop.id,
+      name: barbershop.name,
+      address: barbershop.address,
+      city: barbershop.city,
+      site: barbershop.site,
+    });
+
+  } catch (error) {
+    console.error("❌ Error getPublicBySlug:", error);
+    res.status(500).json({ error: "Error obteniendo barbería pública" });
+  }
+};
+
+/* ============================================================
+   📊 REGISTRAR VISITA (ESTABLE)
+============================================================ */
+exports.registerVisit = async (req, res) => {
+  try {
+    return res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error registrando visita" });
   }
 };

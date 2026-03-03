@@ -1,66 +1,96 @@
-// ✅ backend/src/routes/barbershop.routes.js
 const express = require("express");
 const router = express.Router();
 const barbershopController = require("../controllers/barbershop.controller");
 const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 
-/**
- * 🧾 Rutas de Barberías
- * 
- * Roles:
- *  - Admin (role_id = 1): puede ver, crear, editar y eliminar todas.
- *  - Dueño (role_id = 2): puede ver y gestionar solo las suyas.
- *  - Cliente (role_id = 3): solo puede ver todas las barberías activas.
- */
+/* ============================================================
+   🔓 RUTAS PÚBLICAS (NO REQUIEREN LOGIN)
+============================================================ */
 
-// ✅ Middleware general — todas requieren autenticación
+/* Obtener barbería pública por slug */
+router.get(
+  "/public/:slug",
+  barbershopController.getPublicBySlug
+);
+
+/* Registrar visita */
+router.post(
+  "/public/:slug/visit",
+  barbershopController.registerVisit
+);
+
+
+/* ============================================================
+   🔐 A PARTIR DE AQUÍ TODO REQUIERE LOGIN
+============================================================ */
+
 router.use(verifyToken);
 
-/**
- * 🔹 Crear barbería
- * - Admin puede asignar un dueño (user_id)
- * - Dueño solo puede crear la suya
- */
-router.post("/", requireRole(1, 2), barbershopController.createBarbershop);
+/* ============================================================
+   CREAR
+============================================================ */
+router.post(
+  "/",
+  requireRole(1, 2),
+  barbershopController.createBarbershop
+);
 
-/**
- * 🔹 Obtener barberías
- * - Admin → todas las barberías
- * - Dueño → solo las suyas
- * - Cliente → todas las barberías activas (solo lectura)
- */
-router.get("/", barbershopController.getAllBarbershops);
+/* ============================================================
+   OBTENER TODAS
+============================================================ */
+router.get(
+  "/",
+  barbershopController.getAllBarbershops
+);
 
+/* ============================================================
+   OBTENER MIS BARBERÍAS
+============================================================ */
+router.get(
+  "/my",
+  requireRole(2),
+  barbershopController.getMyBarbershops
+);
 
-/**
- * 🔹 Obtener barberías del barbero autenticado
- * - Solo dueños (role_id = 2)
- */
+/* ============================================================
+   OBTENER POR ID
+============================================================ */
+router.get(
+  "/:id",
+  barbershopController.getBarbershopById
+);
 
-/**
- * 🔹 Obtener barberías del dueño autenticado
- * - Solo dueños (role_id = 2)
- */
-router.get("/my", requireRole(2), barbershopController.getMyBarbershops);
+/* ============================================================
+   ACTUALIZAR
+============================================================ */
+router.put(
+  "/:id",
+  requireRole(1, 2),
+  barbershopController.updateBarbershop
+);
 
-/**
- * 🔹 Obtener una barbería por ID
- * - Admin puede ver cualquiera
- * - Dueño solo la suya
- * - Cliente puede verla si está activa
- */
-router.get("/:id", barbershopController.getBarbershopById);
+/* ============================================================
+   ELIMINAR
+============================================================ */
+router.delete(
+  "/:id",
+  requireRole(1, 2),
+  barbershopController.deleteBarbershop
+);
 
-/**
- * 🔹 Actualizar barbería
- * - Admin o dueño de esa barbería
- */
-router.put("/:id", requireRole(1, 2), barbershopController.updateBarbershop);
+/* ============================================================
+   HORARIOS
+============================================================ */
+router.get(
+  "/:id/schedules",
+  requireRole(1, 2),
+  barbershopController.getSchedules
+);
 
-/**
- * 🔹 Eliminar barbería
- * - Admin o dueño de esa barbería
- */
-router.delete("/:id", requireRole(1, 2), barbershopController.deleteBarbershop);
+router.post(
+  "/:id/schedules",
+  requireRole(1, 2),
+  barbershopController.saveSchedules
+);
 
 module.exports = router;

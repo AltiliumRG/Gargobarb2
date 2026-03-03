@@ -44,6 +44,15 @@ const BarbershopSite = sequelize.define(
       type: DataTypes.ENUM("draft", "published"),
       defaultValue: "draft",
     },
+    is_visible: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: true,
+},
+
+is_published: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: false,
+},
   },
   {
     tableName: "barbershop_sites",

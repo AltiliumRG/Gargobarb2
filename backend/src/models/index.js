@@ -6,7 +6,7 @@ const SiteSection = require("./SiteSection");
 const Service = require("./Service");
 const BarberSchedule = require("./BarberSchedule");
 const Appointment = require("./Appointment");
-
+const { sequelize } = require("../config/db");
 /* ===============================
    USER → BARBERSHOPS
 ================================*/
@@ -93,6 +93,7 @@ Service.hasMany(Appointment, { foreignKey: "service_id" });
 Appointment.belongsTo(Service, { foreignKey: "service_id", as: "service" });
 
 module.exports = {
+  sequelize,
   Barbershop,
   User,
   BarbershopSite,

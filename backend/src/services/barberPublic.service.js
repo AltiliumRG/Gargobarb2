@@ -3,20 +3,24 @@ const { Barbershop, Service, BarberSchedule, BarbershopSite, SitePage, SiteSecti
 exports.getBySlug = async (slug) => {
   // 1️⃣ Buscar el sitio por slug
   const site = await BarbershopSite.findOne({
-    where: { slug },
-    include: [
-      {
-        model: SitePage,
-        as: "pages",
-        include: [
-          {
-            model: SiteSection,
-            as: "sections",
-          },
-        ],
-      },
-    ],
-  });
+  where: {
+    slug,
+    is_visible: true,
+    is_published: true
+  },
+  include: [
+    {
+      model: SitePage,
+      as: "pages",
+      include: [
+        {
+          model: SiteSection,
+          as: "sections",
+        },
+      ],
+    },
+  ],
+});
 
   if (!site) return null;
 

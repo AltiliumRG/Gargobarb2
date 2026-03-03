@@ -1,5 +1,4 @@
 import { useBuilder } from "../../context/BuilderContext";
-import SectionRenderer from "../../components/renderers/SectionRendererUniversal";
 import SectionRendererUniversal from "../../components/renderers/SectionRendererUniversal";
 
 export default function Canvas() {
@@ -19,8 +18,8 @@ export default function Canvas() {
   }
 
   return (
-    <div className="flex-1 bg-[#0b0f14] overflow-auto">
-      <div className="max-w-7xl mx-auto bg-white min-h-screen shadow-xl">
+    <div className="flex-1 bg-transparent overflow-y-auto">
+      <div className="max-w-7xl mx-auto min-h-screen">
 
         {sections.map((section) => {
           const isSelected = section.id === selectedSectionId;
@@ -28,13 +27,36 @@ export default function Canvas() {
           return (
             <div
               key={section.id}
-              onClick={() => selectSection(section.id)}
-              className={`relative ${
-                isSelected ? "ring-2 ring-yellow-400" : ""
-              }`}
+              className="relative group"
+              onClick={(e) => {
+                e.stopPropagation();
+                selectSection(section.id);
+              }}
             >
-<SectionRendererUniversal section={section} preview={true} />
+              {/* HOVER / SELECT OUTLINE */}
+              <div
+                className={`
+                  absolute inset-0 pointer-events-none transition-all
+                  ${
+                    isSelected
+                      ? "ring-4 ring-yellow-400"
+                      : "group-hover:ring-2 group-hover:ring-blue-400"
+                  }
+                `}
+              />
 
+              {/* LABEL SECTION */}
+              <div className="absolute top-2 left-2 z-50 opacity-0 group-hover:opacity-100 transition">
+                <span className="bg-black/80 text-white text-xs px-2 py-1 rounded">
+                  {section.type.toUpperCase()}
+                </span>
+              </div>
+
+              {/* RENDER REAL */}
+              <SectionRendererUniversal
+                section={section}
+                preview={true}
+              />
             </div>
           );
         })}

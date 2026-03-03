@@ -1,12 +1,16 @@
-const Appointment = require('../models/Appointment');
-const Service = require('../models/Service');
-const Barbershop = require('../models/Barbershop');
-const User = require('../models/User');
+const { Op } = require("sequelize");
+const { Appointment, Service, Barbershop, User } = require("../models");
 
-// Crear cita
+/* ============================================================
+   📅 CREAR CITA (Cliente)
+============================================================ */
 exports.createAppointment = async (req, res) => {
   try {
     const { user_id, barbershop_id, service_id, date, time, notes } = req.body;
+
+    if (!user_id || !barbershop_id || !service_id || !date || !time) {
+      return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
 
     const appointment = await Appointment.create({
       user_id,
@@ -14,56 +18,204 @@ exports.createAppointment = async (req, res) => {
       service_id,
       date,
       time,
-      notes
+      notes,
+      status: "pendiente",
     });
 
     res.status(201).json(appointment);
+
   } catch (error) {
-    console.error('❌ Error al crear cita:', error);
-    res.status(500).json({ error: 'Error al crear cita' });
+    console.error("❌ Error al crear cita:", error);
+    res.status(500).json({ error: "Error al crear cita" });
   }
 };
 
-// Listar citas (admin o dueño)
-exports.getAppointments = async (req, res) => {
+
+/* ============================================================
+   📋 LISTAR CITAS POR BARBERÍA (Dueño/Admin)
+============================================================ */
+exports.getAppointmentsByBarbershop = async (req, res) => {
   try {
+    const { barbershopId } = req.params;
+
     const appointments = await Appointment.findAll({
+      where: { barbershop_id: barbershopId },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'username', 'email'] },
-        { model: Service, as: 'service', attributes: ['id', 'name', 'price'] },
-        { model: Barbershop, as: 'barbershop', attributes: ['id', 'name'] }
+        {
+          model: User,
+          as: "client", // 🔥 ESTE ES TU ALIAS REAL
+          attributes: ["id", "username", "email"],
+        },
+        {
+          model: Service,
+          as: "service",
+          attributes: ["id", "name", "price"],
+        },
       ],
-      order: [['date', 'ASC']],
+      order: [["date", "DESC"]],
     });
+
     res.json(appointments);
+
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener citas' });
+    console.error("❌ Error getAppointmentsByBarbershop:", error);
+    res.status(500).json({ error: "Error obteniendo citas" });
   }
 };
 
-// Actualizar estado (confirmar, cancelar, completar)
+
+/* ============================================================
+   🔄 ACTUALIZAR ESTADO
+============================================================ */
 exports.updateStatus = async (req, res) => {
   try {
-    const appointment = await Appointment.findByPk(req.params.id);
-    if (!appointment) return res.status(404).json({ error: 'Cita no encontrada' });
-
+    const { id } = req.params;
     const { status } = req.body;
+
+    const appointment = await Appointment.findByPk(id);
+    if (!appointment) {
+      return res.status(404).json({ error: "Cita no encontrada" });
+    }
+
     await appointment.update({ status });
-    res.json({ message: 'Estado actualizado correctamente', appointment });
+
+    res.json({
+      message: "Estado actualizado correctamente",
+      appointment,
+    });
+
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar cita' });
+    console.error("❌ Error actualizando estado:", error);
+    res.status(500).json({ error: "Error al actualizar cita" });
   }
 };
 
-// Eliminar cita
+
+/* ============================================================
+   🗑 ELIMINAR CITA
+============================================================ */
 exports.deleteAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.findByPk(req.params.id);
-    if (!appointment) return res.status(404).json({ error: 'Cita no encontrada' });
+    const { id } = req.params;
+
+    const appointment = await Appointment.findByPk(id);
+    if (!appointment) {
+      return res.status(404).json({ error: "Cita no encontrada" });
+    }
 
     await appointment.destroy();
-    res.json({ message: 'Cita eliminada correctamente' });
+
+    res.json({ message: "Cita eliminada correctamente" });
+
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar cita' });
+    console.error("❌ Error eliminando cita:", error);
+    res.status(500).json({ error: "Error al eliminar cita" });
+  }
+};
+
+
+/* ============================================================
+   📊 ESTADÍSTICAS PARA DASHBOARD
+============================================================ */
+exports.getStatsByBarbershop = async (req, res) => {
+  try {
+    const { barbershopId } = req.params;
+
+    const today = new Date();
+    const todayString = today.toISOString().split("T")[0];
+
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    )
+      .toISOString()
+      .split("T")[0];
+
+    /* -------------------------
+       TOTAL CITAS
+    -------------------------- */
+    const totalAppointments = await Appointment.count({
+      where: { barbershop_id: barbershopId },
+    });
+
+    /* -------------------------
+       CITAS HOY
+    -------------------------- */
+    const todayAppointments = await Appointment.count({
+      where: {
+        barbershop_id: barbershopId,
+        date: todayString,
+      },
+    });
+
+    /* -------------------------
+       PENDIENTES
+    -------------------------- */
+    const pendingAppointments = await Appointment.count({
+      where: {
+        barbershop_id: barbershopId,
+        status: "pendiente",
+      },
+    });
+
+    /* -------------------------
+       INGRESOS DEL MES
+    -------------------------- */
+    const monthlyAppointments = await Appointment.findAll({
+      where: {
+        barbershop_id: barbershopId,
+        status: "completada",
+        date: {
+          [Op.gte]: firstDayOfMonth,
+        },
+      },
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: ["price"],
+        },
+      ],
+    });
+
+    const monthlyRevenue = monthlyAppointments.reduce(
+      (acc, a) => acc + Number(a.service?.price || 0),
+      0
+    );
+
+    /* -------------------------
+       INGRESOS TOTALES
+    -------------------------- */
+    const allCompleted = await Appointment.findAll({
+      where: {
+        barbershop_id: barbershopId,
+        status: "completada",
+      },
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: ["price"],
+        },
+      ],
+    });
+
+    const totalRevenue = allCompleted.reduce(
+      (acc, a) => acc + Number(a.service?.price || 0),
+      0
+    );
+
+    res.json({
+      totalAppointments,
+      todayAppointments,
+      pendingAppointments,
+      monthlyRevenue,
+      totalRevenue,
+    });
+
+  } catch (error) {
+    console.error("❌ Error obteniendo estadísticas:", error);
+    res.status(500).json({ error: "Error obteniendo estadísticas" });
   }
 };

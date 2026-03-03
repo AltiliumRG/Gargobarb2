@@ -1,25 +1,52 @@
-// backend/src/routes/appointment.routes.js
-const express = require('express');
-const {
-  createAppointment,
-  getAppointments,
-  updateStatus,
-  deleteAppointment,
-} = require('../controllers/appointment.controller');
-const { verifyToken, requireRole } = require('../middleware/auth.middleware');
-
+const express = require("express");
 const router = express.Router();
+const appointmentController = require("../controllers/appointment.controller");
+const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 
-// 🔹 Crear cita (solo cliente)
-router.post('/', verifyToken, requireRole(3), createAppointment);
+/* ============================================================
+   TODAS LAS RUTAS REQUIEREN AUTENTICACIÓN
+============================================================ */
+router.use(verifyToken);
 
-// 🔹 Ver citas (dueños y admin)
-router.get('/', verifyToken, requireRole(1, 2), getAppointments);
+/* ============================================================
+   CREAR CITA (Cliente)
+============================================================ */
+router.post("/", requireRole(3), appointmentController.createAppointment);
 
-// 🔹 Actualizar estado (dueños o admin)
-router.put('/:id/status', verifyToken, requireRole(1, 2), updateStatus);
+/* ============================================================
+   LISTAR CITAS POR BARBERÍA (Admin o Dueño)
+============================================================ */
+router.get(
+  "/barbershop/:barbershopId",
+  requireRole(1, 2),
+  appointmentController.getAppointmentsByBarbershop
+);
 
-// 🔹 Borrar cita (cliente o admin)
-router.delete('/:id', verifyToken, requireRole(1, 3), deleteAppointment);
+/* ============================================================
+   ESTADÍSTICAS (Admin o Dueño)
+============================================================ */
+router.get(
+  "/stats/:barbershopId",
+  requireRole(1, 2),
+  appointmentController.getStatsByBarbershop
+);
+
+/* ============================================================
+   ACTUALIZAR ESTADO
+============================================================ */
+router.put(
+  "/:id/status",
+  requireRole(1, 2),
+  appointmentController.updateStatus
+);
+
+/* ============================================================
+   ELIMINAR CITA
+============================================================ */
+router.delete(
+  "/:id",
+  requireRole(1, 3),
+  appointmentController.deleteAppointment
+);
 
 module.exports = router;

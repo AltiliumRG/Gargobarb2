@@ -9,6 +9,7 @@ const { User } = require("../models");
 // 🔐 1️⃣ VERIFICAR ACCESS TOKEN (15 min)
 // ============================================================
 exports.verifyToken = async (req, res, next) => {
+  
   const token = req.cookies?.access_token;
 
   if (!token) {

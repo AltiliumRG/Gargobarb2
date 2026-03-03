@@ -5,33 +5,116 @@
       "slug": "home",
       "order": 1,
       "sections": [
+
         {
-          "type": "hero",
-          "order": 1,
+  "type": "hero",
+  "order": 1,
+  "content": {
+    "title": "Bienvenido a tu barbería",
+    "subtitle": "Cortes profesionales · Estilo moderno",
+    "buttonText": "Reservar cita",
+    "image": "http://localhost:4000/uploads/Default/hero.jpg"
+  },
+  "styles": {
+    "align": "center"
+  }
+},
+
+        {
+  "type": "services",
+  "order": 2,
+  "content": {
+    "title": "Nuestros servicios",
+    "items": [
+      {
+        "title": "Corte clásico",
+        "description": "Estilo tradicional con acabado profesional",
+        "price": "$20.000",
+        "image": "http://localhost:4000/uploads/Default/default-image.avif",
+        "buttonText": "Reservar",
+        "buttonLink": "#"
+      },
+      {
+        "title": "Barba premium",
+        "description": "Perfilado y tratamiento",
+        "price": "$15.000",
+        "image": "http://localhost:4000/uploads/Default/default-image.avif",
+        "buttonText": "Reservar",
+        "buttonLink": "#"
+      },
+      {
+        "title": "Fade moderno",
+        "description": "Corte degradado de precisión",
+        "price": "$25.000",
+        "image": "http://localhost:4000/uploads/Default/default-image.avif",
+        "buttonText": "Reservar",
+        "buttonLink": "#"
+      }
+    ]
+  }
+},
+{
+  "type": "gallery",
+  "order": 3,
+  "content": {
+    "title": "Galería",
+    "images": [
+      {
+        "url": "http://localhost:4000/uploads/Default/default-image.avif"
+      },
+      {
+        "url": "http://localhost:4000/uploads/Default/default-image.avif"
+      },
+      {
+        "url": "http://localhost:4000/uploads/Default/default-image.avif"
+      }
+    ]
+  }
+},
+
+        {
+          "type": "about",
+          "order": 4,
           "content": {
-            "title": "Bienvenido a tu barbería",
-            "subtitle": "Cortes profesionales · Estilo moderno",
-            "button": "Reservar cita"
-          },
-          "styles": {
-            "align": "center"
+            "title": "Sobre nosotros",
+            "text": "Somos barberos profesionales enfocados en estilo, precisión y experiencia al cliente."
           }
         },
+
         {
-          "type": "services",
-          "order": 2,
+          "type": "testimonials",
+          "order": 5,
           "content": {
-            "title": "Nuestros servicios"
+            "title": "Clientes satisfechos",
+            "items": [
+              {
+                "name": "Carlos R",
+                "comment": "El mejor corte que me han hecho.",
+                "rating": 5
+              },
+              {
+                "name": "Juan P",
+                "comment": "Excelente atención y ambiente.",
+                "rating": 5
+              }
+            ]
           }
         },
+
         {
           "type": "contact",
-          "order": 3,
+          "order": 6,
           "content": {
-            "title": "Contáctanos",
-            "showMap": true
+            "title": "Agenda tu cita",
+            "showMap": true,
+            "showWhatsapp": true,
+            "phone": "",
+            "email": "",
+            "address": "",
+            "formEnabled": true
           }
         }
+
       ]
     }
   ]

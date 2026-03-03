@@ -24,7 +24,7 @@ export default function CustomRenderer({ section }) {
       text: type === "text" ? "Nuevo texto" : "",
       src:
         type === "image"
-          ? "https://via.placeholder.com/300"
+          ? "https://img.freepik.com/vector-premium/lampara-barbero-epoca-afeitadora-ilustracion-barberia-color-negro-sobre-fondo-blanco_117403-4238.jpg"
           : "",
       styles: {
         fontSize: "16px",

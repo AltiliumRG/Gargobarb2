@@ -1,7 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
 import api from "../api/api";
-import { sectionRegistry } from "../components/builder/registry";
 
 const BuilderContext = createContext();
 
@@ -12,25 +11,62 @@ export function BuilderProvider({ children }) {
   const [selectedSectionId, setSelectedSectionId] = useState(null);
 
   /* ============================================================
+     TOGGLE VISIBILITY (CORRECTO)
+  ============================================================ */
+  const toggleSiteVisibility = async (newValue) => {
+  if (!site?.id) return false;
+
+  try {
+    const res = await api.patch(
+      `/sites/builder/visibility/${site.id}`,
+      {
+        is_visible: newValue
+      }
+    );
+
+    if (res.status === 200) {
+      setSite(prev => ({
+        ...prev,
+        is_visible: newValue
+      }));
+      return true;
+    }
+
+    return false;
+  } catch (err) {
+    console.error("❌ Error toggling visibility:", err);
+    return false;
+  }
+};
+
+  /* ============================================================
      LOAD SITE
   ============================================================ */
   const loadSite = ({ site, pages }) => {
+    if (!site) return;
+
     setSite(site);
 
     const normalizedPages = (pages || []).map((p) => ({
       ...p,
-      sections: (p.sections || []).map((s) => ({
-        ...s,
-        content: s.content || {},
-        styles: s.styles || {},
-      })),
+      sections: (p.sections || [])
+        .sort((a, b) => a.order_index - b.order_index)
+        .map((s) => ({
+          ...s,
+          content:
+            typeof s.content === "string"
+              ? JSON.parse(s.content)
+              : s.content || {},
+          styles:
+            typeof s.styles === "string"
+              ? JSON.parse(s.styles)
+              : s.styles || {},
+        })),
     }));
 
     setPages(normalizedPages);
-
-    if (normalizedPages.length) {
-      setCurrentPageId(normalizedPages[0].id);
-    }
+    setCurrentPageId(normalizedPages[0]?.id || null);
+    setSelectedSectionId(null);
   };
 
   const currentPage = pages.find((p) => p.id === currentPageId);
@@ -44,98 +80,145 @@ export function BuilderProvider({ children }) {
   };
 
   /* ============================================================
-     ADD SECTION DESDE REGISTRY
+     UPDATE SECTION CONTENT
   ============================================================ */
-  const addSection = (type) => {
+  const updateSectionContent = (sectionId, updatedFields) => {
+    setPages((prev) =>
+      prev.map((page) => {
+        if (page.id !== currentPageId) return page;
+
+        return {
+          ...page,
+          sections: page.sections.map((section) =>
+            section.id === sectionId
+              ? {
+                  ...section,
+                  content: {
+                    ...section.content,
+                    ...updatedFields,
+                  },
+                }
+              : section
+          ),
+        };
+      })
+    );
+  };
+
+  /* ============================================================
+     UPDATE SECTION STYLES
+  ============================================================ */
+  const updateSectionStyles = (sectionId, updatedStyles) => {
+    setPages((prev) =>
+      prev.map((page) => {
+        if (page.id !== currentPageId) return page;
+
+        return {
+          ...page,
+          sections: page.sections.map((section) =>
+            section.id === sectionId
+              ? {
+                  ...section,
+                  styles: {
+                    ...section.styles,
+                    ...updatedStyles,
+                  },
+                }
+              : section
+          ),
+        };
+      })
+    );
+  };
+
+  /* ============================================================
+     ADD SECTION
+  ============================================================ */
+  const addSection = async (type) => {
     if (!currentPage) return;
 
-    const config = sectionRegistry[type];
+    try {
+      console.log(type);
+      const res = await api.get(`/templates/section/${type}`);
+      const templateSection = res.data;
 
-    const newSection = {
-      id: uuid(),
-      type,
-      order_index: sections.length,
-      content: config?.defaultContent || {},
-      styles: config?.defaultStyles || {},
-      is_visible: true,
-    };
+      const newSection = {
+        id: uuid(),
+        type: templateSection.type,
+        order_index: sections.length,
+        content: templateSection.content || {},
+        styles: templateSection.styles || {},
+        is_visible: true,
+      };
 
-    const updatedPages = pages.map((p) =>
-      p.id === currentPageId
-        ? { ...p, sections: [...sections, newSection] }
-        : p
-    );
+      setPages((prev) =>
+        prev.map((p) =>
+          p.id === currentPageId
+            ? { ...p, sections: [...p.sections, newSection] }
+            : p
+        )
+      );
 
-    setPages(updatedPages);
-    setSelectedSectionId(newSection.id);
+      setSelectedSectionId(newSection.id);
+    } catch (err) {
+      console.error("❌ Error cargando template sección:", err);
+    }
   };
 
   /* ============================================================
-     UPDATE CONTENT
+     MOVE SECTION
   ============================================================ */
-  const updateSectionContent = (sectionId, newContent) => {
+  const moveSection = (sectionId, direction) => {
     setPages((prev) =>
       prev.map((p) => {
         if (p.id !== currentPageId) return p;
 
+        const index = p.sections.findIndex((s) => s.id === sectionId);
+        if (index === -1) return p;
+
+        const newSections = [...p.sections];
+
+        if (direction === "up" && index > 0) {
+          [newSections[index - 1], newSections[index]] =
+            [newSections[index], newSections[index - 1]];
+        }
+
+        if (direction === "down" && index < newSections.length - 1) {
+          [newSections[index + 1], newSections[index]] =
+            [newSections[index], newSections[index + 1]];
+        }
+
         return {
           ...p,
-          sections: p.sections.map((s) =>
-            s.id === sectionId
-              ? {
-                ...s,
-                content: {
-                  ...(s.content || {}),
-                  ...newContent,
-                },
-              }
-              : s
-          ),
+          sections: newSections.map((s, i) => ({
+            ...s,
+            order_index: i,
+          })),
         };
       })
     );
   };
 
   /* ============================================================
-     UPDATE STYLES
-  ============================================================ */
-  const updateSectionStyles = (sectionId, newStyles) => {
-    setPages((prev) =>
-      prev.map((p) => {
-        if (p.id !== currentPageId) return p;
-
-        return {
-          ...p,
-          sections: p.sections.map((s) =>
-            s.id === sectionId
-              ? {
-                ...s,
-                styles: {
-                  ...(s.styles || {}),
-                  ...newStyles,
-                },
-              }
-              : s
-          ),
-        };
-      })
-    );
-  };
-
-  /* ============================================================
-     DELETE SECTION
+     REMOVE SECTION
   ============================================================ */
   const removeSection = (sectionId) => {
-    const updatedPages = pages.map((p) =>
-      p.id === currentPageId
-        ? {
+    setPages((prev) =>
+      prev.map((p) => {
+        if (p.id !== currentPageId) return p;
+
+        const filtered = p.sections.filter((s) => s.id !== sectionId);
+
+        return {
           ...p,
-          sections: p.sections.filter((s) => s.id !== sectionId),
-        }
-        : p
+          sections: filtered.map((s, i) => ({
+            ...s,
+            order_index: i,
+          })),
+        };
+      })
     );
 
-    setPages(updatedPages);
     setSelectedSectionId(null);
   };
 
@@ -143,52 +226,61 @@ export function BuilderProvider({ children }) {
      SAVE
   ============================================================ */
   const saveDraft = async () => {
-    if (!site) return;
+    if (!site?.id) return false;
+
     try {
-      await api.post("/sites/builder/save", {
+      const res = await api.post("/sites/builder/save", {
         siteId: site.id,
         pages,
       });
-      // toast.success("Borrador guardado"); // lo manejaremos en el componente
+
+      return res.status === 200;
     } catch (err) {
       console.error("❌ Error saving:", err);
-      throw err;
+      return false;
     }
   };
 
-  /* ============================================================
-     PUBLISH
-  ============================================================ */
   const publishSite = async () => {
-    if (!site) return;
+    if (!site?.id) return false;
+
     try {
-      await api.post(`/sites/builder/publish/${site.id}`);
+      const res = await api.post(`/sites/builder/publish/${site.id}`);
+
+      if (res.status === 200) {
+        setSite((prev) => ({ ...prev, is_published: true }));
+        return true;
+      }
+
+      return false;
     } catch (err) {
       console.error("❌ Error publishing:", err);
-      throw err;
+      return false;
     }
   };
 
   return (
     <BuilderContext.Provider
       value={{
-        site,
-        pages,
-        currentPage,
-        sections,
-        selectedSectionId,
+    site,
+    pages,
+    currentPage,
+    sections,
+    selectedSectionId,
 
-        selectSection,
-        addSection,
-        removeSection,
+    selectSection,
+    addSection,
+    moveSection,
+    removeSection,
 
-        updateSectionContent,
-        updateSectionStyles,
+    updateSectionContent,
+    updateSectionStyles,
 
-        saveDraft,
-        publishSite,
+    saveDraft,
+    publishSite,
+    loadSite,
 
-        loadSite,
+    toggleSiteVisibility
       }}
     >
       {children}

@@ -15,7 +15,7 @@ const processQueue = (error = null) => {
 // AXIOS INSTANCE
 // ================================
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: "http://localhost:4000/api",
   withCredentials: true,
 });
 

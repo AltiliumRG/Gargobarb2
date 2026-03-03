@@ -6,6 +6,13 @@ export const BarberProvider = ({ children }) => {
   const [activeBarbershop, setActiveBarbershop] = useState(null);
   const [loadingBarbershop, setLoadingBarbershop] = useState(true);
 
+  // 🔥 Trigger para refrescar servicios
+  const [services, setServices] = useState([]);
+
+  const refreshServices = () => {
+    setServicesVersion((prev) => prev + 1);
+  };
+
   return (
     <BarberContext.Provider
       value={{
@@ -13,6 +20,8 @@ export const BarberProvider = ({ children }) => {
         setActiveBarbershop,
         loadingBarbershop,
         setLoadingBarbershop,
+        services,
+        setServices
       }}
     >
       {children}

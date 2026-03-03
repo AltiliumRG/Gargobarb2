@@ -1,34 +1,203 @@
-const builderService = require("../services/siteBuilder.service");
+const {
+  Barbershop,
+  BarbershopSite,
+  SitePage,
+  SiteSection,
+  sequelize,
+} = require("../models");
 
+/* ============================================================
+   GET BUILDER
+============================================================ */
 exports.getBuilder = async (req, res) => {
   try {
     const { barbershopId } = req.params;
-    const site = await builderService.getBuilderSite(barbershopId);
-    res.json(site);
+
+    const barbershop = await Barbershop.findByPk(barbershopId);
+    if (!barbershop) {
+      return res.status(404).json({ error: "Barbería no encontrada" });
+    }
+
+    const site = await BarbershopSite.findOne({
+      where: { barbershop_id: barbershopId },
+    });
+
+    if (!site) {
+      return res.status(404).json({ error: "Site no encontrado" });
+    }
+
+    const pages = await SitePage.findAll({
+      where: { site_id: site.id },
+      order: [["order_index", "ASC"]],
+    });
+
+    const pagesWithSections = await Promise.all(
+      pages.map(async (page) => {
+        const sections = await SiteSection.findAll({
+          where: { page_id: page.id },
+          order: [["order_index", "ASC"]],
+        });
+
+        const parsedSections = sections.map((s) => {
+          const raw = s.toJSON();
+
+          return {
+            ...raw,
+            content:
+              typeof raw.content === "string"
+                ? JSON.parse(raw.content)
+                : raw.content || {},
+            styles:
+              typeof raw.styles === "string"
+                ? JSON.parse(raw.styles)
+                : raw.styles || {},
+          };
+        });
+
+        return {
+          ...page.toJSON(),
+          sections: parsedSections,
+        };
+      })
+    );
+
+    res.json({
+      site,
+      pages: pagesWithSections,
+    });
+
   } catch (err) {
-    console.error("❌ getBuilder:", err);
-    res.status(500).json({ error: "Error cargando builder" });
+    console.error("❌ Error getBuilder:", err);
+    res.status(500).json({ error: "Error getBuilder" });
   }
 };
 
+/* ============================================================
+   SAVE BUILDER (TRANSACCIONAL)
+============================================================ */
 exports.saveBuilder = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
   try {
     const { siteId, pages } = req.body;
-    await builderService.saveBuilderSite(siteId, pages);
-    res.json({ message: "Cambios guardados" });
+
+    if (!siteId || !pages) {
+      await transaction.rollback();
+      return res.status(400).json({ error: "Datos incompletos" });
+    }
+
+    for (const page of pages) {
+
+      // 1️⃣ Actualizar datos de la página
+      await SitePage.update(
+        {
+          title: page.title,
+          slug: page.slug,
+          order_index: page.order_index,
+        },
+        {
+          where: { id: page.id },
+          transaction,
+        }
+      );
+
+      // 2️⃣ ELIMINAR TODAS LAS SECCIONES EXISTENTES DE ESA PÁGINA
+      await SiteSection.destroy({
+        where: { page_id: page.id },
+        transaction,
+      });
+
+      // 3️⃣ CREAR NUEVAMENTE TODAS LAS SECCIONES QUE VIENEN DEL FRONTEND
+      for (let i = 0; i < page.sections.length; i++) {
+        const section = page.sections[i];
+
+        await SiteSection.create(
+          {
+            page_id: page.id,
+            type: section.type,
+            order_index: i + 1,
+            content: JSON.stringify(section.content || {}),
+            styles: JSON.stringify(section.styles || {}),
+            is_visible:
+              typeof section.is_visible === "boolean"
+                ? section.is_visible
+                : true,
+          },
+          { transaction }
+        );
+      }
+    }
+
+    await transaction.commit();
+
+    res.json({ success: true });
+
   } catch (err) {
-    console.error("❌ saveBuilder:", err);
-    res.status(500).json({ error: "Error guardando builder" });
+    await transaction.rollback();
+    console.error("❌ Error saveBuilder:", err);
+    res.status(500).json({ error: "Error saveBuilder" });
   }
 };
+/* ============================================================
+   TOGGLE VISIBILITY
+============================================================ */
+exports.toggleVisibility = async (req, res) => {
+  try {
+    const { siteId } = req.params;
+    const { is_visible } = req.body;
 
+    if (typeof is_visible === "undefined") {
+      return res.status(400).json({
+        error: "is_visible requerido",
+      });
+    }
+
+    const site = await BarbershopSite.findByPk(siteId);
+
+    if (!site) {
+      return res.status(404).json({
+        error: "Site not found",
+      });
+    }
+
+    await site.update({
+      is_visible,
+    });
+
+    res.json({
+      success: true,
+      siteId,
+      is_visible,
+    });
+
+  } catch (err) {
+    console.error("❌ toggleVisibility error:", err);
+    res.status(500).json({
+      error: "Error updating visibility",
+    });
+  }
+};
+/* ============================================================
+   PUBLISH SITE
+============================================================ */
 exports.publish = async (req, res) => {
   try {
     const { siteId } = req.params;
-    await builderService.publishSite(siteId);
-    res.json({ message: "Sitio publicado" });
+
+    const site = await BarbershopSite.findByPk(siteId);
+
+    if (!site) {
+      return res.status(404).json({ error: "Site not found" });
+    }
+
+    await site.update({
+      is_published: true,
+    });
+
+    res.json({ success: true });
+
   } catch (err) {
-    console.error("❌ publish:", err);
-    res.status(500).json({ error: "Error publicando sitio" });
+    console.error("❌ Error publishing:", err);
+    res.status(500).json({ error: "Error publishing" });
   }
 };

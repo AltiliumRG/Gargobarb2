@@ -29,6 +29,10 @@ const Service = sequelize.define('Service', {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false
   },
+  image: {
+  type: DataTypes.STRING,
+  allowNull: true
+},
   duration_minutes: {
     type: DataTypes.INTEGER,
     allowNull: false
@@ -37,6 +41,7 @@ const Service = sequelize.define('Service', {
     type: DataTypes.BOOLEAN,
     defaultValue: true
   }
+  
 }, {
   tableName: 'services',
   timestamps: true,

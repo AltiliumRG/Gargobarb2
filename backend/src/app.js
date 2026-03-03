@@ -26,6 +26,7 @@ const siteRoutes = require("./routes/site.routes");
 const barberDesignRoutes = require("./routes/barberDesign.routes");
 const barberPublicRoutes = require("./routes/barberPublic.routes");
 const app = express();
+const siteUploadRoutes = require("./routes/siteUpload.routes");
 
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
@@ -109,6 +110,7 @@ app.use("/api/users", userRoutes);
 
 // 🧔‍♂️ BARBERO (creación y diseño de su página)
 app.use("/api/barber/design", barberDesignRoutes);
+app.use("/api/uploads", siteUploadRoutes);
 
 // 🏪 BARBERÍAS (CRUD general)
 app.use("/api/barbershops", barbershopRoutes);
@@ -123,11 +125,15 @@ app.use("/api/upload", uploadRoutes);
 // 🧱 SITIOS (builder de barberías)
 app.use("/api/sites", siteRoutes);
 
+app.use("/api/geo", require("./routes/geo.routes"));
 
+app.use("/api/dashboard", require("./modules/dashboard/dashboard.routes"));
 // ===============================================
 // ⚠️ Error Handler
 // ===============================================
 app.use(errorHandler);
+
+app.use("/api/templates", require("./routes/template.routes"));
 
 // ===============================================
 // 📤 Exportar app
