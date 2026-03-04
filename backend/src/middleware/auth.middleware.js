@@ -1,9 +1,9 @@
 // ============================================================
 // 📁 backend/src/middleware/auth.middleware.js
 // ============================================================
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const { User } = require("../models");
+const jwt = require("jsonwebtoken");//jwt
+const bcrypt = require("bcryptjs");//bcrypt para encriptar
+const { User } = require("../models");//modelo de usuario
 
 // ============================================================
 // 🔐 1️⃣ VERIFICAR ACCESS TOKEN (15 min)
@@ -11,6 +11,7 @@ const { User } = require("../models");
 exports.verifyToken = async (req, res, next) => {
   const token = req.cookies?.access_token;
 
+  //validacion de que haya token
   if (!token) {
     return res.status(401).json({ code: "NO_TOKEN" });
   }

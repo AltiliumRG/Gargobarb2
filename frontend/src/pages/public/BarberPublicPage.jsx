@@ -123,33 +123,6 @@ const BarberPublicPage = () => {
         )}
       </main>
 
-      {/* FOOTER PREMIUM */}
-      <footer className="py-24 border-t border-white/5 bg-black px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-16">
-          <div className="text-center md:text-left">
-            <h3 className="text-3xl font-black uppercase tracking-tighter mb-4" style={{ color: "var(--primary)" }}>{data.name}</h3>
-            <div className="flex flex-col gap-2 opacity-40 text-sm font-medium">
-              <p className="flex items-center justify-center md:justify-start gap-2"><MapPin size={16} /> {data.address}, {data.city}</p>
-              <p className="flex items-center justify-center md:justify-start gap-2"><Calendar size={16} /> Lunes a Sábado · 9:00 AM - 8:00 PM</p>
-            </div>
-          </div>
-          <div className="flex gap-6">
-            <button className="p-5 rounded-2xl bg-zinc-900 hover:bg-yellow-600 transition-all group shadow-xl">
-              <Phone className="group-hover:text-black transition-colors" />
-            </button>
-            <button className="p-5 rounded-2xl bg-zinc-900 hover:bg-yellow-600 transition-all group shadow-xl">
-              <MapPin className="group-hover:text-black transition-colors" />
-            </button>
-            <button className="p-5 rounded-2xl bg-zinc-900 hover:bg-yellow-600 transition-all group shadow-xl">
-              <Star className="group-hover:text-black transition-colors" />
-            </button>
-          </div>
-          <div className="text-center md:text-right">
-            <p className="text-[10px] opacity-20 uppercase tracking-[0.3em] font-bold">Plataforma exclusiva</p>
-            <p className="text-xl font-black italic tracking-tighter opacity-10 mt-1 uppercase">GargoBarb 2026</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

@@ -22,7 +22,7 @@ export default function Preview() {
   }
 
   const page = site.pages?.[0];
-  const sections = page?.sections?.sort((a,b)=>a.order_index-b.order_index) || [];
+  const sections = page?.sections?.sort((a, b) => a.order_index - b.order_index) || [];
 
   return (
     <div
@@ -64,16 +64,6 @@ export default function Preview() {
         />
       ))}
 
-      {/* ================= FOOTER ================= */}
-      <footer className="bg-black text-white py-10 text-center">
-        <p className="text-lg font-semibold mb-2">
-          {site.name || "Mi Barbería"}
-        </p>
-
-        <p className="text-sm opacity-70">
-          © {new Date().getFullYear()} Todos los derechos reservados
-        </p>
-      </footer>
 
     </div>
   );

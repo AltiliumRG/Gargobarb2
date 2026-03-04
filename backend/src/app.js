@@ -1,10 +1,12 @@
+//aqui importamos la gran mayotia de lo que vamos a utilizar
+
 // ===============================================
 // 🌐 backend/src/app.js
 // Configuración principal del servidor Express
 // ===============================================
 
-require("dotenv").config();
-const express = require("express");
+require("dotenv").config();//.env
+const express = require("express");//express
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -23,6 +25,7 @@ const serviceRoutes = require("./routes/service.routes");
 const appointmentRoutes = require("./routes/appointment.routes");
 const uploadRoutes = require("./routes/upload.routes");
 const siteRoutes = require("./routes/site.routes");
+const saleRoutes = require("./routes/sale.routes");
 const barberDesignRoutes = require("./routes/barberDesign.routes");
 const barberPublicRoutes = require("./routes/barberPublic.routes");
 const app = express();
@@ -122,6 +125,7 @@ app.use("/api/upload", uploadRoutes);
 
 // 🧱 SITIOS (builder de barberías)
 app.use("/api/sites", siteRoutes);
+app.use("/api/sales", saleRoutes);
 
 
 // ===============================================

@@ -1,7 +1,11 @@
 // ==========================================
 // 📌 IMPORTS
 // ==========================================
+
+//importamos express
 const express = require("express");
+
+
 const { body, validationResult } = require("express-validator");
 
 const {
@@ -36,6 +40,7 @@ const validateFields = (req, res, next) => {
 // ==========================================
 // 🟦 REGISTER (con imagen)
 // ==========================================
+
 router.post(
   "/register",
   upload.single("image"),
