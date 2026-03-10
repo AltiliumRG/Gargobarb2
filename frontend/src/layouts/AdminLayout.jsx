@@ -37,10 +37,7 @@ const AdminLayout = () => {
       <AdminSidebar isOpen={isOpen} isDesktop={isDesktop} toggleSidebar={toggleSidebar} />
 
       {/* Contenido principal */}
-      <div
-        className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 
-          ${isOpen && isDesktop ? "md:pl-64" : ""}`}
-      >
+      <div className="flex-1 flex flex-col overflow-hidden transition-all duration-300">
         <main className="flex-1 overflow-y-auto p-6 md:p-10 bg-gradient-to-tr from-gray-950 via-gray-900 to-black">
           <Routes key={location.pathname}>
             <Route path="/" element={<Navigate to="dashboard" />} />

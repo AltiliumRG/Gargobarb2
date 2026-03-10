@@ -13,6 +13,7 @@ exports.verifyToken = async (req, res, next) => {
 
   //validacion de que haya token
   if (!token) {
+    console.log("⚠️ No token found. Cookies:", Object.keys(req.cookies || {}));
     return res.status(401).json({ code: "NO_TOKEN" });
   }
 
@@ -24,12 +25,15 @@ exports.verifyToken = async (req, res, next) => {
     });
 
     if (!user) {
+      console.log("⚠️ User not found for token - user ID:", decoded.sub);
       return res.status(404).json({ code: "USER_NOT_FOUND" });
     }
 
+    console.log("✅ Token verificado para usuario:", user.username);
     req.user = user;
     next();
   } catch (err) {
+    console.error("❌ Error verificando token:", err.message);
     if (err.name === "TokenExpiredError") {
       return res.status(401).json({ code: "TOKEN_EXPIRED" });
     }
@@ -152,15 +156,20 @@ exports.logout = async (req, res) => {
 exports.requireRole = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
+      console.log("⚠️ requireRole - No autenticado");
       return res.status(401).json({ message: "No autenticado" });
     }
 
+    console.log(`🔐 requireRole - User role_id: ${req.user.role_id}, allowed: ${allowedRoles}`);
+
     if (!allowedRoles.includes(req.user.role_id)) {
+      console.log(`❌ requireRole - Acceso denegado para role_id: ${req.user.role_id}`);
       return res.status(403).json({
         message: "Acceso denegado: no tienes permiso",
       });
     }
 
+    console.log(`✅ requireRole - Acceso permitido para user ${req.user.username}`);
     next();
   };
 };

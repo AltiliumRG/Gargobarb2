@@ -1,0 +1,15 @@
+901dd83 HEAD@{0}: checkout: moving from main to leider
+7b73faf HEAD@{1}: commit: se mejoro el diseño del dashboard del admin
+12653d2 HEAD@{2}: pull origin main: Fast-forward
+754057b HEAD@{3}: commit: mejorar dashboard del admin y shortcuts de prueba
+9b89cfa HEAD@{4}: commit: mejorar dashboard del admin y shortcuts de prueba
+b5cfff6 HEAD@{5}: commit (merge): Merge branch 'main' of https://github.com/AltiliumRG/Gargobarb2
+e9e386e HEAD@{6}: checkout: moving from leider to main
+901dd83 HEAD@{7}: reset: moving to HEAD
+901dd83 HEAD@{8}: checkout: moving from main to leider
+e9e386e HEAD@{9}: commit: actualizacion de archivos
+7f9d556 HEAD@{10}: pull origin main: Fast-forward
+f237fae HEAD@{11}: checkout: moving from leider to main
+901dd83 HEAD@{12}: checkout: moving from main to leider
+f237fae HEAD@{13}: checkout: moving from leider to main
+901dd83 HEAD@{14}: commit (merge): solucion problema estructural y front renovado

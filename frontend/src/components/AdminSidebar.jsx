@@ -70,11 +70,8 @@ const AdminSidebar = ({ isOpen, isDesktop, toggleSidebar }) => {
         className="fixed md:static top-0 left-0 h-full w-64 bg-gradient-to-b from-dark via-dark-gray to-black backdrop-blur-xl border-r border-gold-dark shadow-lg shadow-gold/20 z-40 flex flex-col"
       >
         {/* Logo */}
-        <div className="flex items-center justify-center gap-3 py-6 border-b border-gold/20">
-          <img src="/logo.png" alt="Logo" className="w-10 h-10 drop-shadow-[0_0_8px_#FFD700]" />
-          <h2 className="text-xl font-extrabold text-gold tracking-wide drop-shadow-[0_0_8px_#FFD700]">
-            GargoBarb
-          </h2>
+        <div className="flex items-center justify-center py-8 border-b border-gold/20">
+          <img src="/GargobarbLogo.png" alt="Logo" className="w-24 h-24 drop-shadow-[0_0_12px_#FFD700]" />
         </div>
 
         {/* Menú */}
