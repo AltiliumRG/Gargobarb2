@@ -1,17 +1,31 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const BarberContext = createContext();
 
 export const BarberProvider = ({ children }) => {
   const [activeBarbershop, setActiveBarbershop] = useState(null);
   const [loadingBarbershop, setLoadingBarbershop] = useState(true);
-
-  // 🔥 Trigger para refrescar servicios
   const [services, setServices] = useState([]);
 
-  const refreshServices = () => {
-    setServicesVersion((prev) => prev + 1);
-  };
+  useEffect(() => {
+    const fetchServices = async () => {
+      if (!activeBarbershop?.id) return;
+
+      try {
+        const res = await fetch(
+          `http://localhost:4000/api/services/barbershop/${activeBarbershop.id}`
+        );
+
+        const data = await res.json();
+
+        setServices(data);
+      } catch (err) {
+        console.error("Error cargando servicios:", err);
+      }
+    };
+
+    fetchServices();
+  }, [activeBarbershop]);
 
   return (
     <BarberContext.Provider

@@ -60,13 +60,13 @@
     "title": "Galería",
     "images": [
       {
-        "url": "http://localhost:4000/uploads/Default/default-image.avif"
+        "url": "http://localhost:4000/uploads/Default/gallery1.JPEG"
       },
       {
-        "url": "http://localhost:4000/uploads/Default/default-image.avif"
+        "url": "http://localhost:4000/uploads/Default/gallery2.jpg"
       },
       {
-        "url": "http://localhost:4000/uploads/Default/default-image.avif"
+        "url": "http://localhost:4000/uploads/Default/gallery3.jpg"
       }
     ]
   }

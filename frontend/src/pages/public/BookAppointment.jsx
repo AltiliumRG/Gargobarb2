@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import ReactCalendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 export default function BookAppointment() {
   const { slug } = useParams();
@@ -11,7 +13,17 @@ export default function BookAppointment() {
   const [barbershop, setBarbershop] = useState(null);
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
+  const [availableSlots, setAvailableSlots] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const today = new Date().toISOString().split("T")[0];
+
+  const [selectedDate, setSelectedDate] = useState(null);
+
+const maxDate = new Date();
+maxDate.setDate(maxDate.getDate() + 30);
+
+const maxDateString = maxDate.toISOString().split("T")[0];
 
   const [form, setForm] = useState({
     service_id: "",
@@ -20,59 +32,86 @@ export default function BookAppointment() {
     notes: "",
   });
 
-  /* =========================
-     CARGA
-  ========================= */
+  /* ========================
+     CARGAR BARBERÍA
+  ======================== */
   useEffect(() => {
-  if (!slug) return;
+    if (!slug) return;
 
-  const loadData = async () => {
-    try {
-      console.log("Slug recibido:", slug);
+    const loadData = async () => {
+      try {
+        const shopRes = await api.get(`/barbershops/public/${slug}`);
+        setBarbershop(shopRes.data);
 
-      const shopRes = await api.get(`/barbershops/public/${slug}`);
-      console.log("Barbería:", shopRes.data);
+        const servicesRes = await api.get(
+          `/services/barbershop/${shopRes.data.id}`
+        );
 
-      setBarbershop(shopRes.data);
-
-      if (!shopRes.data?.id) {
-        toast.error("Barbería inválida");
-        return;
+        setServices(servicesRes.data || []);
+      } catch (err) {
+        console.error(err);
+        toast.error("Error cargando información");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const servicesRes = await api.get(
-        `/services/barbershop/${shopRes.data.id}`
-      );
+    loadData();
+  }, [slug]);
 
-      console.log("Servicios:", servicesRes.data);
-
-      setServices(servicesRes.data || []);
-
-    } catch (err) {
-      console.error(err);
-      toast.error("Error cargando información");
-    }
-  };
-
-  loadData();
-}, [slug]);
-  /* =========================
+  /* ========================
      SELECCIONAR SERVICIO
-  ========================= */
-  const handleServiceChange = (id) => {
-    const service = services.find(s => s.id == id);
+  ======================== */
+  const handleServiceChange = (service) => {
     setSelectedService(service);
-    setForm({ ...form, service_id: id });
+
+    setForm((prev) => ({
+  ...prev,
+  service_id: service.id,
+}));
   };
 
-  /* =========================
-     ENVIAR
-  ========================= */
+  /* ========================
+     SELECCIONAR FECHA
+  ======================== */
+  const handleDateChange = async (date) => {
+
+  setForm((prev) => ({
+  ...prev,
+  date,
+  time: ""
+}));
+
+  try {
+
+    const res = await api.get(
+  `/availability/${barbershop.id}?date=${date}&duration=${selectedService?.duration_minutes || 30}`
+);
+
+    setAvailableSlots(res.data || []);
+
+  } catch (err) {
+
+    console.error(err);
+    toast.error("Error cargando horarios");
+
+  }
+
+};
+
+  /* ========================
+     RESERVAR
+  ======================== */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!selectedService) {
       toast.error("Selecciona un servicio");
+      return;
+    }
+
+    if (!form.time) {
+      toast.error("Selecciona un horario");
       return;
     }
 
@@ -86,126 +125,230 @@ export default function BookAppointment() {
       });
 
       toast.success("Cita reservada 🎉");
-      navigate(`/b/${slug}`);
 
+      navigate(`/b/${slug}`);
     } catch (err) {
       console.error(err);
-      toast.error("Error creando cita");
+      toast.error(err?.response?.data?.error || "Error creando cita");
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white">
-        Cargando...
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        Cargando agenda...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-16">
+  <div className="min-h-screen bg-gradient-to-b from-black to-zinc-950 text-white px-6 py-16">
 
-      <div className="max-w-2xl mx-auto">
+    <div className="max-w-4xl mx-auto">
 
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 opacity-60 hover:opacity-100 mb-6"
-        >
-          <ArrowLeft size={16} />
-          Volver
-        </button>
+      {/* BOTON VOLVER */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 opacity-60 hover:opacity-100 mb-8 transition"
+      >
+        <ArrowLeft size={16} />
+        Volver
+      </button>
 
-        <h1 className="text-4xl font-black mb-2">
-          Reservar en {barbershop?.name}
+      {/* HEADER */}
+      <div className="mb-12">
+        <h1 className="text-4xl md:text-5xl font-black mb-2">
+          Reservar cita
         </h1>
 
-        <p className="opacity-50 mb-10">
-          Elige tu servicio y horario disponible
+        <p className="text-yellow-400 font-semibold text-lg">
+          {barbershop?.name}
         </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-zinc-900/50 border border-white/10 p-10 rounded-3xl backdrop-blur-xl space-y-8"
-        >
+        <p className="opacity-50 mt-2">
+          Elige un servicio, fecha y horario disponible
+        </p>
+      </div>
 
-          {/* SERVICIOS */}
-          <div>
-            <label className="text-sm opacity-70">Servicio</label>
-            <select
-              className="w-full mt-2 p-4 bg-black border border-white/10 rounded-xl focus:border-yellow-500"
-              onChange={(e) => handleServiceChange(e.target.value)}
-              required
-            >
-              <option value="">Selecciona servicio</option>
-              {services.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} — ${s.price}
-                </option>
-              ))}
-            </select>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-zinc-900/60 backdrop-blur border border-white/10 p-10 rounded-3xl space-y-12 shadow-2xl"
+      >
+
+        {/* SERVICIOS */}
+        <div>
+
+          <label className="text-sm uppercase tracking-wide opacity-60">
+            1. Selecciona servicio
+          </label>
+
+          <div className="grid md:grid-cols-2 gap-4 mt-4">
+
+            {services.map((service) => (
+
+              <div
+                key={service.id}
+                onClick={() => handleServiceChange(service)}
+                className={`p-6 rounded-2xl cursor-pointer border transition-all duration-200
+                ${
+                  selectedService?.id === service.id
+                    ? "border-yellow-500 bg-yellow-500/10 shadow-lg"
+                    : "border-white/10 hover:border-yellow-500 hover:-translate-y-1"
+                }`}
+              >
+
+                <div className="flex justify-between items-start">
+
+                  <div>
+                    <h3 className="font-bold text-lg">
+                      {service.name}
+                    </h3>
+
+                    <p className="text-sm opacity-60 mt-1">
+                      {service.duration_minutes} minutos
+                    </p>
+                  </div>
+
+                  <p className="text-yellow-400 font-bold text-lg">
+                    ${Number(service.price).toLocaleString()}
+                  </p>
+
+                </div>
+
+              </div>
+
+            ))}
+
           </div>
 
-          {/* INFO DINÁMICA */}
-          {selectedService && (
-            <div className="bg-black border border-yellow-500/30 p-6 rounded-2xl">
-              <p className="text-yellow-400 font-bold">
-                ${selectedService.price}
-              </p>
-              <p className="text-sm opacity-60">
-                Duración: {selectedService.duration_minutes} minutos
-              </p>
-            </div>
-          )}
+        </div>
 
-          {/* FECHA */}
+        {/* FECHA */}
+        <div>
+
+          <label className="flex items-center gap-2 text-sm uppercase tracking-wide opacity-60">
+            <Calendar size={16} />
+            2. Selecciona fecha
+          </label>
+
+          <ReactCalendar
+  onChange={(date) => {
+    const formatted = date.toISOString().split("T")[0];
+
+    setSelectedDate(date);
+    handleDateChange(formatted);
+  }}
+  value={selectedDate}
+  minDate={new Date()}
+  maxDate={new Date(new Date().setDate(new Date().getDate() + 30))}
+  className="mt-4 rounded-xl overflow-hidden"
+/>
+
+        </div>
+
+        {/* HORARIOS */}
+        {form.date && (
+          
           <div>
-            <label className="flex items-center gap-2 text-sm opacity-70">
-              <Calendar size={16} /> Fecha
+            <p className="text-lg font-semibold">
+  {new Date(form.date).toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  })}
+</p>
+            <div className="text-sm text-yellow-400">
+    Horarios disponibles para {form.date}
+  </div>
+            <label className="flex items-center gap-2 text-sm uppercase tracking-wide opacity-60">
+              <Clock size={16} />
+              3. Horarios disponibles
             </label>
-            <input
-              type="date"
-              min={new Date().toISOString().split("T")[0]}
-              className="w-full mt-2 p-4 bg-black border border-white/10 rounded-xl"
-              onChange={(e) =>
-                setForm({ ...form, date: e.target.value })
-              }
-              required
-            />
+
+            {availableSlots.length === 0 ? (
+
+              <div className="mt-4 text-sm opacity-60">
+                No hay horarios disponibles para esta fecha
+              </div>
+
+            ) : (
+
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4">
+
+                {availableSlots.map((slot) => {
+
+  const isBooked = slot.booked;
+  const isSelected = form.time === slot.time;
+
+  return (
+    <button
+      key={new Date(`1970-01-01T${slot.time}`).toLocaleTimeString("es-CO", {
+  hour: "2-digit",
+  minute: "2-digit"
+})}
+      type="button"
+      disabled={isBooked}
+      onClick={() =>
+        setForm((prev) => ({
+  ...prev,
+  time: slot.time,
+}))
+      }
+      className={`p-3 rounded-xl border transition
+        ${
+          isBooked
+            ? "bg-red-600 text-white border-red-600 cursor-not-allowed"
+            : isSelected
+            ? "bg-yellow-500 text-black border-yellow-500"
+            : "border-white/10 hover:border-yellow-500"
+        }`}
+    >
+      {new Date(`1970-01-01T${slot.time}`).toLocaleTimeString("es-CO", {
+  hour: "2-digit",
+  minute: "2-digit"
+})}
+    </button>
+  );
+
+})}
+
+              </div>
+
+            )}
+
           </div>
 
-          {/* HORA */}
-          <div>
-            <label className="flex items-center gap-2 text-sm opacity-70">
-              <Clock size={16} /> Hora
-            </label>
-            <input
-              type="time"
-              className="w-full mt-2 p-4 bg-black border border-white/10 rounded-xl"
-              onChange={(e) =>
-                setForm({ ...form, time: e.target.value })
-              }
-              required
-            />
-          </div>
+        )}
 
-          {/* NOTAS */}
+        {/* NOTAS */}
+        <div>
+
+          <label className="text-sm uppercase tracking-wide opacity-60">
+            Notas (opcional)
+          </label>
+
           <textarea
-            placeholder="Notas opcionales"
-            className="w-full p-4 bg-black border border-white/10 rounded-xl"
+            placeholder="Ej: corte degradado alto"
+            className="w-full mt-3 p-4 bg-black border border-white/10 rounded-xl focus:border-yellow-500"
             onChange={(e) =>
               setForm({ ...form, notes: e.target.value })
             }
           />
 
-          <button
-            type="submit"
-            className="w-full py-4 rounded-xl font-bold text-black bg-yellow-500 hover:scale-[1.02] transition"
-          >
-            Confirmar cita
-          </button>
-        </form>
+        </div>
 
-      </div>
+        {/* BOTON */}
+        <button
+          type="submit"
+          className="w-full py-4 rounded-xl font-bold text-black bg-yellow-500 hover:bg-yellow-400 hover:scale-[1.02] transition"
+        >
+          Confirmar cita
+        </button>
+
+      </form>
+
     </div>
-  );
+
+  </div>
+);
 }

@@ -27,6 +27,7 @@ const barberDesignRoutes = require("./routes/barberDesign.routes");
 const barberPublicRoutes = require("./routes/barberPublic.routes");
 const app = express();
 const siteUploadRoutes = require("./routes/siteUpload.routes");
+const availabilityRoutes = require("./routes/availability.routes");
 
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
@@ -66,7 +67,7 @@ app.use(
 // ===============================================
 app.use(morgan("dev"));
 
-
+app.use("/api", availabilityRoutes);
 // ===============================================
 // 🔒 Rate Limit Global — EXCLUYENDO GOOGLE LOGIN
 // ===============================================

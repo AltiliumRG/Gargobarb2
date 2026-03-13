@@ -5,50 +5,75 @@ import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../api/axios";
 
-const days = [
+/* =========================
+   DÍAS BASE
+========================= */
+
+const WEEK_DAYS = [
   "monday",
   "tuesday",
   "wednesday",
   "thursday",
   "friday",
   "saturday",
-  "sunday",
+  "sunday"
 ];
 
+const DAY_LABELS = {
+  monday: "Lunes",
+  tuesday: "Martes",
+  wednesday: "Miércoles",
+  thursday: "Jueves",
+  friday: "Viernes",
+  saturday: "Sábado",
+  sunday: "Domingo"
+};
+
 export default function Schedule() {
-  const { barbershopId } = useParams(); // 🔥 UNIFICADO
+
+  const { barbershopId } = useParams();
+
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
   /* ================= LOAD ================= */
+
   const loadSchedules = useCallback(async () => {
+
     try {
+
       setLoading(true);
 
-      const res = await api.get(
-        `/barbershops/${barbershopId}/schedules`
-      );
+      const res = await api.get(`/barbershops/${barbershopId}/schedules`);
 
-      if (res.data && res.data.length > 0) {
-        setSchedules(res.data);
-      } else {
-        // Si no existen en DB, crea base inicial
-        setSchedules(
-          days.map((day) => ({
-            day,
-            open_time: "08:00",
-            close_time: "18:00",
-            is_closed: false,
-          }))
-        );
-      }
+      const dbSchedules = res.data || [];
+
+      const normalized = WEEK_DAYS.map((day) => {
+
+        const existing = dbSchedules.find((s) => s.day === day);
+
+        return existing || {
+          day,
+          open_time: "08:00",
+          close_time: "18:00",
+          is_closed: false
+        };
+
+      });
+
+      setSchedules(normalized);
 
     } catch (error) {
+
       console.error("Error cargando horarios:", error);
       toast.error("Error cargando horarios");
+
     } finally {
+
       setLoading(false);
+
     }
+
   }, [barbershopId]);
 
   useEffect(() => {
@@ -56,43 +81,62 @@ export default function Schedule() {
   }, [barbershopId, loadSchedules]);
 
   /* ================= HANDLE CHANGE ================= */
+
   const handleChange = (index, field, value) => {
+
     setSchedules((prev) => {
+
       const updated = [...prev];
+
       updated[index] = {
         ...updated[index],
-        [field]: value,
+        [field]: value
       };
+
       return updated;
+
     });
+
   };
 
   /* ================= SAVE ================= */
+
   const handleSave = async () => {
+
     try {
+
       await api.post(
         `/barbershops/${barbershopId}/schedules`,
-        schedules
+        { schedules }
       );
 
       toast.success("Horarios guardados correctamente");
+
     } catch (error) {
+
       console.error("Error guardando horarios:", error);
       toast.error("Error guardando horarios");
+
     }
+
   };
 
   /* ================= LOADING ================= */
+
   if (loading) {
+
     return (
       <div className="p-10 text-center text-gray-400">
         Cargando horarios...
       </div>
     );
+
   }
 
   /* ================= UI ================= */
+
   return (
+
     <div className="max-w-3xl mx-auto text-white p-6">
 
       <h2 className="text-2xl font-bold mb-6">
@@ -100,13 +144,16 @@ export default function Schedule() {
       </h2>
 
       <div className="space-y-4">
+
         {schedules.map((s, i) => (
+
           <div
             key={s.day}
             className="flex flex-col md:flex-row items-center gap-4 bg-zinc-900 p-4 rounded-2xl border border-white/5"
           >
-            <span className="w-28 capitalize font-semibold text-gray-300">
-              {s.day}
+
+            <span className="w-28 font-semibold text-gray-300">
+              {DAY_LABELS[s.day]}
             </span>
 
             <input
@@ -130,6 +177,7 @@ export default function Schedule() {
             />
 
             <label className="flex items-center gap-2 text-sm">
+
               <input
                 type="checkbox"
                 checked={s.is_closed}
@@ -137,10 +185,15 @@ export default function Schedule() {
                   handleChange(i, "is_closed", e.target.checked)
                 }
               />
+
               Cerrado
+
             </label>
+
           </div>
+
         ))}
+
       </div>
 
       <button
@@ -149,6 +202,9 @@ export default function Schedule() {
       >
         Guardar horarios
       </button>
+
     </div>
+
   );
+
 }

@@ -265,6 +265,7 @@ exports.deleteBarbershop = async (req, res) => {
 ============================================================ */
 exports.getSchedules = async (req, res) => {
   try {
+
     const { id } = req.params;
 
     const schedules = await BarberSchedule.findAll({
@@ -282,26 +283,39 @@ exports.getSchedules = async (req, res) => {
 
 exports.saveSchedules = async (req, res) => {
   try {
+
     const { id } = req.params;
-    const schedules = req.body;
+    const { schedules } = req.body;
 
-    await BarberSchedule.destroy({ where: { barbershop_id: id } });
+    if (!Array.isArray(schedules)) {
+      return res.status(400).json({
+        error: "Schedules debe ser un array"
+      });
+    }
 
-    const formatted = schedules.map((s) => ({
+    await BarberSchedule.destroy({
+      where: { barbershop_id: id }
+    });
+
+    const data = schedules.map((s) => ({
+      barbershop_id: id,
       day: s.day,
       open_time: s.open_time,
       close_time: s.close_time,
-      is_closed: s.is_closed,
-      barbershop_id: id,
+      is_closed: s.is_closed ? 1 : 0
     }));
 
-    await BarberSchedule.bulkCreate(formatted);
+    await BarberSchedule.bulkCreate(data);
 
-    res.json({ message: "Horarios guardados correctamente" });
+    res.json({
+      message: "Horarios guardados correctamente"
+    });
 
   } catch (error) {
     console.error("❌ Error guardando horarios:", error);
-    res.status(500).json({ error: "Error guardando horarios" });
+    res.status(500).json({
+      error: "Error guardando horarios"
+    });
   }
 };
 

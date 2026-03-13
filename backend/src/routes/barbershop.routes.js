@@ -93,4 +93,9 @@ router.post(
   barbershopController.saveSchedules
 );
 
+router.get(
+  "/barbershops/:barbershopId/schedules",
+  barbershopController.getSchedules
+);
+
 module.exports = router;

@@ -10,7 +10,11 @@ export default function GalleryRenderer({ section }) {
 
   const content = section.content || {};
   const styles = section.styles || {};
-  const images = Array.isArray(content.images) ? content.images : [];
+  const images = Array.isArray(content.images)
+  ? content.images.map((img) =>
+      typeof img === "string" ? img : img.url
+    )
+  : [];
 
   const [activeImage, setActiveImage] = useState(null);
 

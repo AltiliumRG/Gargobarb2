@@ -729,7 +729,9 @@ const { activeBarbershop, services, setServices } = useBarber();
       <div className="
         grid grid-cols-2 gap-4
       ">
-        {content.images.map((img, i) => (
+        {content.images.map((img, i) => {
+        const src = typeof img === "string" ? img : img?.url;
+          return (
           <div
             key={`gallery-${section.id}-${i}`}
             className="
@@ -745,14 +747,13 @@ const { activeBarbershop, services, setServices } = useBarber();
           >
             {/* IMAGE */}
             <img
-              src={img}
-              className="
-                h-32 w-full object-cover
-                transition-transform duration-500
-                group-hover:scale-110
-              "
-            />
-
+           src={src}
+          className="
+          h-32 w-full object-cover
+          transition-transform duration-500
+          group-hover:scale-110
+          "
+          />
             {/* DARK OVERLAY */}
             <div className="
               absolute inset-0
@@ -796,7 +797,8 @@ const { activeBarbershop, services, setServices } = useBarber();
               #{i + 1}
             </div>
           </div>
-        ))}
+          );
+})}
       </div>
     )}
   </div>

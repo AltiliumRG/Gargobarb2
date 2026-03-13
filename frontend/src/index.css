@@ -43,3 +43,45 @@
 .animate-scaleIn {
   animation: scaleIn 0.3s ease forwards;
 }
+.react-calendar {
+  background: #0b0b0b;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 16px;
+  width: 100%;
+}
+
+.react-calendar__navigation button {
+  color: white;
+  font-weight: 600;
+}
+
+.react-calendar__month-view__weekdays {
+  text-transform: uppercase;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.react-calendar__tile {
+  border-radius: 10px;
+  height: 42px;
+  color: white;
+}
+
+.react-calendar__tile:hover {
+  background: rgba(234,179,8,0.2);
+}
+
+.react-calendar__tile--active {
+  background: #eab308 !important;
+  color: black;
+  font-weight: bold;
+}
+
+.react-calendar__tile--now {
+  border: 1px solid #eab308;
+}
+
+.react-calendar__tile:disabled {
+  opacity: 0.25;
+}

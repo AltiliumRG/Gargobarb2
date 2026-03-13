@@ -1,16 +1,84 @@
 const { Op } = require("sequelize");
-const { Appointment, Service, Barbershop, User } = require("../models");
+const { Appointment, Service, Barbershop, User, BarberSchedule } = require("../models");
 
 /* ============================================================
    📅 CREAR CITA (Cliente)
 ============================================================ */
 exports.createAppointment = async (req, res) => {
   try {
-    const { user_id, barbershop_id, service_id, date, time, notes } = req.body;
+    const { barbershop_id, service_id, date, time, notes } = req.body;
+    const user_id = req.user.id;
 
-    if (!user_id || !barbershop_id || !service_id || !date || !time) {
+    if (!barbershop_id || !service_id || !date || !time) {
       return res.status(400).json({ error: "Faltan campos obligatorios" });
     }
+
+    /* -------------------------
+       verificar horario del barbero
+    -------------------------- */
+
+    const dateObj = new Date(`${date}T00:00:00`);
+
+const daySpanish = dateObj.toLocaleDateString("es-CO", {
+  weekday: "long",
+  timeZone: "America/Bogota"
+});
+
+const dayMap = {
+  domingo: "sunday",
+  lunes: "monday",
+  martes: "tuesday",
+  miércoles: "wednesday",
+  jueves: "thursday",
+  viernes: "friday",
+  sábado: "saturday"
+};
+
+const day = dayMap[daySpanish];
+
+    const schedule = await BarberSchedule.findOne({
+      where: {
+        barbershop_id,
+        day,
+      },
+    });
+
+    if (!schedule || schedule.is_closed) {
+      return res.status(400).json({
+        error: "La barbería está cerrada ese día",
+      });
+    }
+
+    if (time < schedule.open_time || time > schedule.close_time) {
+      return res.status(400).json({
+        error: "Horario fuera del horario permitido",
+      });
+    }
+
+    /* -------------------------
+       verificar duplicados
+    -------------------------- */
+
+    const existing = await Appointment.findOne({
+      where: {
+        barbershop_id,
+        date,
+        time,
+        status: {
+          [Op.ne]: "cancelada",
+        },
+      },
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        error: "Ese horario ya está reservado",
+      });
+    }
+
+    /* -------------------------
+       crear cita
+    -------------------------- */
 
     const appointment = await Appointment.create({
       user_id,

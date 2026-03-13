@@ -106,18 +106,18 @@ export default function AboutRenderer({
       </div>
 
       {/* 🎬 Keyframes */}
-      <style jsx>{`
-        @keyframes fadeSlide {
-          from {
-            transform: translateY(50px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0px);
-            opacity: 1;
-          }
-        }
-      `}</style>
+      <style>{`
+  @keyframes fadeSlide {
+    from {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0px);
+      opacity: 1;
+    }
+  }
+`}</style>
     </section>
   );
 }

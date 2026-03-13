@@ -2,36 +2,73 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import barberPublicApi from "../../api/barberPublic.api";
 import SectionRendererUniversal from "../../components/renderers/SectionRendererUniversal";
-
+import { useBarber } from "../../context/BarberContext";
 export default function BarberPublicPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+
   const [site, setSite] = useState(null);
+
+const { setServices, setActiveBarbershop } = useBarber();
 
   /* ===============================
      CARGAR SITIO POR SLUG
   =============================== */
-  useEffect(() => {
-    if (!slug) return;
+ useEffect(() => {
+  if (!slug) return;
 
-    barberPublicApi
-      .getBySlug(slug)
-      .then((res) => {
-        setSite(res.data.site);
+  const loadSite = async () => {
+    try {
+      const res = await barberPublicApi.getBySlug(slug);
 
-        // 🔥 Registrar visita
-        fetch(
-          `http://localhost:4000/api/barbershops/public/${slug}/visit`,
-          { method: "POST" }
-        );
-      })
-      .catch((err) => {
-        console.error("Error cargando sitio:", err);
-      });
-  }, [slug]);
+      const siteData = res.data.site;
 
-  // 🔥 SIEMPRE DEFINIR VARIABLES
+      console.log("SITE DATA:", siteData);
+
+      setSite(siteData);
+
+      // 🔥 guardar barbería activa
+      if (siteData?.barbershop_id) {
+
+  // guardar barbería activa
+  setActiveBarbershop({ id: siteData.barbershop_id });
+
+  try {
+    const servicesRes = await fetch(
+      `http://localhost:4000/api/services/barbershop/${siteData.barbershop_id}`
+    );
+
+    const servicesData = await servicesRes.json();
+
+    console.log("SERVICES API:", servicesData);
+
+    setServices(servicesData);
+
+  } catch (err) {
+    console.error("Error cargando servicios:", err);
+  }
+
+}
+
+      // registrar visita
+      fetch(
+        `http://localhost:4000/api/barbershops/public/${slug}/visit`,
+        { method: "POST" }
+      );
+
+    } catch (err) {
+      console.error("Error cargando sitio:", err);
+    }
+  };
+
+  loadSite();
+}, [slug]);
+
+  /* ===============================
+     SECCIONES
+  =============================== */
   const page = site?.pages?.[0];
+
   const sections =
     page?.sections?.sort((a, b) => a.order_index - b.order_index) || [];
 
@@ -117,6 +154,7 @@ export default function BarberPublicPage() {
         <p className="text-lg font-semibold mb-2">
           {site.name || "Mi Barbería"}
         </p>
+
         <p className="text-sm opacity-70">
           © {new Date().getFullYear()} Todos los derechos reservados
         </p>
