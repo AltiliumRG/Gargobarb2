@@ -223,6 +223,16 @@ export function BuilderProvider({ children }) {
   };
 
   /* ============================================================
+     UPDATE SITE SETTINGS
+  ============================================================ */
+  const updateSiteSettings = (updatedFields) => {
+    setSite((prev) => ({
+      ...prev,
+      ...updatedFields,
+    }));
+  };
+
+  /* ============================================================
      SAVE
   ============================================================ */
   const saveDraft = async () => {
@@ -232,6 +242,12 @@ export function BuilderProvider({ children }) {
       const res = await api.post("/sites/builder/save", {
         siteId: site.id,
         pages,
+        siteMetadata: {
+          name: site.name,
+          primary_color: site.primary_color,
+          secondary_color: site.secondary_color,
+          font_family: site.font_family,
+        },
       });
 
       return res.status === 200;
@@ -275,6 +291,7 @@ export function BuilderProvider({ children }) {
 
     updateSectionContent,
     updateSectionStyles,
+    updateSiteSettings,
 
     saveDraft,
     publishSite,

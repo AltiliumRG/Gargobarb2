@@ -79,11 +79,27 @@ exports.saveBuilder = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const { siteId, pages } = req.body;
+    const { siteId, pages, siteMetadata } = req.body;
 
     if (!siteId || !pages) {
       await transaction.rollback();
       return res.status(400).json({ error: "Datos incompletos" });
+    }
+
+    // 0️⃣ Actualizar metadata del sitio si viene
+    if (siteMetadata) {
+      await BarbershopSite.update(
+        {
+          name: siteMetadata.name,
+          primary_color: siteMetadata.primary_color,
+          secondary_color: siteMetadata.secondary_color,
+          font_family: siteMetadata.font_family,
+        },
+        {
+          where: { id: siteId },
+          transaction,
+        }
+      );
     }
 
     for (const page of pages) {
@@ -116,8 +132,8 @@ exports.saveBuilder = async (req, res) => {
             page_id: page.id,
             type: section.type,
             order_index: i + 1,
-            content: JSON.stringify(section.content || {}),
-            styles: JSON.stringify(section.styles || {}),
+            content: section.content || {},
+            styles: section.styles || {},
             is_visible:
               typeof section.is_visible === "boolean"
                 ? section.is_visible

@@ -7,6 +7,7 @@ export default function Canvas() {
     sections,
     selectSection,
     selectedSectionId,
+    site,
   } = useBuilder();
 
   if (!currentPage) {
@@ -55,6 +56,7 @@ export default function Canvas() {
               {/* RENDER REAL */}
               <SectionRendererUniversal
                 section={section}
+                site={site}
                 preview={true}
               />
             </div>

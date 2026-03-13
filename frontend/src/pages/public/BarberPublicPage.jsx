@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import barberPublicApi from "../../api/barberPublic.api";
 import SectionRendererUniversal from "../../components/renderers/SectionRendererUniversal";
 import { useBarber } from "../../context/BarberContext";
+
 export default function BarberPublicPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -20,34 +21,31 @@ export default function BarberPublicPage() {
     const loadSite = async () => {
       try {
         const res = await barberPublicApi.getBySlug(slug);
+        const { site: siteRaw, name: barbershopName } = res.data;
 
-        const siteData = res.data.site;
+        // Combinar datos para que el renderer tenga todo lo necesario
+        const siteData = {
+          ...siteRaw,
+          name: siteRaw.name || barbershopName, // Prioridad al nombre personalizado del sitio
+        };
 
-        console.log("SITE DATA:", siteData);
-
+        console.log("SITE DATA LOADED:", siteData);
         setSite(siteData);
 
         // 🔥 guardar barbería activa
         if (siteData?.barbershop_id) {
-
-          // guardar barbería activa
           setActiveBarbershop({ id: siteData.barbershop_id });
 
           try {
             const servicesRes = await fetch(
               `http://localhost:4000/api/services/barbershop/${siteData.barbershop_id}`
             );
-
             const servicesData = await servicesRes.json();
-
             console.log("SERVICES API:", servicesData);
-
             setServices(servicesData);
-
           } catch (err) {
             console.error("Error cargando servicios:", err);
           }
-
         }
 
         // registrar visita
@@ -55,7 +53,6 @@ export default function BarberPublicPage() {
           `http://localhost:4000/api/barbershops/public/${slug}/visit`,
           { method: "POST" }
         );
-
       } catch (err) {
         console.error("Error cargando sitio:", err);
       }
@@ -68,15 +65,13 @@ export default function BarberPublicPage() {
      SECCIONES
   =============================== */
   const page = site?.pages?.[0];
-
-  const sections =
-    page?.sections?.sort((a, b) => a.order_index - b.order_index) || [];
+  const sections = page?.sections?.sort((a, b) => a.order_index - b.order_index) || [];
 
   /* ===============================
      NAV LINKS DINÁMICOS
   =============================== */
   const navLinks = useMemo(() => {
-    return sections.map((section) => ({
+    return sections.map((section, index) => ({
       label:
         section.type === "hero"
           ? "Inicio"
@@ -87,7 +82,7 @@ export default function BarberPublicPage() {
               : section.type === "contact"
                 ? "Contacto"
                 : section.type,
-      id: section.type,
+      id: section.type + "-" + index, // ✅ clave única
     }));
   }, [sections]);
 
@@ -117,8 +112,8 @@ export default function BarberPublicPage() {
         <div className="flex gap-8 text-sm font-medium">
           {navLinks.map((link) => (
             <a
-              key={link.id}
-              href={`#${link.id}`}
+              key={link.id} // ✅ clave única
+              href={`#${link.id.split("-")[0]}`} // solo usamos el tipo para el ancla
               className="hover:text-yellow-400 transition"
             >
               {link.label}

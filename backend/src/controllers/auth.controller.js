@@ -41,7 +41,8 @@ const sendAuthCookies = (res, accessToken, refreshToken) => {
 // ============================================================
 exports.register = async (req, res) => {
   try {
-    const { username, email, password, full_name, role_id } = req.body;
+    console.log("📩 Intento de registro recibido:", req.body);
+    const { username, email, password, full_name, phone, role_id } = req.body;
 
     let avatar_url = null;
     if (req.file) avatar_url = `/uploads/${req.file.filename}`;
@@ -51,6 +52,7 @@ exports.register = async (req, res) => {
       email,
       password,
       full_name,
+      phone,
       role_id,
       avatar_url,
     });
@@ -60,8 +62,8 @@ exports.register = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error("❌ Error en register:", error.message);
-    res.status(error.status || 500).json({ error: error.message });
+    console.error("❌ Error completo en register:", error);
+    res.status(error.status || 500).json({ error: error.message || "Error interno en el servidor" });
   }
 };
 
@@ -76,13 +78,6 @@ exports.login = async (req, res) => {
       usernameOrEmail: email,
       password,
     });
-
-    // Guardar hash del refresh token
-    const hash = await bcrypt.hash(result.refreshToken, 10);
-    await User.update(
-      { refresh_token_hash: hash },
-      { where: { id: result.user.id } }
-    );
 
     // Enviar cookies
     sendAuthCookies(res, result.accessToken, result.refreshToken);
@@ -166,39 +161,14 @@ exports.googleAuth = async (req, res) => {
 
     const { email, name, picture } = ticket.getPayload();
 
-    let user = await User.findOne({ where: { email } });
-
-    // Si no existe → crear usuario nuevo
-    if (!user) {
-      user = await User.create({
-        username: email.split("@")[0],
-        email,
-        full_name: name,
-        avatar_url: picture,
-        password_hash: null,
-        role_id: 3,
-      });
-    }
-
-    // Crear tokens
-    const tokens = await authService.createTokens(user);
-
-    // Guardar hash
-    const hash = await bcrypt.hash(tokens.refreshToken, 10);
-    user.refresh_token_hash = hash;
-    await user.save();
+    const result = await authService.googleAuth({ email, name, picture });
 
     // Enviar cookies
-    sendAuthCookies(res, tokens.accessToken, tokens.refreshToken);
-
-    // Enviar usuario limpio
-    const safeUser = user.toJSON();
-    delete safeUser.password_hash;
-    delete safeUser.refresh_token_hash;
+    sendAuthCookies(res, result.accessToken, result.refreshToken);
 
     res.json({
       message: "Google Auth exitoso",
-      user: safeUser,
+      user: result.user,
     });
   } catch (error) {
     console.error("❌ Error en Google Auth:", error.message);

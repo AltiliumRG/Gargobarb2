@@ -51,6 +51,7 @@ async function register({
   password,
   full_name = null,
   avatar_url = null,
+  phone = null,
   role_id = 3,
 }) {
   if (!username || !email) {
@@ -79,6 +80,7 @@ async function register({
     email,
     password_hash,
     full_name,
+    phone,
     avatar_url,
     role_id,
   });
@@ -209,11 +211,38 @@ async function logout(userId) {
   await user.save();
 }
 
+async function googleAuth({ email, name, picture }) {
+  let user = await User.findOne({ where: { email } });
+
+  if (!user) {
+    user = await User.create({
+      username: email.split("@")[0],
+      email,
+      full_name: name,
+      avatar_url: picture,
+      password_hash: null,
+      role_id: 3,
+    });
+  }
+
+  const { accessToken, refreshToken } = await createTokens(user);
+
+  user.refresh_token_hash = await hashRefreshToken(refreshToken);
+  await user.save();
+
+  const safeUser = user.toJSON();
+  delete safeUser.password_hash;
+  delete safeUser.refresh_token_hash;
+
+  return { user: safeUser, accessToken, refreshToken };
+}
+
 module.exports = {
   register,
   login,
   refreshTokens,
   logout,
+  googleAuth, // Added
   verifyPassword,
   hashRefreshToken,
   createTokens,
