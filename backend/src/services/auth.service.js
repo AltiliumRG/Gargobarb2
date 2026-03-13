@@ -1,8 +1,11 @@
 // ============================================================
 // 📁 backend/src/services/auth.service.js
 // ============================================================
+
+//bcrypt para encriptar
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
+//modelo de usuarios
 const { User } = require("../models");
 const jwtUtil = require("../utils/jwt"); // signAccessToken, signRefreshToken, verifyRefreshToken
 

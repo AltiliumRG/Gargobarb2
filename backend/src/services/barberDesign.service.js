@@ -2,7 +2,9 @@
 // 🎨 Servicio de diseño de barbería
 // ===============================================
 
+//Modelo del Barbero
 const Barbershop = require("../models/Barbershop");
+
 
 exports.saveDesign = async (userId, designData) => {
   const barbershop = await Barbershop.findOne({

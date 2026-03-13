@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+
+
 export default function Dashboard() {
   const { barbershopId } = useParams();
   const navigate = useNavigate();

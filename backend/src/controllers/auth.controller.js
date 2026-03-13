@@ -2,8 +2,11 @@
 // 📁 backend/src/controllers/auth.controller.js
 // ============================================================
 
+//bcrypt para encriptar
 const bcrypt = require("bcryptjs");
+//libreria de google
 const { OAuth2Client } = require("google-auth-library");
+//
 const authService = require("../services/auth.service");
 const { User } = require("../models");
 

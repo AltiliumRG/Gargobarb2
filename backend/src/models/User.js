@@ -1,9 +1,11 @@
 // ============================================================
 // 📁 backend/src/models/User.js
 // ============================================================
+
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 
+//definimos el usuario
 const User = sequelize.define(
   "User",
   {

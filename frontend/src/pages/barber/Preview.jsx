@@ -25,12 +25,12 @@ export default function Preview() {
         section.type === "hero"
           ? "Inicio"
           : section.type === "services"
-          ? "Servicios"
-          : section.type === "gallery"
-          ? "Galería"
-          : section.type === "contact"
-          ? "Contacto"
-          : section.type,
+            ? "Servicios"
+            : section.type === "gallery"
+              ? "Galería"
+              : section.type === "contact"
+                ? "Contacto"
+                : section.type,
       id: section.type
     }));
   }, [sections]);

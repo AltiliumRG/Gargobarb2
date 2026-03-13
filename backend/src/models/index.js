@@ -7,6 +7,7 @@ const Service = require("./Service");
 const BarberSchedule = require("./BarberSchedule");
 const Appointment = require("./Appointment");
 const { sequelize } = require("../config/db");
+const Sale = require("./Sale");
 /* ===============================
    USER → BARBERSHOPS
 ================================*/
@@ -92,6 +93,18 @@ Appointment.belongsTo(Barbershop, { foreignKey: "barbershop_id", as: "barbershop
 Service.hasMany(Appointment, { foreignKey: "service_id" });
 Appointment.belongsTo(Service, { foreignKey: "service_id", as: "service" });
 
+/* ===============================
+   SALES
+================================*/
+Barbershop.hasMany(Sale, { foreignKey: "barbershop_id", as: "sales" });
+Sale.belongsTo(Barbershop, { foreignKey: "barbershop_id", as: "barbershop" });
+
+Service.hasMany(Sale, { foreignKey: "service_id", as: "sales" });
+Sale.belongsTo(Service, { foreignKey: "service_id", as: "service" });
+
+User.hasMany(Sale, { foreignKey: "barber_id", as: "barberSales" });
+Sale.belongsTo(User, { foreignKey: "barber_id", as: "barber" });
+
 module.exports = {
   sequelize,
   Barbershop,
@@ -102,4 +115,5 @@ module.exports = {
   Service,
   BarberSchedule,
   Appointment,
+  Sale,
 };

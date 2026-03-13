@@ -1,10 +1,12 @@
+//aqui importamos la gran mayotia de lo que vamos a utilizar
+
 // ===============================================
 // 🌐 backend/src/app.js
 // Configuración principal del servidor Express
 // ===============================================
 
-require("dotenv").config();
-const express = require("express");
+require("dotenv").config();//.env
+const express = require("express");//express
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -23,8 +25,10 @@ const serviceRoutes = require("./routes/service.routes");
 const appointmentRoutes = require("./routes/appointment.routes");
 const uploadRoutes = require("./routes/upload.routes");
 const siteRoutes = require("./routes/site.routes");
+const saleRoutes = require("./routes/sale.routes");
 const barberDesignRoutes = require("./routes/barberDesign.routes");
 const barberPublicRoutes = require("./routes/barberPublic.routes");
+const adminRoutes = require("./routes/admin.routes");
 const app = express();
 const siteUploadRoutes = require("./routes/siteUpload.routes");
 const availabilityRoutes = require("./routes/availability.routes");
@@ -108,6 +112,7 @@ app.get("/api/health", (req, res) => {
 // ===============================================
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 
 // 🧔‍♂️ BARBERO (creación y diseño de su página)
 app.use("/api/barber/design", barberDesignRoutes);
@@ -125,6 +130,7 @@ app.use("/api/upload", uploadRoutes);
 
 // 🧱 SITIOS (builder de barberías)
 app.use("/api/sites", siteRoutes);
+app.use("/api/sales", saleRoutes);
 
 app.use("/api/geo", require("./routes/geo.routes"));
 

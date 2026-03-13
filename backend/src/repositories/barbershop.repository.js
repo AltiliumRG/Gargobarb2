@@ -1,6 +1,7 @@
 const Barbershop = require("../models/Barbershop");
 
 module.exports = {
+
   async create(data, transaction) {
     return Barbershop.create(data, { transaction });
   },

@@ -9,60 +9,60 @@ export default function BarberPublicPage() {
 
   const [site, setSite] = useState(null);
 
-const { setServices, setActiveBarbershop } = useBarber();
+  const { setServices, setActiveBarbershop } = useBarber();
 
   /* ===============================
      CARGAR SITIO POR SLUG
   =============================== */
- useEffect(() => {
-  if (!slug) return;
+  useEffect(() => {
+    if (!slug) return;
 
-  const loadSite = async () => {
-    try {
-      const res = await barberPublicApi.getBySlug(slug);
+    const loadSite = async () => {
+      try {
+        const res = await barberPublicApi.getBySlug(slug);
 
-      const siteData = res.data.site;
+        const siteData = res.data.site;
 
-      console.log("SITE DATA:", siteData);
+        console.log("SITE DATA:", siteData);
 
-      setSite(siteData);
+        setSite(siteData);
 
-      // 🔥 guardar barbería activa
-      if (siteData?.barbershop_id) {
+        // 🔥 guardar barbería activa
+        if (siteData?.barbershop_id) {
 
-  // guardar barbería activa
-  setActiveBarbershop({ id: siteData.barbershop_id });
+          // guardar barbería activa
+          setActiveBarbershop({ id: siteData.barbershop_id });
 
-  try {
-    const servicesRes = await fetch(
-      `http://localhost:4000/api/services/barbershop/${siteData.barbershop_id}`
-    );
+          try {
+            const servicesRes = await fetch(
+              `http://localhost:4000/api/services/barbershop/${siteData.barbershop_id}`
+            );
 
-    const servicesData = await servicesRes.json();
+            const servicesData = await servicesRes.json();
 
-    console.log("SERVICES API:", servicesData);
+            console.log("SERVICES API:", servicesData);
 
-    setServices(servicesData);
+            setServices(servicesData);
 
-  } catch (err) {
-    console.error("Error cargando servicios:", err);
-  }
+          } catch (err) {
+            console.error("Error cargando servicios:", err);
+          }
 
-}
+        }
 
-      // registrar visita
-      fetch(
-        `http://localhost:4000/api/barbershops/public/${slug}/visit`,
-        { method: "POST" }
-      );
+        // registrar visita
+        fetch(
+          `http://localhost:4000/api/barbershops/public/${slug}/visit`,
+          { method: "POST" }
+        );
 
-    } catch (err) {
-      console.error("Error cargando sitio:", err);
-    }
-  };
+      } catch (err) {
+        console.error("Error cargando sitio:", err);
+      }
+    };
 
-  loadSite();
-}, [slug]);
+    loadSite();
+  }, [slug]);
 
   /* ===============================
      SECCIONES
@@ -81,12 +81,12 @@ const { setServices, setActiveBarbershop } = useBarber();
         section.type === "hero"
           ? "Inicio"
           : section.type === "services"
-          ? "Servicios"
-          : section.type === "gallery"
-          ? "Galería"
-          : section.type === "contact"
-          ? "Contacto"
-          : section.type,
+            ? "Servicios"
+            : section.type === "gallery"
+              ? "Galería"
+              : section.type === "contact"
+                ? "Contacto"
+                : section.type,
       id: section.type,
     }));
   }, [sections]);
