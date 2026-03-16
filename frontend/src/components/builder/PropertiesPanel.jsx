@@ -1004,25 +1004,212 @@ const { activeBarbershop, services, setServices } = useBarber();
   </div>
 )}
 
+{/* =======================================================
+    CART EDITOR PRO
+======================================================= */}
+{section.type === "cart" && (
+  <div className="space-y-8">
+    {/* HEADER CARD */}
+    <div className="
+      bg-gradient-to-br from-[#0b1220] to-[#0f172a]
+      border border-gray-800
+      rounded-2xl
+      p-6
+      shadow-lg
+      space-y-5
+    ">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-yellow-400 tracking-wide">
+          Sección Carrito de Compras
+        </h3>
+        <span className="text-xs text-gray-500">
+          Venta de Productos
+        </span>
+      </div>
+
+      <InputPro
+        placeholder="Título sección (ej. Carrito de Compras)"
+        value={content.title || ""}
+        onChange={(value) => handleContent("title", value)}
+      />
+
+      <InputPro
+        placeholder="Texto del botón (ej. Añadir al Carrito)"
+        value={content.buttonText || ""}
+        onChange={(value) => handleContent("buttonText", value)}
+      />
+    </div>
+
+    {/* LISTA DE PRODUCTOS */}
+    {(content.items || []).map((item, index) => {
+      const updateItem = (field, value) => {
+        const updated = [...(content.items || [])];
+        updated[index] = { ...updated[index], [field]: value };
+        handleContent("items", updated);
+      };
+
+      return (
+        <div
+          key={index}
+          className="
+            bg-[#0b1220]
+            border border-gray-800
+            rounded-2xl
+            p-6
+            space-y-6
+            transition hover:border-yellow-400/40
+          "
+        >
+          {/* HEADER PRODUCTO */}
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-400">
+              Producto #{index + 1}
+            </span>
+            <button
+              onClick={() => {
+                const updated = content.items.filter((_, i) => i !== index);
+                handleContent("items", updated);
+              }}
+              className="text-xs text-red-400 hover:text-red-500 transition"
+            >
+              Eliminar
+            </button>
+          </div>
+
+          <InputPro
+            placeholder="Nombre del producto"
+            value={item.name || ""}
+            onChange={(value) => updateItem("name", value)}
+          />
+
+          <TextareaPro
+            placeholder="Descripción del producto"
+            value={item.description || ""}
+            onChange={(value) => updateItem("description", value)}
+          />
+
+          <div>
+            <label className="text-xs text-gray-400 mb-2 block">Precio ($)</label>
+            <input
+              type="number"
+              value={item.price || ""}
+              onChange={(e) => updateItem("price", Number(e.target.value))}
+              placeholder="Ej. 15.00"
+              className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-400 p-3 rounded-xl outline-none"
+            />
+          </div>
+
+          {/* IMAGEN PRODUCTO */}
+          <div className="space-y-3">
+            <label className="text-xs text-gray-400">
+              Imagen del producto
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const res = await uploadSiteImage(file);
+                updateItem("image", res.data.url);
+              }}
+              className="w-full bg-gray-900 border border-gray-700 p-2 rounded-xl"
+            />
+            {item.image && (
+              <img
+                src={item.image}
+                className="w-full h-32 object-cover rounded-xl border border-gray-800"
+                alt="preview"
+              />
+            )}
+          </div>
+        </div>
+      );
+    })}
+
+    {/* BOTON AÑADIR PRODUCTO */}
+    <button
+      onClick={() => {
+        const updated = [
+          ...(content.items || []),
+          {
+            id: Date.now().toString(),
+            name: "Nuevo producto",
+            description: "Descripción del nuevo producto",
+            price: 10.00,
+            image: ""
+          }
+        ];
+        handleContent("items", updated);
+      }}
+      className="
+        w-full
+        bg-gradient-to-r from-yellow-500 to-yellow-400
+        text-black
+        py-3
+        rounded-xl
+        font-bold
+        transition
+        active:scale-95
+        shadow-lg
+      "
+    >
+      + Agregar producto
+    </button>
+  </div>
+)}
+
       {/* =======================================================
           STYLES
       ======================================================= */}
       <div className="mt-6 border-t border-gray-700 pt-4">
-        <p className="text-sm text-gray-400 mb-2">Estilos</p>
+        <p className="text-sm text-gray-400 mb-4">Estilos</p>
 
-        <label className="block text-sm mb-1">Color fondo</label>
-        <input
-          type="color"
-          value={styles.backgroundColor || "#000000"}
-          onChange={(e) => handleStyle("backgroundColor", e.target.value)}
-        />
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <label className="text-sm">Color fondo</label>
+             <input
+              type="color"
+              value={styles.backgroundColor || "#000000"}
+              onChange={(e) => handleStyle("backgroundColor", e.target.value)}
+              className="w-12 h-8 rounded cursor-pointer border border-gray-700 bg-transparent"
+             />
+          </div>
 
-        <label className="block text-sm mt-3 mb-1">Color texto</label>
-        <input
-          type="color"
-          value={styles.textColor || "#ffffff"}
-          onChange={(e) => handleStyle("textColor", e.target.value)}
-        />
+          <div className="flex justify-between items-center">
+            <label className="text-sm">Color texto</label>
+            <input
+              type="color"
+              value={styles.textColor || "#ffffff"}
+              onChange={(e) => handleStyle("textColor", e.target.value)}
+              className="w-12 h-8 rounded cursor-pointer border border-gray-700 bg-transparent"
+            />
+          </div>
+
+          {section.type === "cart" && (
+            <>
+              <div className="flex justify-between items-center">
+                <label className="text-sm">Color botones y detalles</label>
+                <input
+                  type="color"
+                  value={styles.buttonColor || "#facc15"}
+                  onChange={(e) => handleStyle("buttonColor", e.target.value)}
+                  className="w-12 h-8 rounded cursor-pointer border border-gray-700 bg-transparent"
+                />
+              </div>
+
+              <div className="flex justify-between items-center">
+                <label className="text-sm">Fondo de Tarjetas (Cards)</label>
+                <input
+                  type="color"
+                  value={styles.cardBackgroundColor || "#ffffff"}
+                  onChange={(e) => handleStyle("cardBackgroundColor", e.target.value)}
+                  className="w-12 h-8 rounded cursor-pointer border border-gray-700 bg-transparent"
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
     </aside>

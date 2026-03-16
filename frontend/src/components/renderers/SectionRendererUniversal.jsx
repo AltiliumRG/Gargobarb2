@@ -5,6 +5,7 @@ import ContactRenderer from "./ContactRenderer";
 import CustomRenderer from "./CustomRenderer";
 import AboutRenderer from "./AboutRenderer";
 import TestimonialsRenderer from "./TestimonialsRenderer";
+import CartRenderer from "./CartRenderer";
 
 export default function SectionRendererUniversal({ section, site, preview }) {
   if (!section?.is_visible) return null;
@@ -80,6 +81,17 @@ export default function SectionRendererUniversal({ section, site, preview }) {
 case "testimonials":
   return (
     <TestimonialsRenderer
+      section={section}
+      content={content}
+      styles={styles}
+      site={site}
+      preview={preview}
+    />
+  );
+
+case "cart":
+  return (
+    <CartRenderer
       section={section}
       content={content}
       styles={styles}

@@ -1,0 +1,15 @@
+﻿5e42403 se completo el merge entre nueva seccion de barberias y dashboard de admin
+2d4093a commit de emergencia 2
+1f90a4b commit de emergencia
+1e3c6f3 Gargobarb-avanzado-add
+06b5a55 preparando para merge
+38e18c6 se mejoro el dashboard del admin
+e9e386e actualizacion de archivos
+ba6b4fe Gargobarb-avanzado
+7f9d556 correccion errores y secciones cliente
+76c0959 Solucion problema estructural
+f237fae se a├▒adieron datos de prueba en el script de la DB
+9f49a4c se mejoro el formulario de crear barberias
+ec16ab1 se mejoro el formulario de crear barberia
+536aa02 creacion de barberias funcional
+ec4ade4 Gargobarb_full

@@ -47,8 +47,15 @@ exports.createSiteForBarbershop = async (data, transaction) => {
       { transaction }
     );
 
-    // 🔹 crear secciones
+    // 🔹 crear secciones con filtro de features
     for (const section of page.sections) {
+      const type = section.type;
+      
+      // Filter out cart if not selected in features
+      if (type === "cart" && (!data.features || !data.features.cart)) {
+        continue;
+      }
+
       await SiteSection.create(
         {
           page_id: newPage.id,

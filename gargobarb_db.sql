@@ -135,12 +135,28 @@ CREATE TABLE IF NOT EXISTS site_pages (
 CREATE TABLE IF NOT EXISTS site_sections (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     page_id BIGINT UNSIGNED NOT NULL,
-    type ENUM('hero', 'services', 'gallery', 'about', 'testimonials', 'contact', 'custom') NOT NULL,
+    type ENUM('hero', 'services', 'gallery', 'about', 'testimonials', 'contact', 'cart', 'custom') NOT NULL,
     order_index INT DEFAULT 0,
     content JSON NOT NULL,
     styles JSON,
     is_visible BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (page_id) REFERENCES site_pages(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 8.5. TABLA DE CARRITOS DE COMPRA (shopping_carts)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS shopping_carts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    site_id BIGINT UNSIGNED NOT NULL,
+    client_name VARCHAR(255) NOT NULL,
+    client_phone VARCHAR(50),
+    items JSON NOT NULL,
+    total DECIMAL(10, 2) NOT NULL,
+    status ENUM('pending', 'completed', 'cancelled') DEFAULT 'pending',
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (site_id) REFERENCES barbershop_sites(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- ============================================================

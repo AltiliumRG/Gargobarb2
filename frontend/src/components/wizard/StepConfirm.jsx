@@ -22,6 +22,7 @@ export default function StepConfirm() {
       department: data.department,
       city: data.city.trim(),
       address: data.address.trim(),
+      features: data.features,
     };
 
     const loadingToast = toast.loading("Creando tu barbería...");

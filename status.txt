@@ -1,0 +1,39 @@
+﻿On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   backend/node_modules/.package-lock.json
+	modified:   backend/package-lock.json
+	modified:   backend/src/app.js
+	modified:   backend/src/config/db.js
+	modified:   backend/src/controllers/barbershop.controller.js
+	modified:   backend/src/controllers/template.controller.js
+	modified:   backend/src/models/BarbershopSite.js
+	modified:   backend/src/models/SiteSection.js
+	modified:   backend/src/models/index.js
+	modified:   backend/src/services/site.service.js
+	modified:   backend/src/services/siteTemplate.service.js
+	modified:   backend/src/templates/default.template.json
+	modified:   frontend/src/components/builder/PropertiesPanel.jsx
+	modified:   frontend/src/components/builder/Toolbar.jsx
+	modified:   frontend/src/components/renderers/SectionRendererUniversal.jsx
+	modified:   frontend/src/components/wizard/StepConfirm.jsx
+	modified:   frontend/src/context/BarberContext.jsx
+	modified:   frontend/src/pages/public/BarberPublicPage.jsx
+	modified:   gargobarb_db.sql
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	backend/src/controllers/product.controller.js
+	backend/src/models/Product.js
+	backend/src/routes/product.routes.js
+	backend/test-db.js
+	frontend/src/api/products.api.js
+	frontend/src/components/renderers/CartRenderer.jsx
+	log2.txt
+	status.txt
+	tmp_log.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")

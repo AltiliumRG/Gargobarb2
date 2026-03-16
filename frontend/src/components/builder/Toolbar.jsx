@@ -117,6 +117,12 @@ export default function Toolbar() {
     onClick={() => addSection("contact")}
   />
 
+  <Block
+    title="Carrito"
+    desc="Catálogo y compras"
+    onClick={() => addSection("cart")}
+  />
+
 </div>
         </div>
 

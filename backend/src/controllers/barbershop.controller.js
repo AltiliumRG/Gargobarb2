@@ -16,7 +16,7 @@ const slugify = require("../utils/slugify");
 ============================================================ */
 exports.createBarbershop = async (req, res) => {
   try {
-    const { name, address, city, user_id, country, department, latitude, longitude } = req.body;
+    const { name, address, city, user_id, country, department, latitude, longitude, features } = req.body;
     const user = req.user;
 
     if (!name || !address || !city) {
@@ -84,6 +84,7 @@ exports.createBarbershop = async (req, res) => {
         primaryColor: "#111827",
         secondaryColor: "#facc15",
         fontFamily: "Inter",
+        features,
       }, transaction);
 
       await transaction.commit();
