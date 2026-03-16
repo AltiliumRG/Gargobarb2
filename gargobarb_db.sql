@@ -4,7 +4,7 @@
 -- Fecha: 2026-03-13
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS gargobarb;
+CREATE DATABASE IF NOT EXISTS gargobarb;--crear db
 USE gargobarb;
 
 -- Desactivar llaves foráneas para facilitar la creación
