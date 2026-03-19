@@ -1,33 +1,41 @@
-//Importamos las variables de entorno del .env
+/**
+ * Gargobarb Server Entry Point
+ * 
+ * Initializes the database connection and starts the HTTP server.
+ */
+
 require('dotenv').config();
-
-//traemos las importaciones de db.js
 const { testConnection, sequelize } = require('./config/db');
-
-//traemos el archivo app con todas las importaciones
 const app = require('./app');
 
-//usamos el puerto del .env y si no funciona usamos 4000
+// Server Configuration
 const PORT = process.env.PORT || 4000;
 
-
-(async () => {
+/**
+ * Main application bootstrap function.
+ */
+const bootstrap = async () => {
   try {
-
-    //Funcion TestConnection() en config/db.js
-
+    // 1. Database Connection Test
     await testConnection();
-    console.log('✅ Conectado a MySQL (Sequelize).');
+    console.log('✅ MySQL Connection via Sequelize established.');
 
+    // 2. Authentication Test
     await sequelize.authenticate();
+    console.log('✅ Database authentication successful.');
 
-    //aqui escuchamos el puerto podiendo utilizar nuestro servidor
-    app.listen(PORT, () =>
-      console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
-    );
+    // 3. Start Express Server
+    app.listen(PORT, () => {
+      console.log(`🚀 Server listening at http://localhost:${PORT}`);
+      console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
+    });
 
-    //si hay error imprime mensaje
   } catch (error) {
-    console.error('❌ Error al iniciar el servidor:', error.message);
+    console.error('❌ Critical error during server startup:');
+    console.error(error.message);
+    process.exit(1); // Exit with failure
   }
-})();
+};
+
+// Start the bootstrap process
+bootstrap();

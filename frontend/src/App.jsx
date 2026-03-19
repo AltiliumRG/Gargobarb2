@@ -11,7 +11,7 @@ import BarberPublicPage from "./pages/public/BarberPublicPage";
 import CheckoutPage from "./pages/public/CheckoutPage";
 import BookAppointment from "./pages/public/BookAppointment";
 
-import { BarberProvider } from "./context/BarberContext";
+
 
 // Layouts
 import AdminLayout from "./layouts/AdminLayout";
@@ -73,20 +73,12 @@ const App = () => {
         ======================================================== */}
         <Route
           path="/b/:slug"
-          element={
-            <BarberProvider>
-              <BarberPublicPage />
-            </BarberProvider>
-          }
+          element={<BarberPublicPage />}
         />
 
         <Route
           path="/b/:slug/book"
-          element={
-            <BarberProvider>
-              <BookAppointment />
-            </BarberProvider>
-          }
+          element={<BookAppointment />}
         />
 
         {/* Checkout no necesita contexto Barber */}

@@ -2,14 +2,36 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
-import zxcvbn from "zxcvbn";
 import api from "../api/api";
 import { GoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff, Upload, User, Scissors } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
+
+// Validation Utilities
+import { 
+  validateRegisterForm, 
+  getPasswordStatus, 
+  EMAIL_REGEX 
+} from "../utils/auth.validate";
+
 const AuthBackground = "/AuthBackground.jpg";
 
+/**
+ * Register Component
+ * 
+ * Handles user sign-up for both Clients and Barbers.
+ * Features:
+ * - Role selection (Client/Barber)
+ * - Avatar upload with preview
+ * - Real-time email and password validation
+ * - Password strength scoring
+ * - Google OAuth integration
+ */
 const Register = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  // --- FORM STATE ---
   const [form, setForm] = useState({
     username: "",
     full_name: "",
@@ -21,98 +43,23 @@ const Register = () => {
     role_id: 3, // 3 = Cliente, 2 = Barbero
   });
 
+  // UI State
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
-  const [passwordScore, setPasswordScore] = useState(0);
+  
+  // Validation State (Computed from utilities)
   const [emailValid, setEmailValid] = useState(null);
-  const [passwordValid, setPasswordValid] = useState({
-    upper: false,
-    lower: false,
-    number: false,
-    length: false,
-    special: false,
-  });
   const [passwordMatch, setPasswordMatch] = useState(null);
+  const [passwordScore, setPasswordScore] = useState(0);
+  const [passwordValid, setPasswordValid] = useState({
+    upper: false, lower: false, number: false, length: false, special: false,
+  });
 
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
-  // Caracteres especiales permitidos
-  const allowedSpecials = /[@._*-]/;
-  // Caracteres peligrosos
-  const forbiddenSpecials = /[<>{}[\]()'";|\\/~!#$%^&*+=?´]/;
-
-  const validateForm = () => {
-    const usernameRegex = /^[a-zA-Z0-9._-]{3,20}$/;
-    const trimmedUsername = form.username.trim();
-    const trimmedFullName = form.full_name.trim();
-    const trimmedEmail = form.email.trim();
-    const trimmedPhone = form.phone.trim();
-
-    if (!trimmedUsername) return "El nombre de usuario es obligatorio.";
-    if (/^\s/.test(form.username)) return "El nombre de usuario no puede iniciar con espacio.";
-    if (!usernameRegex.test(trimmedUsername))
-      return "El nombre de usuario solo puede contener letras, números, puntos o guiones.";
-
-    if (!trimmedFullName) return "El nombre completo es obligatorio.";
-    if (/^\s/.test(form.full_name)) return "El nombre completo no puede iniciar con espacio.";
-
-    if (!trimmedEmail) return "El correo electrónico es obligatorio.";
-    if (/^\s/.test(form.email)) return "El correo no puede iniciar con espacio.";
-    if (!/\S+@\S+\.\S+/.test(trimmedEmail)) return "El correo no es válido.";
-
-    if (trimmedPhone && !/^\d{10}$/.test(trimmedPhone))
-      return "El número de teléfono debe tener 10 dígitos.";
-    if (/^\s/.test(form.phone)) return "El teléfono no puede iniciar con espacio.";
-
-    if (/\s/.test(form.password)) return "La contraseña no puede contener espacios.";
-    if (passwordScore < 3) return "La contraseña debe ser más fuerte (barra en verde).";
-    if (forbiddenSpecials.test(form.password))
-      return "La contraseña contiene caracteres no permitidos.";
-    if (!allowedSpecials.test(form.password))
-      return "La contraseña debe incluir al menos un carácter especial permitido (@ . _ * -).";
-    if (!/[A-Z]/.test(form.password))
-      return "La contraseña debe contener al menos una letra mayúscula.";
-    if (!/[a-z]/.test(form.password))
-      return "La contraseña debe contener al menos una letra minúscula.";
-    if (!/\d/.test(form.password))
-      return "La contraseña debe contener al menos un número.";
-    if (form.password.length < 8)
-      return "La contraseña debe tener al menos 8 caracteres.";
-    if (form.password !== form.confirmPassword)
-      return "Las contraseñas no coinciden.";
-
-    if (!cookiesAccepted) return "Debes aceptar las cookies para continuar.";
-
-    return null;
-  };
-
-  const handlePasswordChange = (e) => {
-    const value = e.target.value;
-    if (forbiddenSpecials.test(value)) {
-      toast.error("⚠️ La contraseña contiene caracteres no permitidos.");
-      return;
-    }
-    setForm({ ...form, password: value });
-    const result = zxcvbn(value);
-    setPasswordScore(result.score);
-    setPasswordValid({
-      upper: /[A-Z]/.test(value),
-      lower: /[a-z]/.test(value),
-      number: /\d/.test(value),
-      length: value.length >= 8,
-      special: allowedSpecials.test(value),
-    });
-    setPasswordMatch(value === form.confirmPassword);
-  };
-
-  const handleConfirmPasswordChange = (e) => {
-    const value = e.target.value;
-    setForm({ ...form, confirmPassword: value });
-    setPasswordMatch(value === form.password);
-  };
-
+  // ============================================================
+  // Handlers
+  // ============================================================
+  
   const handleChange = (e) => {
     let value = e.target.value;
     if (/^\s/.test(value)) value = value.trimStart();
@@ -120,10 +67,30 @@ const Register = () => {
   };
 
   const handleEmailChange = (e) => {
-    let value = e.target.value;
-    value = value.trimStart();
+    let value = e.target.value.trimStart();
     setForm({ ...form, email: value });
-    setEmailValid(/\S+@\S+\.\S+/.test(value));
+    setEmailValid(EMAIL_REGEX.test(value));
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    const status = getPasswordStatus(value, form.confirmPassword);
+    
+    if (status.error) {
+      toast.error(status.error);
+      return;
+    }
+
+    setForm({ ...form, password: value });
+    setPasswordScore(status.score);
+    setPasswordValid(status.valid);
+    setPasswordMatch(status.match);
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    const value = e.target.value;
+    setForm({ ...form, confirmPassword: value });
+    setPasswordMatch(value === form.password);
   };
 
   const handleImageUpload = (e) => {
@@ -136,17 +103,19 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationError = validateForm();
+    
+    // External Validation Logic
+    const validationError = validateRegisterForm(form, cookiesAccepted);
     if (validationError) return toast.error(validationError);
 
     try {
       const formData = new FormData();
-      formData.append("username", form.username.trim());
-      formData.append("full_name", form.full_name.trim());
-      formData.append("email", form.email.trim());
-      formData.append("phone", form.phone.trim());
-      formData.append("password", form.password);
-      formData.append("role_id", form.role_id);
+      Object.keys(form).forEach(key => {
+        if (key !== 'confirmPassword' && key !== 'avatar_url' && key !== 'imageFile') {
+          formData.append(key, typeof form[key] === 'string' ? form[key].trim() : form[key]);
+        }
+      });
+      
       if (form.imageFile) formData.append("image", form.imageFile);
 
       await api.post("/auth/register", formData, {
@@ -170,9 +139,8 @@ const Register = () => {
       toast.success("Inicio de sesión con Google exitoso 🚀");
       login(user, token);
 
-      if (user.role_id === 1) navigate("/admin/dashboard");
-      else if (user.role_id === 2) navigate("/barber/dashboard");
-      else navigate("/client/home");
+      const routes = { 1: "/admin/dashboard", 2: "/barber/dashboard" };
+      navigate(routes[user.role_id] || "/client/home");
     } catch (err) {
       console.error("Error Google Login:", err);
       toast.error(err.response?.data?.error || "Error al iniciar con Google");

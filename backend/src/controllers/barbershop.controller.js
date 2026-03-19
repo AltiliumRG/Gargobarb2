@@ -1,3 +1,9 @@
+/**
+ * Barbershop Controller
+ * 
+ * Logic for managing barbershops, schedules, and public site access.
+ */
+
 const {
   Barbershop,
   User,
@@ -11,16 +17,20 @@ const SiteService = require("../services/site.service");
 const { sequelize } = require("../config/db");
 const slugify = require("../utils/slugify");
 
-/* ============================================================
-   📍 Crear barbería
-============================================================ */
+/**
+ * Creates a new barbershop for a user.
+ * If user is admin (1), they must specify a user_id.
+ * If user is barber (2), they can only create one barbershop.
+ * 
+ * @route POST /api/barbershops
+ */
 exports.createBarbershop = async (req, res) => {
   try {
     const { name, address, city, user_id, country, department, latitude, longitude, features } = req.body;
     const user = req.user;
 
     if (!name || !address || !city) {
-      return res.status(400).json({ error: "Todos los campos son obligatorios" });
+      return res.status(400).json({ error: "Todos los campos obligatorios (*)" });
     }
 
     if (!user) {
@@ -29,40 +39,44 @@ exports.createBarbershop = async (req, res) => {
 
     let assignedUserId;
 
-    if (user.role_id === 1) {
-      if (!user_id) {
-        return res.status(400).json({ error: "Debe seleccionar un dueño" });
-      }
+    // Role-based validation
+    if (user.role_id === 1) { // Admin
+      if (!user_id) return res.status(400).json({ error: "Debe seleccionar un dueño (Barbero)" });
 
       const owner = await User.findByPk(user_id);
       if (!owner || owner.role_id !== 2) {
-        return res.status(400).json({ error: "El usuario debe ser dueño" });
+        return res.status(400).json({ error: "El usuario seleccionado debe tener rol de Barbero" });
       }
-
       assignedUserId = owner.id;
-    }
-    else if (user.role_id === 2) {
+    } 
+    else if (user.role_id === 2) { // Barber
       const existing = await Barbershop.findOne({ where: { user_id: user.id } });
       if (existing) {
-        return res.status(400).json({
-          error: "Ya tienes una barbería registrada. Solo puedes tener una.",
-        });
+        return res.status(400).json({ error: "Ya tienes una barbería registrada." });
       }
       assignedUserId = user.id;
-    }
+    } 
     else {
-      return res.status(403).json({ error: "No autorizado" });
+      return res.status(403).json({ error: "No autorizado para crear barberías" });
     }
 
     const transaction = await sequelize.transaction();
 
     try {
+      // SLUG GENERATION LOGIC (Optimized)
       const baseSlug = slugify(name);
       let slug = baseSlug;
       let counter = 1;
 
-      while (await Barbershop.findOne({ where: { slug }, transaction })) {
-        slug = `${baseSlug}-${counter++}`;
+      // Ensure slug uniqueness
+      let exists = true;
+      while (exists) {
+        const conflict = await Barbershop.findOne({ where: { slug }, transaction });
+        if (conflict) {
+          slug = `${baseSlug}-${counter++}`;
+        } else {
+          exists = false;
+        }
       }
 
       const newBarbershop = await Barbershop.create({
@@ -77,6 +91,7 @@ exports.createBarbershop = async (req, res) => {
         longitude: longitude || null,
       }, { transaction });
 
+      // Create associated website for the barbershop
       await SiteService.createSiteForBarbershop({
         barbershopId: newBarbershop.id,
         name,
@@ -92,27 +107,31 @@ exports.createBarbershop = async (req, res) => {
       return res.status(201).json({
         message: "Barbería y sitio creados correctamente",
         barbershopId: newBarbershop.id,
+        slug: newBarbershop.slug
       });
 
     } catch (err) {
-      await transaction.rollback();
+      if (transaction) await transaction.rollback();
       throw err;
     }
 
   } catch (error) {
-    console.error("❌ Error:", error);
-    return res.status(500).json({ error: error.message || "Error interno" });
+    console.error("❌ createBarbershop Error:", error);
+    return res.status(500).json({ error: error.message || "Error interno del servidor" });
   }
 };
 
-/* ============================================================
-   📍 Obtener todas
-============================================================ */
+/**
+ * Retrieves all barbershops with optional filtering by role.
+ * 
+ * @route GET /api/barbershops
+ */
 exports.getAllBarbershops = async (req, res) => {
   try {
     const user = req.user;
     let where = {};
 
+    // Barbers only see their own
     if (user.role_id === 2) {
       where = { user_id: user.id };
     }
@@ -129,12 +148,10 @@ exports.getAllBarbershops = async (req, res) => {
           model: BarbershopSite,
           as: "site",
           attributes: ["slug", "is_visible", "is_published"],
+          // Clients only see public/published sites
           ...(user.role_id === 3 && {
             required: true,
-            where: {
-              is_visible: true,
-              is_published: true,
-            },
+            where: { is_visible: true, is_published: true },
           }),
         },
       ],
@@ -144,14 +161,16 @@ exports.getAllBarbershops = async (req, res) => {
     res.json(barbershops);
 
   } catch (error) {
-    console.error("❌ Error al obtener barberías:", error);
-    res.status(500).json({ error: "Error al obtener barberías" });
+    console.error("❌ getAllBarbershops Error:", error);
+    res.status(500).json({ error: "Error al obtener lista de barberías" });
   }
 };
 
-/* ============================================================
-   📍 Obtener barbería por ID
-============================================================ */
+/**
+ * Gets a single barbershop's basic info by ID.
+ * 
+ * @route GET /api/barbershops/:id
+ */
 exports.getBarbershopById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -171,14 +190,16 @@ exports.getBarbershopById = async (req, res) => {
     res.json(barbershop);
 
   } catch (error) {
-    console.error("❌ Error al obtener la barbería:", error);
-    res.status(500).json({ error: "Error al obtener la barbería" });
+    console.error("❌ getBarbershopById Error:", error);
+    res.status(500).json({ error: "Error al obtener datos de la barbería" });
   }
 };
 
-/* ============================================================
-   ✏️ Actualizar barbería
-============================================================ */
+/**
+ * Updates barbershop profile information.
+ * 
+ * @route PUT /api/barbershops/:id
+ */
 exports.updateBarbershop = async (req, res) => {
   try {
     const { id } = req.params;
@@ -186,18 +207,18 @@ exports.updateBarbershop = async (req, res) => {
     const user = req.user;
 
     const barbershop = await Barbershop.findByPk(id);
-    if (!barbershop) {
-      return res.status(404).json({ error: "Barbería no encontrada" });
-    }
+    if (!barbershop) return res.status(404).json({ error: "Barbería no encontrada" });
 
+    // Ownership check
     if (user.role_id !== 1 && barbershop.user_id !== user.id) {
-      return res.status(403).json({ error: "No tienes permiso" });
+      return res.status(403).json({ error: "No tienes permisos para editar esta barbería" });
     }
 
+    // Admin can reassign owner
     if (user.role_id === 1 && user_id) {
       const newOwner = await User.findByPk(user_id);
       if (!newOwner || newOwner.role_id !== 2) {
-        return res.status(400).json({ error: "Dueño inválido" });
+        return res.status(400).json({ error: "Dueño seleccionado inválido" });
       }
       barbershop.user_id = newOwner.id;
     }
@@ -208,17 +229,19 @@ exports.updateBarbershop = async (req, res) => {
       city: city || barbershop.city,
     });
 
-    res.json({ message: "Barbería actualizada correctamente" });
+    res.json({ message: "Barbería actualizada con éxito" });
 
   } catch (error) {
-    console.error("❌ Error al actualizar:", error);
-    res.status(500).json({ error: "Error al actualizar barbería" });
+    console.error("❌ updateBarbershop Error:", error);
+    res.status(500).json({ error: "Error al actualizar la información" });
   }
 };
 
-/* ============================================================
-   📍 Mis barberías
-============================================================ */
+/**
+ * Retrieves barbershops belonging to the current user.
+ * 
+ * @route GET /api/barbershops/my
+ */
 exports.getMyBarbershops = async (req, res) => {
   try {
     const user = req.user;
@@ -231,98 +254,104 @@ exports.getMyBarbershops = async (req, res) => {
     res.json(barbershops);
 
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener barberías" });
+    res.status(500).json({ error: "Error al obtener tus barberías" });
   }
 };
 
-/* ============================================================
-   🗑 Eliminar barbería
-============================================================ */
+/**
+ * Permanently deletes a barbershop.
+ * 
+ * @route DELETE /api/barbershops/:id
+ */
 exports.deleteBarbershop = async (req, res) => {
   try {
     const { id } = req.params;
     const user = req.user;
 
     const barbershop = await Barbershop.findByPk(id);
-    if (!barbershop) {
-      return res.status(404).json({ error: "Barbería no encontrada" });
-    }
+    if (!barbershop) return res.status(404).json({ error: "Barbería no encontrada" });
 
     if (user.role_id !== 1 && barbershop.user_id !== user.id) {
-      return res.status(403).json({ error: "No tienes permiso" });
+      return res.status(403).json({ error: "Acceso denegado" });
     }
 
     await barbershop.destroy();
     res.json({ message: "Barbería eliminada correctamente" });
 
   } catch (error) {
-    console.error("❌ Error eliminando:", error);
-    res.status(500).json({ error: "Error eliminando barbería" });
+    console.error("❌ deleteBarbershop Error:", error);
+    res.status(500).json({ error: "Hubo un error al intentar eliminar la barbería" });
   }
 };
 
 /* ============================================================
-   HORARIOS
+   📍 SCHEDULE MANAGEMENT
 ============================================================ */
+
+/**
+ * Gets weekly schedules for a specific barbershop.
+ */
 exports.getSchedules = async (req, res) => {
   try {
-
     const { id } = req.params;
-
     const schedules = await BarberSchedule.findAll({
       where: { barbershop_id: id },
       order: [["day", "ASC"]],
     });
-
     res.json(schedules);
-
   } catch (error) {
-    console.error("❌ Error obteniendo horarios:", error);
-    res.status(500).json({ error: "Error obteniendo horarios" });
+    res.status(500).json({ error: "Error al obtener horarios" });
   }
 };
 
+/**
+ * Saves or updates schedules in bulk for a barbershop.
+ */
 exports.saveSchedules = async (req, res) => {
   try {
-
     const { id } = req.params;
     const { schedules } = req.body;
 
     if (!Array.isArray(schedules)) {
-      return res.status(400).json({
-        error: "Schedules debe ser un array"
-      });
+      return res.status(400).json({ error: "El formato de horarios es inválido" });
     }
 
-    await BarberSchedule.destroy({
-      where: { barbershop_id: id }
+    await sequelize.transaction(async (t) => {
+      // Clear old schedules
+      await BarberSchedule.destroy({
+        where: { barbershop_id: id },
+        transaction: t
+      });
+
+      // Insert new ones
+      const data = schedules.map((s) => ({
+        barbershop_id: id,
+        day: s.day,
+        open_time: s.open_time,
+        close_time: s.close_time,
+        is_closed: s.is_closed ? 1 : 0
+      }));
+
+      await BarberSchedule.bulkCreate(data, { transaction: t });
     });
 
-    const data = schedules.map((s) => ({
-      barbershop_id: id,
-      day: s.day,
-      open_time: s.open_time,
-      close_time: s.close_time,
-      is_closed: s.is_closed ? 1 : 0
-    }));
-
-    await BarberSchedule.bulkCreate(data);
-
-    res.json({
-      message: "Horarios guardados correctamente"
-    });
+    res.json({ message: "Horarios actualizados con éxito" });
 
   } catch (error) {
-    console.error("❌ Error guardando horarios:", error);
-    res.status(500).json({
-      error: "Error guardando horarios"
-    });
+    console.error("❌ saveSchedules Error:", error);
+    res.status(500).json({ error: "Error al guardar los horarios" });
   }
 };
 
 /* ============================================================
-   🌍 PÚBLICO POR SLUG
+   📍 PUBLIC ACCESS
 ============================================================ */
+
+/**
+ * Retrieves full site configuration and sections by slug (for public view).
+ * 
+ * @route GET /api/barbershops/public/:slug
+ */
 exports.getPublicBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
@@ -337,12 +366,7 @@ exports.getPublicBySlug = async (req, res) => {
             {
               model: SitePage,
               as: "pages",
-              include: [
-                {
-                  model: SiteSection,
-                  as: "sections",
-                },
-              ],
+              include: [{ model: SiteSection, as: "sections" }],
             },
           ],
         },
@@ -350,7 +374,7 @@ exports.getPublicBySlug = async (req, res) => {
     });
 
     if (!barbershop) {
-      return res.status(404).json({ error: "Barbería no encontrada" });
+      return res.status(404).json({ error: "Sitio no encontrado" });
     }
 
     res.json({
@@ -362,16 +386,17 @@ exports.getPublicBySlug = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Error getPublicBySlug:", error);
-    res.status(500).json({ error: "Error obteniendo barbería pública" });
+    console.error("❌ getPublicBySlug Error:", error);
+    res.status(500).json({ error: "Error al cargar el sitio público" });
   }
 };
 
-/* ============================================================
-   📊 REGISTRAR VISITA (ESTABLE)
-============================================================ */
+/**
+ * Placeholder for visit registration.
+ */
 exports.registerVisit = async (req, res) => {
   try {
+    // Logic for tracking metrics could go here
     return res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: "Error registrando visita" });

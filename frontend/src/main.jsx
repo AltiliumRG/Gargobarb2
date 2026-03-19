@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
+import { BarberProvider } from "./context/BarberContext.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./index.css";
 
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <AuthProvider>
           <ThemeProvider>
-            <App />
+            <BarberProvider>
+              <App />
+            </BarberProvider>
           </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>

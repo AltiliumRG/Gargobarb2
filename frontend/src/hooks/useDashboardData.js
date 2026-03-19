@@ -11,7 +11,7 @@ import {
     eachDayOfInterval
 } from "date-fns";
 import { getSalesByBarbershop, getRequiredDataForSale, createSale, bulkCreateSales } from "../api/sale.api";
-import { createService as apiCreateService } from "../api/service.api";
+import { createService as apiCreateService } from "../api/services.api";
 import toast from "react-hot-toast";
 
 export function useDashboardData() {
