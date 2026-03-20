@@ -10,6 +10,8 @@ import AboutEditor from "./PropertyEditors/Editors/AboutEditor";
 import TestimonialsEditor from "./PropertyEditors/Editors/TestimonialsEditor";
 import ServicesEditor from "./PropertyEditors/Editors/ServicesEditor";
 import GalleryEditor from "./PropertyEditors/Editors/GalleryEditor";
+import ContactEditor from "./PropertyEditors/Editors/ContactEditor";
+import CartEditor from "./PropertyEditors/Editors/CartEditor";
 
 /**
  * PropertiesPanel - Main Builder Side Panel
@@ -101,6 +103,10 @@ export default function PropertiesPanel() {
         );
       case "gallery":
         return <GalleryEditor {...commonProps} />;
+      case "contact":
+        return <ContactEditor {...commonProps} />;
+      case "cart":
+        return <CartEditor {...commonProps} />;
       default:
         return (
           <div className="p-10 text-center text-gray-500 italic">
