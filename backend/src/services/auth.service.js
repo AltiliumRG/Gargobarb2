@@ -216,7 +216,7 @@ async function googleAuth({ email, name, picture }) {
 
   if (!user) {
     user = await User.create({
-      username: email.split("@")[0],
+      username: `${email.split("@")[0]}_${Math.floor(Math.random() * 10000)}`,
       email,
       full_name: name,
       avatar_url: picture,

@@ -55,14 +55,16 @@ const Home = () => {
           : "bg-white/80 border-gray-200 shadow-sm"
           }`}
       >
-        <motion.h1
-          className={`text-2xl font-bold bg-gradient-to-r ${isClassic ? "from-[#D4AF37] to-[#B8860B]" : "from-[#C6A75E] to-[#A8842F]"
-            } bg-clip-text text-transparent cursor-pointer`}
+        <motion.div
+          className="flex items-center gap-2 cursor-pointer"
           whileHover={{ scale: 1.05 }}
           onClick={() => navigate("/client/home")}
         >
-          GargoBarb 💈
-        </motion.h1>
+          <img src="/GargobarbLogo.png" alt="GargoBarb Logo" className="w-10 h-10 drop-shadow-[0_0_8px_#FFD700]" />
+          <h1 className={`text-xl font-bold bg-gradient-to-r ${isClassic ? "from-[#D4AF37] to-[#B8860B]" : "from-[#C6A75E] to-[#A8842F]"} bg-clip-text text-transparent hidden sm:block`}>
+            GargoBarb
+          </h1>
+        </motion.div>
 
         <div className="flex items-center gap-6 text-sm">
           <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/about-us")}>
@@ -165,9 +167,12 @@ const Home = () => {
 
       {/* Footer Branding */}
       <footer className="max-w-7xl mx-auto mt-20 pb-12 text-center">
-        <p className={`text-sm flex items-center justify-center gap-2 font-medium ${isClassic ? "text-gray-500" : "text-gray-400"}`}>
-          <span className="font-bold text-[#D4AF37]">GARGO</span>BARB © 2026 • Selección Premier
-        </p>
+        <div className={`flex flex-col items-center justify-center gap-2 font-medium ${isClassic ? "text-gray-500" : "text-gray-400"}`}>
+          <img src="/GargobarbLogo.png" alt="GargoBarb Logo" className="w-8 h-8 opacity-80" />
+          <p className="text-sm">
+            <span className="font-bold text-[#D4AF37]">GARGO</span>BARB © 2026 • Selección Premier
+          </p>
+        </div>
       </footer>
     </div>
   );

@@ -27,9 +27,12 @@ export default function BarberSidebar() {
         ${open ? "w-64" : "w-0 overflow-hidden"} lg:w-64`}
       >
         {/* LOGO */}
-        <div className="p-6 border-b border-gray-800">
-          <h1 className="text-2xl font-bold text-yellow-500">GargoBarb</h1>
-          <p className="text-xs text-gray-500">Panel barbero</p>
+        <div className="p-6 border-b border-gray-800 flex items-center gap-3">
+          <img src="/GargobarbLogo.png" alt="GargoBarb Logo" className="w-12 h-12 drop-shadow-[0_0_8px_#FFD700]" />
+          <div>
+            <h1 className="text-xl font-bold text-yellow-500 uppercase tracking-tight">GargoBarb</h1>
+            <p className="text-xs text-gray-500">Panel barbero</p>
+          </div>
         </div>
 
         {/* PERFIL */}

@@ -145,7 +145,9 @@ const Login = () => {
       toast.success("Inicio de sesión con Google exitoso 🚀");
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      toast.error("Error al iniciar sesión con Google");
+      const msg = err.response?.data?.error || err.response?.data?.message || "Error al iniciar sesión con Google";
+      toast.error(msg);
+      console.error("Detalles del error de Google Login:", err);
     }
   };
 
