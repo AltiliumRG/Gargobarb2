@@ -69,6 +69,16 @@ const User = sequelize.define(
       type: DataTypes.STRING(64),
       allowNull: true,
     },
+
+    // 🔑 Generación de código para recuperación de contraseña
+    reset_code: {
+      type: DataTypes.STRING(6),
+      allowNull: true,
+    },
+    reset_code_expires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "users",

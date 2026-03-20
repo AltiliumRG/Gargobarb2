@@ -145,7 +145,9 @@ const Login = () => {
       toast.success("Inicio de sesión con Google exitoso 🚀");
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      toast.error("Error al iniciar sesión con Google");
+      const msg = err.response?.data?.error || err.response?.data?.message || "Error al iniciar sesión con Google";
+      toast.error(msg);
+      console.error("Detalles del error de Google Login:", err);
     }
   };
 
@@ -240,6 +242,15 @@ const Login = () => {
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
+          <div className="flex justify-end mt-2">
+            <button 
+              type="button" 
+              onClick={() => navigate("/forgot-password")} 
+              className="text-xs text-yellow-500 hover:text-white transition"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
         </div>
 
         <motion.button

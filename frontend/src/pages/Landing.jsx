@@ -104,9 +104,7 @@ const Landing = () => {
             <nav className="fixed top-0 w-full z-50 bg-[#0b0f14]/80 backdrop-blur-md border-b border-white/5">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-yellow-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                            <Scissors className="text-black" size={24} />
-                        </div>
+                        <img src="/GargobarbLogo.png" alt="GargoBarb Logo" className="w-12 h-12 drop-shadow-[0_0_8px_#FFD700]" />
                         <span className={styles.navbarLogoText}>GargoBarb</span>
                     </div>
 
@@ -242,7 +240,8 @@ const Landing = () => {
             {/* FOOTER */}
             <footer className={styles.footer}>
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-                    <div className={`flex items-center gap-2 transition-all ${isClassic ? "grayscale hover:grayscale-0" : ""}`}>
+                    <div className={`flex items-center gap-3 transition-all ${isClassic ? "grayscale hover:grayscale-0" : ""}`}>
+                        <img src="/GargobarbLogo.png" alt="GargoBarb Logo" className="w-10 h-10 drop-shadow-[0_0_8px_#FFD700]" />
                         <span className={`text-xl font-black tracking-tighter uppercase italic ${isClassic ? "text-gray-400" : "text-[#1C1C1C]"}`}>GargoBarb</span>
                     </div>
                     <p className="text-gray-500 text-sm font-medium">

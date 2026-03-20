@@ -1,10 +1,10 @@
 -- ============================================================
 -- 🗄️ SCRIPT DE CREACIÓN DE BASE DE DATOS - GARGOBARB
 -- Generado automáticamente basado en los modelos actuales
--- Fecha: 2026-03-13
+-- Fecha: 2026-03-20
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS gargobarb;--crear db
+CREATE DATABASE IF NOT EXISTS gargobarb;
 USE gargobarb;
 
 -- Desactivar llaves foráneas para facilitar la creación
@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS users (
     role_id INT NOT NULL DEFAULT 3,
     avatar_url VARCHAR(255),
     refresh_token_hash VARCHAR(255),
+    reset_code VARCHAR(6),
+    reset_code_expires DATETIME,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON UPDATE CASCADE
@@ -74,6 +76,21 @@ CREATE TABLE IF NOT EXISTS services (
     image VARCHAR(255),
     duration_minutes INT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (barbershop_id) REFERENCES barbershops(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 4.5. TABLA DE PRODUCTOS (carrito_de_compras)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS carrito_de_compras (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    barbershop_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    description TEXT,
+    image VARCHAR(255),
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (barbershop_id) REFERENCES barbershops(id) ON DELETE CASCADE ON UPDATE CASCADE

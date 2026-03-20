@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import AuthRedirect from "./pages/AuthRedirect";
 import PrivateRoute from "./auth/PrivateRoute";
 
@@ -67,6 +68,7 @@ const App = () => {
         ======================================================== */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* ========================================================
             PUBLIC BARBER SITE (ENVUELTO EN PROVIDER)
