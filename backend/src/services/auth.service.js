@@ -237,11 +237,65 @@ async function googleAuth({ email, name, picture }) {
   return { user: safeUser, accessToken, refreshToken };
 }
 
+// ============================================================
+// 📩 FORGOT PASSWORD
+// ============================================================
+async function forgotPassword(email) {
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    const err = new Error("No hay un usuario registrado con este correo.");
+    err.status = 404;
+    throw err;
+  }
+
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+  user.reset_code = code;
+  user.reset_code_expires = expires;
+  await user.save();
+
+  return { user, code };
+}
+
+// ============================================================
+// 🔑 RESET PASSWORD
+// ============================================================
+async function resetPassword({ email, code, newPassword }) {
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    const err = new Error("Usuario no encontrado.");
+    err.status = 404;
+    throw err;
+  }
+
+  if (user.reset_code !== code) {
+    const err = new Error("Código incorrecto.");
+    err.status = 400;
+    throw err;
+  }
+
+  if (new Date() > user.reset_code_expires) {
+    const err = new Error("El código ha expirado. Solicita uno nuevo.");
+    err.status = 400;
+    throw err;
+  }
+
+  user.password_hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  user.reset_code = null;
+  user.reset_code_expires = null;
+  await user.save();
+
+  return true;
+}
+
 module.exports = {
   register,
   login,
   refreshTokens,
   logout,
+  forgotPassword,
+  resetPassword,
   googleAuth, // Added
   verifyPassword,
   hashRefreshToken,

@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 //libreria de google
 const { OAuth2Client } = require("google-auth-library");
 //
+const { sendMail } = require("../utils/mailer");
 const authService = require("../services/auth.service");
 const { User } = require("../models");
 
@@ -172,6 +173,60 @@ exports.googleAuth = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error en Google Auth:", error.message);
+    res.status(error.status || 500).json({ error: error.message });
+  }
+};
+
+// ============================================================
+// 📩 FORGOT PASSWORD
+// ============================================================
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "El correo es requerido" });
+
+    const { user, code } = await authService.forgotPassword(email);
+
+    await sendMail({
+      to: email,
+      subject: "Recuperación de Contraseña - GargoBarb",
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+          <h2 style="color: #D4AF37;">GargoBarb</h2>
+          <p>Has solicitado restablecer tu contraseña.</p>
+          <p>Usa el siguiente código de 6 dígitos para crear una nueva contraseña:</p>
+          <div style="background: #f4f4f4; padding: 15px; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px auto; width: fit-content; border-radius: 8px;">
+            ${code}
+          </div>
+          <p>Este código expirará en 15 minutos.</p>
+          <p>Si no fuiste tú, puedes ignorar este correo de forma segura.</p>
+        </div>
+      `
+    });
+
+    res.json({ message: "Código de recuperación enviado. Revisa tu correo." });
+  } catch (error) {
+    console.error("❌ Error en forgotPassword:", error.message);
+    res.status(error.status || 500).json({ error: error.message });
+  }
+};
+
+// ============================================================
+// 🔑 RESET PASSWORD
+// ============================================================
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: "Todos los campos son requeridos" });
+    }
+
+    await authService.resetPassword({ email, code, newPassword });
+
+    res.json({ message: "Contraseña actualizada exitosamente. Ya puedes iniciar sesión." });
+  } catch (error) {
+    console.error("❌ Error en resetPassword:", error.message);
     res.status(error.status || 500).json({ error: error.message });
   }
 };

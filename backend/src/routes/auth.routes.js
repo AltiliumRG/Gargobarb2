@@ -12,6 +12,8 @@ const {
   register,
   login,
   googleAuth,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/auth.controller");
 
 const {
@@ -81,6 +83,12 @@ router.post(
 // 🟨 LOGIN GOOGLE
 // ==========================================
 router.post("/google", googleAuth);
+
+// ==========================================
+// 📩 RECUPERAR CONTRASEÑA
+// ==========================================
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 // ==========================================
 // 🔄 REFRESH TOKEN

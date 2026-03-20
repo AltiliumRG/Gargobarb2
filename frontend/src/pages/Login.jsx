@@ -242,6 +242,15 @@ const Login = () => {
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
+          <div className="flex justify-end mt-2">
+            <button 
+              type="button" 
+              onClick={() => navigate("/forgot-password")} 
+              className="text-xs text-yellow-500 hover:text-white transition"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
         </div>
 
         <motion.button
