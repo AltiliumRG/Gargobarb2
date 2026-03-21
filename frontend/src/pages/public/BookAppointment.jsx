@@ -251,11 +251,15 @@ const maxDateString = maxDate.toISOString().split("T")[0];
           
           <div>
             <p className="text-lg font-semibold">
-  {new Date(form.date).toLocaleDateString("es-ES", {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
-  })}
+  {(() => {
+    if (!form.date) return "";
+    const [y, m, d] = form.date.split("-").map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString("es-ES", {
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    });
+  })()}
 </p>
             <div className="text-sm text-yellow-400">
     Horarios disponibles para {form.date}

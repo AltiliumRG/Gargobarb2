@@ -6,7 +6,13 @@ export default function CartRenderer({ section, content, styles, site, preview }
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const displayProducts = content?.items?.length > 0 ? content.items : [];
+  // If we have products in the context (from DB), use them.
+  // Otherwise, use the static items from the section content.
+  const displayProducts = useMemo(() => {
+    return contextProducts && contextProducts.length > 0 
+      ? contextProducts 
+      : (content?.items || []);
+  }, [contextProducts, content?.items]);
 
   const addToCart = (product) => {
     setCart((prev) => {

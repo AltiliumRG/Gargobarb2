@@ -3,7 +3,7 @@ const router = express.Router();
 const availabilityController = require("../controllers/availability.controller");
 
 router.get(
-  "/availability/:barbershopId",
+  "/:barbershopId",
   availabilityController.getAvailability
 );
 

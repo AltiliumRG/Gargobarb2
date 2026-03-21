@@ -9,6 +9,7 @@ const Appointment = require("./Appointment");
 const { sequelize } = require("../config/db");
 const Sale = require("./Sale");
 const ShoppingCart = require("./ShoppingCart");
+const Product = require("./Product");
 /* ===============================
    USER → BARBERSHOPS
 ================================*/
@@ -83,6 +84,18 @@ BarberSchedule.belongsTo(Barbershop, {
 });
 
 /* ===============================
+   BARBERSHOP → PRODUCTS
+================================*/
+Barbershop.hasMany(Product, {
+  foreignKey: "barbershop_id",
+  as: "products",
+});
+
+Product.belongsTo(Barbershop, {
+  foreignKey: "barbershop_id",
+});
+
+/* ===============================
    APPOINTMENTS
 ================================*/
 User.hasMany(Appointment, { foreignKey: "user_id" });
@@ -131,4 +144,5 @@ module.exports = {
   Appointment,
   Sale,
   ShoppingCart,
+  Product
 };

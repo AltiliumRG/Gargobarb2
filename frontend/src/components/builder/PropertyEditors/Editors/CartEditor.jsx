@@ -1,9 +1,38 @@
 import React from "react";
 import { InputPro } from "../Shared/InputPro";
+import { createProduct } from "../../../../api/products.api";
+import ProductCardEditor from "./ProductCardEditor";
 
-export default function CartEditor({ content, styles, handleContent, handleStyle }) {
+export default function CartEditor({ 
+  content, 
+  styles, 
+  handleContent, 
+  handleStyle,
+  activeBarbershop,
+  products,
+  setProducts,
+  loadingProducts,
+  savingId,
+  setSavingId
+}) {
+  const handleAddProduct = async () => {
+    if (!activeBarbershop?.id) return;
+    try {
+      const res = await createProduct({
+        barbershop_id: activeBarbershop.id,
+        name: "Nuevo producto",
+        description: "",
+        price: 0,
+        image: ""
+      });
+      setProducts(prev => [res.data, ...prev]);
+    } catch (err) {
+      console.error("❌ Error adding product:", err);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* HEADER CARD */}
       <div className="bg-gradient-to-br from-[#0b1220] to-[#0f172a] border border-gray-800 rounded-2xl p-6 shadow-lg space-y-5">
         <div className="flex items-center justify-between">
@@ -24,6 +53,43 @@ export default function CartEditor({ content, styles, handleContent, handleStyle
           value={content.buttonText}
           onChange={(value) => handleContent("buttonText", value)}
         />
+      </div>
+
+      {/* PRODUCTS LIST */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest text-[10px]">Mis Productos</h4>
+          <span className="text-[10px] text-gray-600 font-medium">{products?.length || 0} items</span>
+        </div>
+
+        {loadingProducts ? (
+          <div className="text-center text-gray-500 text-sm py-10 animate-pulse">Cargando productos...</div>
+        ) : products?.length === 0 ? (
+          <div className="text-center text-gray-500 text-sm py-12 border-2 border-dashed border-gray-800 rounded-2xl bg-[#0b1220]/50">
+            No tienes productos aún.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {products.map((p, i) => (
+              <ProductCardEditor
+                key={p.id}
+                product={p}
+                index={i}
+                products={products}
+                setProducts={setProducts}
+                setSavingId={setSavingId}
+                savingId={savingId}
+              />
+            ))}
+          </div>
+        )}
+
+        <button
+          onClick={handleAddProduct}
+          className="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black py-4 rounded-2xl font-black transition shadow-xl active:scale-95 transform hover:-translate-y-0.5 border-b-4 border-yellow-700 mt-4"
+        >
+          + AGREGAR PRODUCTO
+        </button>
       </div>
 
       {/* COLORS CARD */}
@@ -69,12 +135,6 @@ export default function CartEditor({ content, styles, handleContent, handleStyle
             className="w-10 h-8 rounded bg-transparent border border-gray-700 cursor-pointer"
           />
         </div>
-      </div>
-
-      <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-        <p className="text-xs text-yellow-500/80 leading-relaxed italic">
-          Tip: Los productos se gestionan desde la sección de "Inventario" de tu barbería. Aquí solo editas cómo se ven en la web.
-        </p>
       </div>
     </div>
   );
