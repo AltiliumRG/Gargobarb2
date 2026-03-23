@@ -261,6 +261,10 @@ export function BuilderProvider({ children }) {
     if (!site?.id) return false;
 
     try {
+      // Auto-save draft before publishing to ensure section UI state persists
+      const savedOk = await saveDraft();
+      if (!savedOk) return false;
+
       const res = await api.post(`/sites/builder/publish/${site.id}`);
 
       if (res.status === 200) {

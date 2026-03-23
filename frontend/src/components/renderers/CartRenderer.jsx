@@ -6,13 +6,34 @@ export default function CartRenderer({ section, content, styles, site, preview }
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // If we have products in the context (from DB), use them.
-  // Otherwise, use the static items from the section content.
+  const DEFAULT_PRODUCTS = [
+    { id: 'def1', name: 'Aceite para barba', price: 25000, description: 'Aceite hidratante enriquecido con vitamina E.', image: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=500&auto=format&fit=crop&q=60' },
+    { id: 'def2', name: 'Cera moldeadora', price: 30000, description: 'Fijación media, ideal para estilizar peinados clásicos.', image: 'https://images.unsplash.com/photo-1597851065532-055f97d12e47?w=500&auto=format&fit=crop&q=60' },
+    { id: 'def3', name: 'Shampoo especial', price: 45000, description: 'Limpieza profunda con extractos naturales.', image: 'https://images.unsplash.com/photo-1585232351009-aa87416fca90?w=500&auto=format&fit=crop&q=60' }
+  ];
+
   const displayProducts = useMemo(() => {
-    return contextProducts && contextProducts.length > 0 
-      ? contextProducts 
-      : (content?.items || []);
-  }, [contextProducts, content?.items]);
+    // If we have content.items (from DB), map over them and enforce an image fallback.
+    const rawDefaultItems = content?.items !== undefined ? content.items : DEFAULT_PRODUCTS;
+    const defaultItems = rawDefaultItems.map((item, idx) => ({
+      ...item,
+      image: item.image || DEFAULT_PRODUCTS[idx]?.image
+    }));
+    const combined = [...defaultItems, ...(contextProducts || [])];
+    const discount = Number(content?.globalDiscount) || 0;
+    if (discount > 0) {
+      return combined.map(p => ({
+        ...p,
+        originalPrice: p.price,
+        price: p.price * (1 - discount / 100)
+      }));
+    }
+    return combined;
+  }, [contextProducts, content?.items, content?.globalDiscount]);
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price) + ' COP';
+  };
 
   const addToCart = (product) => {
     setCart((prev) => {
@@ -58,10 +79,10 @@ export default function CartRenderer({ section, content, styles, site, preview }
           </h2>
           <button
             onClick={() => setIsCartOpen(!isCartOpen)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold shadow-md transition"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold shadow-md transition whitespace-nowrap"
             style={{ backgroundColor: buttonColor, color: "#000" }}
           >
-            🛒 Carrito ({cart.reduce((acc, item) => acc + item.quantity, 0)})
+            🛒 Carrito ({cart.reduce((acc, item) => acc + item.quantity, 0)}) - {formatPrice(cartTotal)}
           </button>
         </div>
 
@@ -75,27 +96,35 @@ export default function CartRenderer({ section, content, styles, site, preview }
             ) : (
               displayProducts.map((product) => {
                 return (
-                <div key={product.id} className={`rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-800 transition hover:shadow-xl ${!cardBgColor ? 'bg-white dark:bg-[#111827]' : ''}`} style={{ backgroundColor: cardBgColor || undefined }}>
-                  <div className="h-48 overflow-hidden bg-gray-200 dark:bg-gray-800 relative">
+                <div key={product.id} className={`group rounded-3xl shadow-lg border border-gray-100 dark:border-gray-800/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1.5 overflow-hidden ${!cardBgColor ? 'bg-white dark:bg-[#111827]' : ''}`} style={{ backgroundColor: cardBgColor || undefined }}>
+                  <div className="h-56 overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
                     {product.image ? (
-                      <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">Sin Imagen</div>
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 font-medium">Sin Imagen</div>
+                    )}
+                    {product.originalPrice && (
+                       <div className="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">Oferta</div>
                     )}
                   </div>
-                  <div className="p-6 space-y-4">
-                    <h3 className="font-bold text-xl text-gray-900 dark:text-white line-clamp-1">{product.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{product.description}</p>
+                  <div className="p-6 relative">
+                    <h3 className="font-extrabold text-xl text-gray-900 dark:text-white line-clamp-1 mb-2">{product.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mb-6 min-h-[40px]">{product.description}</p>
   
-                    <div className="flex items-end gap-3 pt-2">
-                      <span className="text-2xl font-black drop-shadow-sm" style={{ color: buttonColor }}>
-                        ${Number(product.price).toFixed(2)}
+                    <div className="flex flex-col items-start gap-1">
+                      {product.originalPrice && (
+                        <span className="text-sm line-through text-gray-400 font-bold opacity-75">
+                          {formatPrice(product.originalPrice)}
+                        </span>
+                      )}
+                      <span className="text-3xl font-black drop-shadow-sm tracking-tight" style={{ color: buttonColor }}>
+                        {formatPrice(product.price)}
                       </span>
                     </div>
   
                     <button
                       onClick={() => addToCart(product)}
-                      className="w-full py-3 mt-4 rounded-xl font-bold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-95 flex justify-center items-center gap-2"
+                      className="w-full py-4 mt-6 rounded-2xl font-black transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-95 flex justify-center items-center gap-2 border border-black/5"
                       style={{ backgroundColor: buttonColor, color: "#000" }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -112,61 +141,100 @@ export default function CartRenderer({ section, content, styles, site, preview }
         </div>
       </div>
 
+      {/* FLOATING CART BUTTON OMNIPRESENT ON MOBILE */}
+      {cart.length > 0 && !isCartOpen && (
+        <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center md:hidden px-4 pointer-events-none">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="w-full max-w-sm py-4 rounded-xl shadow-2xl font-black flex justify-between items-center px-6 transition hover:scale-105 active:scale-95 pointer-events-auto border border-black/10 animate-bounce-slow"
+            style={{ backgroundColor: buttonColor, color: "#000" }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl animate-pulse">🛒</span>
+              <div className="text-left">
+                <div className="text-xs uppercase tracking-widest font-black opacity-70">Ver Carrito</div>
+                <div className="text-sm font-bold">{cart.reduce((acc, item) => acc + item.quantity, 0)} Items</div>
+              </div>
+            </div>
+            <div className="text-xl tracking-tight">{formatPrice(cartTotal)}</div>
+          </button>
+        </div>
+      )}
+
       {/* CART OVERLAY / MODAL */}
       {isCartOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-          <div className="bg-white dark:bg-[#111827] w-full max-w-md h-full shadow-2xl flex flex-col">
-
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/60 z-50 flex justify-end animate-in fade-in duration-300">
+          <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-[#0b1220] w-full max-w-md h-full shadow-2xl flex flex-col border-l border-white/10 slide-in-from-right-8 fade-in duration-300">
             {/* Header */}
-            <div className="p-5 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
-              <div className="flex items-center gap-3">
+            <div className="p-6 border-b border-gray-200/50 dark:border-gray-800/50 flex justify-between items-center bg-white/50 dark:bg-black/20 backdrop-blur-md sticky top-0 z-10">
+              <div className="flex items-center gap-4">
                 <button
                   onClick={() => setIsCartOpen(false)}
-                  className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center justify-center text-gray-700 dark:text-gray-300"
+                  className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition flex items-center justify-center text-gray-700 dark:text-gray-300 shadow-inner group"
                   aria-label="Volver atrás"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:-translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Tu Carrito</h3>
+                <h3 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">Tu Carrito</h3>
               </div>
-              <span className="bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-300 text-xs font-bold px-3 py-1 rounded-full">
+              <span className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-black px-4 py-1.5 rounded-full shadow-md">
                 {cart.reduce((acc, item) => acc + item.quantity, 0)} Items
               </span>
             </div>
 
             {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scroll">
               {cart.length === 0 ? (
-                <div className="text-center text-gray-500 mt-10">Tu carrito está vacío</div>
+                <div className="text-center text-gray-500 mt-20 flex flex-col items-center">
+                  <span className="text-6xl mb-4 opacity-50">🛒</span>
+                  <p className="text-lg font-bold">Tu carrito está vacío</p>
+                  <p className="text-sm mt-2 opacity-75">Añade algunos productos para empezar</p>
+                </div>
               ) : (
                 cart.map(item => {
                   return (
-                    <div key={item.id} className="flex gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                      <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                        {item.image && <img src={item.image} className="w-full h-full object-cover" />}
+                    <div key={item.id} className="flex gap-4 p-4 bg-white dark:bg-gray-800/40 rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-sm hover:shadow-md transition group">
+                      <div className="w-20 h-20 bg-gray-100 dark:bg-gray-900 rounded-2xl overflow-hidden flex-shrink-0 relative">
+                        {item.image ? (
+                           <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                           <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px] font-bold">Sin Img</div>
+                        )}
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-900 dark:text-white text-sm line-clamp-1">{item.name}</h4>
-                        <div className="text-sm font-bold mt-1" style={{ color: buttonColor }}>${Number(item.price).toFixed(2)} c/u</div>
+                      <div className="flex-1 flex flex-col justify-center">
+                        <div>
+                          <h4 className="font-extrabold text-gray-900 dark:text-white text-sm line-clamp-1 group-hover:text-yellow-500 transition-colors">{item.name}</h4>
+                          <div className="mt-1 flex gap-2 items-center">
+                            <span className="text-sm font-black" style={{ color: buttonColor }}>{formatPrice(item.price)}</span>
+                            {item.originalPrice && (
+                              <span className="text-[10px] line-through text-gray-400 font-medium">{formatPrice(item.originalPrice)}</span>
+                            )}
+                          </div>
+                        </div>
 
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-900/50 rounded-xl p-1 border border-gray-200 dark:border-gray-800">
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="w-6 h-6 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300 shadow-sm transition active:scale-95"
                             >-</button>
-                            <span className="text-sm dark:text-white">{item.quantity}</span>
+                            <span className="text-sm font-bold w-6 text-center text-gray-900 dark:text-white">{item.quantity}</span>
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="w-6 h-6 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300 shadow-sm transition active:scale-95"
                             >+</button>
                           </div>
                           <button
                             onClick={() => removeFromCart(item.id)}
-                            className="text-red-500 text-sm hover:underline"
-                          >Quitar</button>
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition hover:scale-110 rotate-0 hover:rotate-12"
+                            aria-label="Quitar producto"
+                          >
+                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                             </svg>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -177,24 +245,24 @@ export default function CartRenderer({ section, content, styles, site, preview }
 
             {/* Footer / Checkout */}
             {cart.length > 0 && (
-              <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 space-y-4">
-                <div className="flex justify-between items-center text-lg font-bold dark:text-white">
-                  <span>Total:</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+              <div className="p-6 border-t border-gray-200/50 dark:border-gray-800/50 bg-white/80 dark:bg-black/40 backdrop-blur-md space-y-4 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+                <div className="flex justify-between items-end">
+                  <span className="text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest text-xs">Subtotal</span>
+                  <span className="text-3xl font-black text-gray-900 dark:text-white leading-none tracking-tight">{formatPrice(cartTotal)}</span>
                 </div>
                 <button
-                  className="w-full py-4 rounded-xl font-bold shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2 text-lg"
+                  className="w-full mt-4 py-4 rounded-2xl font-black shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-3 text-lg border border-black/10"
                   style={{ backgroundColor: buttonColor, color: "#000" }}
                   onClick={() => alert("Función de checkout (WhatsApp o Pasarela) próximamente")}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                   Proceder al Pago
                 </button>
                 <button
                   onClick={() => setIsCartOpen(false)}
-                  className="w-full py-3 mt-2 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+                  className="w-full py-4 mt-2 rounded-2xl font-bold bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 transition shadow-sm"
                 >
                   Seguir Comprando
                 </button>
