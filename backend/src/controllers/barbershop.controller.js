@@ -203,7 +203,7 @@ exports.getBarbershopById = async (req, res) => {
 exports.updateBarbershop = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, city, user_id } = req.body;
+    const { name, address, city, user_id, country, department, latitude, longitude, is_active } = req.body;
     const user = req.user;
 
     const barbershop = await Barbershop.findByPk(id);
@@ -224,9 +224,14 @@ exports.updateBarbershop = async (req, res) => {
     }
 
     await barbershop.update({
-      name: name || barbershop.name,
-      address: address || barbershop.address,
-      city: city || barbershop.city,
+      name: name !== undefined ? name : barbershop.name,
+      address: address !== undefined ? address : barbershop.address,
+      city: city !== undefined ? city : barbershop.city,
+      country: country !== undefined ? country : barbershop.country,
+      department: department !== undefined ? department : barbershop.department,
+      latitude: latitude !== undefined ? latitude : barbershop.latitude,
+      longitude: longitude !== undefined ? longitude : barbershop.longitude,
+      is_active: is_active !== undefined ? is_active : barbershop.is_active,
     });
 
     res.json({ message: "Barbería actualizada con éxito" });

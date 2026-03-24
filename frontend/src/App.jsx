@@ -25,6 +25,7 @@ import MyBarbershops from "./pages/barber/MyBarbershops";
 import CreateBarbershopWizard from "./pages/barber/CreateBarbershopWizard";
 import BarberHome from "./pages/barber/BarberHome";
 import Preview from "./pages/barber/Preview";
+import Settings from "./pages/barber/Settings";
 
 import BarberWorkspaceLayout from "./pages/barber/BarberWorkspaceLayout";
 import Dashboard from "./pages/barber/Dashboard";
@@ -124,7 +125,7 @@ const App = () => {
             <Route path="appointments" element={<Appointments />} />
             <Route path="schedule" element={<Schedule />} />
             <Route path="stats" element={<div>Estadísticas próximamente</div>} />
-            <Route path="settings" element={<div>Configuración próximamente</div>} />
+            <Route path="settings" element={<Settings />} />
           </Route>
         </Route>
 
