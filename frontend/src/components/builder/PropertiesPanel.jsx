@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useBuilder } from "../../context/BuilderContext";
 import { useBarber } from "../../context/BarberContext";
 import { getServicesByBarbershop } from "../../api/services.api";
+import { getProductsByBarbershop } from "../../api/products.api";
 
 // Sub-components (Property Editors)
 import GlobalSettings from "./PropertyEditors/Editors/GlobalSettings";

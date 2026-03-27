@@ -1,16 +1,23 @@
 import { useState, useMemo } from "react";
 import { useBarber } from "../../context/BarberContext";
+import { createCart } from "../../api/cart.api";
+import toast from "react-hot-toast";
 
 export default function CartRenderer({ section, content, styles, site, preview }) {
   const { products: contextProducts } = useBarber();
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [clientName, setClientName] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const DEFAULT_PRODUCTS = [
-    { id: 'def1', name: 'Aceite para barba', price: 25000, description: 'Aceite hidratante enriquecido con vitamina E.', image: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=500&auto=format&fit=crop&q=60' },
-    { id: 'def2', name: 'Cera moldeadora', price: 30000, description: 'Fijación media, ideal para estilizar peinados clásicos.', image: 'https://images.unsplash.com/photo-1597851065532-055f97d12e47?w=500&auto=format&fit=crop&q=60' },
-    { id: 'def3', name: 'Shampoo especial', price: 45000, description: 'Limpieza profunda con extractos naturales.', image: 'https://images.unsplash.com/photo-1585232351009-aa87416fca90?w=500&auto=format&fit=crop&q=60' }
+    { id: 'def1', name: 'Cera Fijadora Profesional', price: 15000, description: 'Cera de alta fijación con acabado mate.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
+    { id: 'def2', name: 'Aceite para barba', price: 20000, description: 'Aceite hidratante de argán para suavizar la barba.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
+    { id: 'def3', name: 'Loción Aftershave', price: 12500, description: 'Refresca y calma la piel después del afeitado.', image: 'http://localhost:4000/uploads/Default/product1.jpg' }
   ];
+
 
   const displayProducts = useMemo(() => {
     // If we have content.items (from DB), map over them and enforce an image fallback.
@@ -63,6 +70,42 @@ export default function CartRenderer({ section, content, styles, site, preview }
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  const handleCheckout = async (e) => {
+    e.preventDefault();
+    if (!clientName.trim() || !clientPhone.trim()) {
+      toast.error("Por favor completa tu nombre y teléfono.");
+      return;
+    }
+    if (cart.length === 0) return;
+
+    setIsLoading(true);
+    try {
+      const payload = {
+        site_id: site?.id || 1, // Fallback if site is missing in preview
+        client_name: clientName,
+        client_phone: clientPhone,
+        items: cart,
+        total: cartTotal
+      };
+
+      await createCart(payload);
+      
+      toast.success("¡Pedido creado correctamente!");
+      
+      setCart([]);
+      setIsCheckoutOpen(false);
+      setIsCartOpen(false);
+      setClientName("");
+      setClientPhone("");
+      
+    } catch (error) {
+      console.error("Error al crear pedido:", error);
+      toast.error("Hubo un error al procesar tu pedido.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const title = content?.title || "Carrito de Compras";
   const buttonText = content?.buttonText || "Añadir al Carrito";
   const buttonColor = styles?.buttonColor || "#facc15";
@@ -71,10 +114,10 @@ export default function CartRenderer({ section, content, styles, site, preview }
   const cardBgColor = styles?.cardBackgroundColor || "";
 
   return (
-    <div className={`py-16 relative ${!bgColor ? 'bg-gray-50 dark:bg-[#0b0f14]' : ''}`} style={{ backgroundColor: bgColor || undefined }}>
+    <div className={`py-16 relative ${!bgColor ? 'bg-transparent text-white' : ''}`} style={{ backgroundColor: bgColor || undefined, color: txtColor || undefined }}>
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center mb-12">
-          <h2 className={`text-3xl md:text-4xl font-black ${!txtColor ? 'text-gray-900 dark:text-white' : ''}`} style={{ color: txtColor || undefined }}>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-center mb-0">
             {title}
           </h2>
           <button
@@ -96,20 +139,20 @@ export default function CartRenderer({ section, content, styles, site, preview }
             ) : (
               displayProducts.map((product) => {
                 return (
-                <div key={product.id} className={`group rounded-3xl shadow-lg border border-gray-100 dark:border-gray-800/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1.5 overflow-hidden ${!cardBgColor ? 'bg-white dark:bg-[#111827]' : ''}`} style={{ backgroundColor: cardBgColor || undefined }}>
-                  <div className="h-56 overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
+                <div key={product.id} className={`group flex flex-col bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-500 hover:-translate-y-3 hover:shadow-yellow-500/30 ${!cardBgColor ? '' : ''}`} style={{ backgroundColor: cardBgColor || undefined }}>
+                  <div className="h-56 overflow-hidden bg-black/20 relative">
                     {product.image ? (
-                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 font-medium">Sin Imagen</div>
+                      <div className="w-full h-full flex items-center justify-center text-gray-500 font-medium">Sin Imagen</div>
                     )}
                     {product.originalPrice && (
                        <div className="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">Oferta</div>
                     )}
                   </div>
-                  <div className="p-6 relative">
-                    <h3 className="font-extrabold text-xl text-gray-900 dark:text-white line-clamp-1 mb-2">{product.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mb-6 min-h-[40px]">{product.description}</p>
+                  <div className="p-6 flex flex-col flex-1 relative">
+                    <h3 className="font-bold text-xl mb-3 text-white line-clamp-1">{product.name}</h3>
+                    <p className="text-sm text-gray-300 mb-6 line-clamp-2 min-h-[40px]">{product.description}</p>
   
                     <div className="flex flex-col items-start gap-1">
                       {product.originalPrice && (
@@ -117,14 +160,14 @@ export default function CartRenderer({ section, content, styles, site, preview }
                           {formatPrice(product.originalPrice)}
                         </span>
                       )}
-                      <span className="text-3xl font-black drop-shadow-sm tracking-tight" style={{ color: buttonColor }}>
+                      <span className="text-2xl font-black drop-shadow-sm tracking-tight" style={{ color: buttonColor }}>
                         {formatPrice(product.price)}
                       </span>
                     </div>
   
                     <button
                       onClick={() => addToCart(product)}
-                      className="w-full py-4 mt-6 rounded-2xl font-black transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-95 flex justify-center items-center gap-2 border border-black/5"
+                      className="w-full py-3 mt-6 rounded-xl font-bold transition-all duration-300 hover:bg-yellow-400 hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2"
                       style={{ backgroundColor: buttonColor, color: "#000" }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -253,7 +296,7 @@ export default function CartRenderer({ section, content, styles, site, preview }
                 <button
                   className="w-full mt-4 py-4 rounded-2xl font-black shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-3 text-lg border border-black/10"
                   style={{ backgroundColor: buttonColor, color: "#000" }}
-                  onClick={() => alert("Función de checkout (WhatsApp o Pasarela) próximamente")}
+                  onClick={() => setIsCheckoutOpen(true)}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -268,6 +311,57 @@ export default function CartRenderer({ section, content, styles, site, preview }
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* CHECKOUT MODAL */}
+      {isCheckoutOpen && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/60 z-[60] flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2rem] p-8 shadow-2xl relative">
+            <button 
+              onClick={() => setIsCheckoutOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+            
+            <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-6">Finalizar Compra</h3>
+            
+            <form onSubmit={handleCheckout} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Tu Nombre</label>
+                <input 
+                  type="text" 
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder="Ej. Juan Pérez"
+                  className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500 transition-colors"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Tu Teléfono</label>
+                <input 
+                  type="tel" 
+                  value={clientPhone}
+                  onChange={(e) => setClientPhone(e.target.value)}
+                  placeholder="Ej. 3001234567"
+                  className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500 transition-colors"
+                  required
+                />
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full mt-6 py-4 rounded-xl font-black shadow-lg transition-all hover:-translate-y-1 active:scale-95 flex justify-center items-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0"
+                style={{ backgroundColor: buttonColor, color: "#000" }}
+              >
+                {isLoading ? "Procesando..." : `Confirmar Pedido - ${formatPrice(cartTotal)}`}
+              </button>
+            </form>
           </div>
         </div>
       )}

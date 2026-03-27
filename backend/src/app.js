@@ -31,6 +31,7 @@ const adminRoutes = require("./routes/admin.routes");
 const siteUploadRoutes = require("./routes/siteUpload.routes");
 const availabilityRoutes = require("./routes/availability.routes");
 const productRoutes = require("./routes/product.routes");
+const shoppingCartRoutes = require("./routes/shoppingCart.routes");
 
 const app = express();
 
@@ -115,6 +116,7 @@ app.use("/api/geo", require("./routes/geo.routes"));
 app.use("/api/dashboard", require("./modules/dashboard/dashboard.routes"));
 app.use("/api/templates", require("./routes/template.routes"));
 app.use("/api/products", productRoutes);
+app.use("/api/shopping-carts", shoppingCartRoutes);
 
 // --- Global Error Handling ---
 app.use(errorHandler);

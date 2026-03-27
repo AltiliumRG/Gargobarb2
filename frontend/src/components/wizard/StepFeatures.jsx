@@ -19,17 +19,19 @@ export default function StepFeatures() {
       </h2>
 
       <div className="space-y-4">
-        {Object.entries(data.features).map(([key, value]) => (
+        {Object.entries(data.features)
+          .filter(([key]) => key !== 'cart')
+          .map(([key, value]) => (
           <label
             key={key}
-            className="flex items-center justify-between bg-gray-800 p-4 rounded cursor-pointer"
+            className="flex items-center justify-between bg-gray-800 p-4 rounded cursor-pointer transition hover:bg-gray-750"
           >
             <span className="capitalize">{key}</span>
             <input
               type="checkbox"
               checked={value}
               onChange={() => toggle(key)}
-              className="w-5 h-5"
+              className="w-5 h-5 accent-yellow-500 rounded border-gray-600 bg-gray-700"
             />
           </label>
         ))}
