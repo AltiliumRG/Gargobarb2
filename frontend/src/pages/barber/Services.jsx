@@ -1,5 +1,5 @@
 // src/pages/barber/services.jsx
-import axios from "axios";
+import api from "../../api/axios";
 
 const API_URL = "http://localhost:4000/api/barbershops";
 

@@ -7,7 +7,7 @@ import AboutRenderer from "./AboutRenderer";
 import TestimonialsRenderer from "./TestimonialsRenderer";
 import CartRenderer from "./CartRenderer";
 
-export default function SectionRendererUniversal({ section, site, preview }) {
+export default function SectionRendererUniversal({ section, site, preview, slug }) {
   if (!section?.is_visible) return null;
 
   const content = section.content || {};
@@ -33,6 +33,7 @@ export default function SectionRendererUniversal({ section, site, preview }) {
           styles={styles}
           site={site}
           preview={preview}
+          slug={slug}
         />
       );
 
@@ -89,7 +90,7 @@ case "testimonials":
     />
   );
 
-case "cart":
+case "carrito":
   return (
     <CartRenderer
       section={section}

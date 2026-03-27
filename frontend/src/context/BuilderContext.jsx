@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
-import api from "../api/api";
+import api from "../api/axios";
 
 const BuilderContext = createContext();
 
@@ -232,6 +232,27 @@ export function BuilderProvider({ children }) {
     }));
   };
 
+  // 🔥 LIMPIADOR DE CONTENT (CRÍTICO)
+const cleanContent = (section) => {
+  const content = section.content || {};
+
+  if (section.type === "carrito") {
+    return {
+      title: content.title || "",
+      buttonText: content.buttonText || "",
+      globalDiscount: Number(content.globalDiscount) || 0,
+      items: (content.items || []).map(item => ({
+        name: item.name || "",
+        price: Number(item.price) || 0,
+        description: item.description || "",
+        image: item.image || ""
+      }))
+    };
+  }
+
+  return content || {};
+};
+
   /* ============================================================
      SAVE
   ============================================================ */
@@ -239,16 +260,28 @@ export function BuilderProvider({ children }) {
     if (!site?.id) return false;
 
     try {
-      const res = await api.post("/sites/builder/save", {
-        siteId: site.id,
-        pages,
-        siteMetadata: {
-          name: site.name,
-          primary_color: site.primary_color,
-          secondary_color: site.secondary_color,
-          font_family: site.font_family,
-        },
-      });
+      // 🔥 LIMPIAR TODAS LAS PAGES
+const cleanPages = pages.map(page => ({
+  ...page,
+  sections: page.sections.map(section => ({
+    ...section,
+    content: cleanContent(section),
+    styles: section.styles || {}
+  }))
+}));
+
+console.log("📦 CLEAN DATA:", cleanPages); // debug
+
+const res = await api.post("/sites/builder/save", {
+  siteId: site.id,
+  pages: cleanPages,
+  siteMetadata: {
+    name: site.name,
+    primary_color: site.primary_color,
+    secondary_color: site.secondary_color,
+    font_family: site.font_family,
+  },
+});
 
       return res.status === 200;
     } catch (err) {

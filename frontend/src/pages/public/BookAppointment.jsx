@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import ReactCalendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
+
 export default function BookAppointment() {
   const { slug } = useParams();
   const navigate = useNavigate();
 
+  const location = useLocation();
+const serviceFromState = location.state?.service;
   const [barbershop, setBarbershop] = useState(null);
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
@@ -37,7 +40,7 @@ const maxDateString = maxDate.toISOString().split("T")[0];
   ======================== */
   useEffect(() => {
     if (!slug) return;
-
+    
     const loadData = async () => {
       try {
         const shopRes = await api.get(`/barbershops/public/${slug}`);
@@ -58,7 +61,24 @@ const maxDateString = maxDate.toISOString().split("T")[0];
 
     loadData();
   }, [slug]);
+  /* ========================
+   AUTO SELECCIONAR SERVICIO
+======================== */
+useEffect(() => {
+  if (!serviceFromState || services.length === 0) return;
 
+  const found = services.find(s => s.id === serviceFromState.id);
+
+  if (found) {
+    setSelectedService(found);
+
+    setForm(prev => ({
+      ...prev,
+      service_id: found.id
+    }));
+  }
+
+}, [serviceFromState, services]);
   /* ========================
      SELECCIONAR SERVICIO
   ======================== */

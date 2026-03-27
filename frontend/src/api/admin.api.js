@@ -1,5 +1,5 @@
 // src/api/admin.api.js
-import api from "./api";
+import api from "./axios";
 
 export const getDashboardStats = async () => {
     try {

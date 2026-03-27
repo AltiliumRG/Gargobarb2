@@ -5,73 +5,70 @@
       "slug": "home",
       "order": 1,
       "sections": [
-
         {
-  "type": "hero",
-  "order": 1,
-  "content": {
-    "title": "Bienvenido a tu barbería",
-    "subtitle": "Cortes profesionales · Estilo moderno",
-    "buttonText": "Reservar cita",
-    "image": "http://localhost:4000/uploads/Default/hero.jpg"
-  },
-  "styles": {
-    "align": "center"
-  }
-},
-
+          "type": "hero",
+          "order": 1,
+          "content": {
+            "title": "Bienvenido a tu barbería",
+            "subtitle": "Cortes profesionales · Estilo moderno",
+            "buttonText": "Reservar cita",
+            "image": "http://localhost:4000/uploads/Default/hero.jpg"
+          },
+          "styles": {
+            "align": "center"
+          }
+        },
         {
-  "type": "services",
-  "order": 2,
-  "content": {
-    "title": "Nuestros servicios",
-    "items": [
-      {
-        "title": "Corte clásico",
-        "description": "Estilo tradicional con acabado profesional",
-        "price": "$20.000",
-        "image": "http://localhost:4000/uploads/Default/default-image.avif",
-        "buttonText": "Reservar",
-        "buttonLink": "#"
-      },
-      {
-        "title": "Barba premium",
-        "description": "Perfilado y tratamiento",
-        "price": "$15.000",
-        "image": "http://localhost:4000/uploads/Default/default-image.avif",
-        "buttonText": "Reservar",
-        "buttonLink": "#"
-      },
-      {
-        "title": "Fade moderno",
-        "description": "Corte degradado de precisión",
-        "price": "$25.000",
-        "image": "http://localhost:4000/uploads/Default/default-image.avif",
-        "buttonText": "Reservar",
-        "buttonLink": "#"
-      }
-    ]
-  }
-},
-{
-  "type": "gallery",
-  "order": 3,
-  "content": {
-    "title": "Galería",
-    "images": [
-      {
-        "url": "http://localhost:4000/uploads/Default/gallery1.JPEG"
-      },
-      {
-        "url": "http://localhost:4000/uploads/Default/gallery2.jpg"
-      },
-      {
-        "url": "http://localhost:4000/uploads/Default/gallery3.jpg"
-      }
-    ]
-  }
-},
-
+          "type": "services",
+          "order": 2,
+          "content": {
+            "title": "Nuestros servicios",
+            "items": [
+              {
+                "title": "Corte clásico",
+                "description": "Estilo tradicional con acabado profesional",
+                "price": "$20.000",
+                "image": "http://localhost:4000/uploads/Default/default-image.avif",
+                "buttonText": "Reservar",
+                "buttonLink": "#"
+              },
+              {
+                "title": "Barba premium",
+                "description": "Perfilado y tratamiento",
+                "price": "$15.000",
+                "image": "http://localhost:4000/uploads/Default/default-image.avif",
+                "buttonText": "Reservar",
+                "buttonLink": "#"
+              },
+              {
+                "title": "Fade moderno",
+                "description": "Corte degradado de precisión",
+                "price": "$25.000",
+                "image": "http://localhost:4000/uploads/Default/default-image.avif",
+                "buttonText": "Reservar",
+                "buttonLink": "#"
+              }
+            ]
+          }
+        },
+        {
+          "type": "gallery",
+          "order": 3,
+          "content": {
+            "title": "Galería",
+            "images": [
+              {
+                "url": "http://localhost:4000/uploads/Default/gallery1.JPEG"
+              },
+              {
+                "url": "http://localhost:4000/uploads/Default/gallery2.jpg"
+              },
+              {
+                "url": "http://localhost:4000/uploads/Default/gallery3.jpg"
+              }
+            ]
+          }
+        },
         {
           "type": "about",
           "order": 4,
@@ -80,7 +77,6 @@
             "text": "Somos barberos profesionales enfocados en estilo, precisión y experiencia al cliente."
           }
         },
-
         {
           "type": "testimonials",
           "order": 5,
@@ -100,7 +96,6 @@
             ]
           }
         },
-
         {
           "type": "contact",
           "order": 6,
@@ -115,7 +110,7 @@
           }
         },
         {
-          "type": "cart",
+          "type": "carrito",
           "order": 7,
           "content": {
             "title": "Carrito de Compras",
@@ -125,22 +120,22 @@
                 "id": "1",
                 "name": "Cera Fijadora Profesional",
                 "description": "Cera de alta fijación con acabado mate.",
-                "price": 15.00,
-                "image": "http://localhost:4000/uploads/Default/default-product.png"
+                "price": 15000,
+                "image": "http://localhost:4000/uploads/Default/product1.jpg"
               },
               {
                 "id": "2",
                 "name": "Aceite para Barba",
                 "description": "Aceite hidratante de argán para suavizar la barba.",
-                "price": 20.00,
-                "image": "http://localhost:4000/uploads/Default/default-product.png"
+                "price": 20000,
+                "image": "http://localhost:4000/uploads/Default/product1.jpg"
               },
               {
                 "id": "3",
                 "name": "Loción Aftershave",
                 "description": "Refresca y calma la piel después del afeitado.",
-                "price": 12.50,
-                "image": "http://localhost:4000/uploads/Default/default-product.png"
+                "price": 12500,
+                "image": "http://localhost:4000/uploads/Default/product1.jpg"
               }
             ]
           },

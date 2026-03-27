@@ -125,22 +125,29 @@ exports.saveBuilder = async (req, res) => {
 
       // 3️⃣ CREAR NUEVAMENTE TODAS LAS SECCIONES QUE VIENEN DEL FRONTEND
       for (let i = 0; i < page.sections.length; i++) {
-        const section = page.sections[i];
+  const section = page.sections[i];
 
-        await SiteSection.create(
-          {
-            page_id: page.id,
-            type: section.type,
-            order_index: i + 1,
-            content: section.content || {},
-            styles: section.styles || {},
-            is_visible:
-              typeof section.is_visible === "boolean"
-                ? section.is_visible
-                : true,
-          },
-          { transaction }
-        );
+  // 🔍 VALIDACIÓN AQUÍ
+  const allowedTypes = ['hero', 'gallery', 'services', 'contact', 'carrito', 'about', 'testimonials'];
+
+  if (!allowedTypes.includes(section.type)) {
+    throw new Error(`Tipo inválido: ${section.type}`);
+  }
+
+  await SiteSection.create(
+    {
+      page_id: page.id,
+      type: section.type,
+      order_index: i + 1,
+      content: section.content || {},
+      styles: section.styles || {},
+      is_visible:
+        typeof section.is_visible === "boolean"
+          ? section.is_visible
+          : true,
+    },
+    { transaction }
+  );
       }
     }
 

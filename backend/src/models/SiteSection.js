@@ -22,7 +22,7 @@ const SiteSection = sequelize.define(
         "about",
         "testimonials",
         "contact",
-        "cart",
+        "carrito",
         "custom"
       ),
       allowNull: false,

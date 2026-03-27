@@ -3,7 +3,7 @@
 import { createContext, useContext, useState } from "react";
 
 const WizardContext = createContext();
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 export function WizardProvider({ children }) {
 
@@ -32,7 +32,7 @@ export function WizardProvider({ children }) {
     features: {
       services: true,
       gallery: true,
-      cart: false,
+      cart: true,
       appointments: true,
     },
 
@@ -108,7 +108,7 @@ export function WizardProvider({ children }) {
       features: {
         services: true,
         gallery: true,
-        cart: false,
+        cart: true,
         appointments: true,
       },
       template: "default",

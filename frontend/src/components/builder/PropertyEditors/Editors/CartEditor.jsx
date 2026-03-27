@@ -18,9 +18,9 @@ export default function CartEditor({
   setSavingId
 }) {
   const DEFAULT_PRODUCTS = [
-    { id: 'def1', name: 'Aceite para barba', price: 25000, description: 'Aceite hidratante enriquecido con vitamina E.', image: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=500&auto=format&fit=crop&q=60' },
-    { id: 'def2', name: 'Cera moldeadora', price: 30000, description: 'Fijación media, ideal para estilizar peinados clásicos.', image: 'https://images.unsplash.com/photo-1597851065532-055f97d12e47?w=500&auto=format&fit=crop&q=60' },
-    { id: 'def3', name: 'Shampoo especial', price: 45000, description: 'Limpieza profunda con extractos naturales.', image: 'https://images.unsplash.com/photo-1585232351009-aa87416fca90?w=500&auto=format&fit=crop&q=60' }
+    { id: 'def1', name: 'Cera Fijadora Profesional', price: 15000, description: 'Cera de alta fijación con acabado mate.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
+    { id: 'def2', name: 'Aceite para barba', price: 20000, description: 'Aceite hidratante de argán para suavizar la barba.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
+    { id: 'def3', name: 'Loción Aftershave', price: 12500, description: 'Refresca y calma la piel después del afeitado.', image: 'http://localhost:4000/uploads/Default/product1.jpg' }
   ];
 
   const formatPrice = (price) => {
@@ -134,9 +134,9 @@ export default function CartEditor({
               <button
                 onClick={() => {
                   const currentItems = content?.items !== undefined ? content.items : [
-                    { id: 'def1', name: 'Aceite para barba', price: 25000, description: 'Aceite hidratante enriquecido con vitamina E.', image: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=500&auto=format&fit=crop&q=60' },
-                    { id: 'def2', name: 'Cera moldeadora', price: 30000, description: 'Fijación media, ideal para estilizar peinados clásicos.', image: 'https://images.unsplash.com/photo-1597851065532-055f97d12e47?w=500&auto=format&fit=crop&q=60' },
-                    { id: 'def3', name: 'Shampoo especial', price: 45000, description: 'Limpieza profunda con extractos naturales.', image: 'https://images.unsplash.com/photo-1585232351009-aa87416fca90?w=500&auto=format&fit=crop&q=60' }
+                    { id: 'def1', name: 'Cera Fijadora Profesional', price: 15000, description: 'Cera de alta fijación con acabado mate.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
+                    { id: 'def2', name: 'Aceite para barba', price: 20000, description: 'Aceite hidratante de argán para suavizar la barba.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
+                    { id: 'def3', name: 'Loción Aftershave', price: 12500, description: 'Refresca y calma la piel después del afeitado.', image: 'http://localhost:4000/uploads/Default/product1.jpg' }
                   ];
                   handleContent('items', currentItems.filter(item => item.id !== p.id));
                 }}

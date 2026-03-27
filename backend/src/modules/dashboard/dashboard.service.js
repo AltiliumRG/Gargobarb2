@@ -47,7 +47,7 @@ exports.getOverview = async (barbershopId) => {
   });
 
   const monthlyRevenue = monthlyAppointments.reduce(
-    (acc, a) => acc + (a.Service?.price || 0),
+    (acc, a) => acc + (a.service?.price || 0),
     0
   );
 

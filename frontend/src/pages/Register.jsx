@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
-import api from "../api/api";
+import api from "../api/axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff, Upload, User, Scissors } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";

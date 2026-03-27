@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getBarbershopById } from "../../api/barber.api";
-import api from "../../api/api"; // 🔥 usamos instancia con withCredentials
+import api from "../../api/axios"; // 🔥 usamos instancia con withCredentials
 import {
   Layout,
   Calendar,

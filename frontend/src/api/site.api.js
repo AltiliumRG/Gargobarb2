@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./axios";
 
 // 🔹 Cargar builder completo
 export const getSiteByBarbershop = (barbershopId) =>

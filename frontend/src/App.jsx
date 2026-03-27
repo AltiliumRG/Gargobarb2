@@ -26,6 +26,7 @@ import CreateBarbershopWizard from "./pages/barber/CreateBarbershopWizard";
 import BarberHome from "./pages/barber/BarberHome";
 import Preview from "./pages/barber/Preview";
 import Settings from "./pages/barber/Settings";
+import Stats from "./pages/barber/Stats";
 
 import BarberWorkspaceLayout from "./pages/barber/BarberWorkspaceLayout";
 import Dashboard from "./pages/barber/Dashboard";
@@ -35,6 +36,7 @@ import Appointments from "./pages/barber/Appointments";
 const App = () => {
   return (
     <>
+    
       {/* 🔔 TOAST GLOBAL */}
       <Toaster
         position="top-right"
@@ -57,7 +59,7 @@ const App = () => {
       />
 
       <Routes>
-
+        
         {/* ========================================================
             LANDING
         ======================================================== */}
@@ -124,7 +126,7 @@ const App = () => {
             <Route index element={<Dashboard />} />
             <Route path="appointments" element={<Appointments />} />
             <Route path="schedule" element={<Schedule />} />
-            <Route path="stats" element={<div>Estadísticas próximamente</div>} />
+            <Route path="stats" element={<Stats />} />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Route>

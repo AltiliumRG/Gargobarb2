@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useBuilder } from "../../context/BuilderContext";
 import { useBarber } from "../../context/BarberContext";
 import { getServicesByBarbershop } from "../../api/services.api";
+import { getProductsByBarbershop } from "../../api/products.api";
 
 // Sub-components (Property Editors)
 import GlobalSettings from "./PropertyEditors/Editors/GlobalSettings";
@@ -119,7 +120,7 @@ export default function PropertiesPanel() {
         return <GalleryEditor {...commonProps} />;
       case "contact":
         return <ContactEditor {...commonProps} />;
-      case "cart":
+      case "carrito":
         return (
           <CartEditor 
             {...commonProps} 

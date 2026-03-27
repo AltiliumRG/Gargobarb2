@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./axios";
 
 export const updateSection = (id, data) =>
   api.put(`/site/sections/${id}`, data);
