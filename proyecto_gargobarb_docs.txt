@@ -1,0 +1,118 @@
+============================================================
+📄 DOCUMENTACIÓN DEL PROYECTO: GARGOBARB
+============================================================
+
+1. INFORMACIÓN GENERAL DEL SOFTWARE
+------------------------------------------------------------
+Gargobarb es una plataforma todo en uno creada especialmente para barberías, que facilita la gestión de citas, servicios, ventas y la creación de sitios web personalizados para cada negocio. El sistema cuenta con un panel administrativo para los barberos y una interfaz pública para los clientes.
+
+- Nombre: Gargobarb
+- Propósito: Gestión de barberías y constructor de sitios web (Site Builder).
+- Stack Tecnológico:
+  - Frontend: React 18, Vite, Tailwind CSS, Framer Motion.
+  - Backend: Node.js, Express 5.1, Sequelize ORM.
+  - Base de Datos: MySQL.
+  - Integraciones: Stripe (Pagos), Google OAuth, Google Maps API.
+
+2. INSTALACIÓN Y CONFIGURACIÓN
+------------------------------------------------------------
+Requisitos: Node.js (se recomienda la versión 18 o superior), MySQL (puede ser XAMPP/WAMP o standalone).
+
+Pasos de Instalación:
+1. Clona el repositorio.
+2. Configura la Base de Datos:
+   - Crea una base de datos llamada `gargobarb`.
+   - Importa el archivo `gargobarb_db.sql` que se encuentra en la raíz.
+3. Configura el Backend:
+   - Dirígete a `/backend`.
+   - Ejecuta `npm install`.
+   - Ajusta el archivo `.env` con las credenciales de la base de datos y las llaves de API (consulta el ejemplo de `.env`).
+   - Cambia el puerto de la base de datos en `.env` según el puerto de tu MySQL.
+   - Inicia el servidor con `npm run dev`.
+4. Configura el Frontend:
+   - Ve a `/frontend`.
+   - Ejecuta `npm install`.
+   - Inicia el entorno de desarrollo con `npm run dev`.
+
+3. ARQUITECTURA DEL SISTEMA
+------------------------------------------------------------
+El sistema está diseñado con una arquitectura de Cliente-Servidor desacoplada:
+- Frontend (SPA): Una aplicación React que consume la API REST. Utiliza Context API para manejar el estado global (autenticación, carrito).
+- Backend (API REST): Un servidor Express que se encarga de la lógica de negocio, autenticación y persistencia de datos. Incorpora una capa de DTOs para la validación y transporte seguro de datos entre el cliente y el servidor.
+- Persistencia: Base de datos relacional MySQL gestionada a través de Sequelize, lo que permite realizar migraciones y sincronizar modelos.
+
+4. DESARROLLO Y ESTRUCTURA DEL CÓDIGO
+------------------------------------------------------------
+BACKEND (`/backend/src`):
+- `app.js`: Aquí se encuentra la configuración principal de Express y los middlewares.
+- `routes/`: Aquí definimos los endpoints (auth, users, barbershops, appointments, sites, etc.).
+- `controllers/`: Este es el lugar donde manejamos la lógica de las peticiones.
+- `dto/`: Objetos de Transferencia de Datos (Data Transfer Objects). Clases encargadas de validar, limpiar y estructurar la información que llega desde las peticiones (ej: `CreateBarbershopDTO`, `PublishSiteDTO`) antes de que sea procesada por el sistema.
+- `models/`: Aquí se definen las tablas y relaciones de Sequelize.
+- `middleware/`: Encargado de la seguridad, validación y manejo de errores.
+- `services/`: Contiene la lógica de negocio que se puede reutilizar.
+- `repositories/`: Actúa como una capa de abstracción para los datos.
+
+FRONTEND (`/frontend/src`):
+- `components/`: Componentes reutilizables, incluyendo el constructor de sitios (`builder/`).
+- `pages/`: Aquí están las vistas principales (Landing, Dashboard, Login, Perfil de Cliente).
+- `api/`: Servicios que permiten la comunicación con el backend usando Axios.
+- `context/`: Proveedores de estado (AuthContext, CartContext).
+- `hooks/`: Ganchos personalizados para la lógica de la interfaz de usuario.
+
+5. BASE DE DATOS
+------------------------------------------------------------
+Motor: MySQL.
+Estructura Principal:
+- `users`: Gestión de usuarios (Admin, Barbero, Cliente).
+- `barbershops`: Información sobre los negocios registrados.
+- `services`: Catálogo de servicios ofrecidos por cada barbería.
+- `appointments`: Registro de citas (fecha, hora, estado).
+- `barbershop_sites`: Configuración de los sitios web generados.
+- `site_pages` y `site_sections`: Estructura dinámica de los sitios web (Hero, Servicios, Galería, etc.).
+- `shopping_carts`: Persistencia de órdenes y carritos de compra.
+- `sales`: Registro histórico de transacciones.
+
+6. API Y SERVICIOS
+------------------------------------------------------------
+La API se organiza bajo el prefijo `/api/`.
+Principales Endpoints:
+- `/api/auth`: Para iniciar sesión, registrarse, usar Google OAuth y refrescar el token.
+- `/api/users`: Manejo de perfiles de usuario.
+- `/api/barbershops`: CRUD de barberías y geolocalización.
+- `/api/appointments`: Gestión de reservas de turnos.
+- `/api/sites`: Configuración de sitios web personalizados.
+- `/api/upload`: Servicio para cargar imágenes (Multer).
+
+Servicios Externos:
+- Stripe: Procesamiento de pagos para servicios y productos.
+- Google OAuth: Autenticación rápida para usuarios.
+- Google Maps/Mapbox: Visualización de la ubicación de las barberías.
+
+7. SEGURIDAD
+------------------------------------------------------------
+- Autenticación: Implementada con JSON Web Tokens (JWT) utilizando un esquema de Access Token (corto plazo) y Refresh Token (largo plazo en cookies HttpOnly).
+- Encriptación: Contraseñas hasheadas con BcryptJS.
+- CORS: Configurado para permitir solo el dominio del frontend.
+- Helmet: Aplicación de cabeceras de seguridad HTTP.
+- Rate Limiting: Protección contra ataques de fuerza bruta (100 peticiones por minuto por IP).
+- Validación: Sanitización de entradas con Express-validator, Joi y capas de DTOs.
+
+8. PRUEBAS Y DEPURACIÓN
+------------------------------------------------------------
+- Depuración: Utiliza Morgan para registrar las peticiones HTTP en la consola.
+- Conectividad: Emplea scripts como `test-db.js` para comprobar la conexión con MySQL.
+- Logs: Archivos de registro como `output.log` y `temp.log` en el backend para seguir el rastro de errores durante la ejecución.
+- Herramientas: Se recomienda usar "Sequelize Sync" (`npm run db:sync`) para asegurarte de que los modelos estén alineados con la base de datos.
+
+9. DESPLIEGUE Y MANTENIMIENTO
+------------------------------------------------------------
+Despliegue Sugerido:
+1. Frontend: Ejecutar `npm run build` para crear la carpeta `dist/`. Aloja en servicios de archivos estáticos o en un servidor web.
+2. Backend: Utiliza PM2 o procesos similares para servir. Asegúrate de que las variables de entorno estén correctamente configuradas en el servidor de producción.
+3. Archivos: Los archivos subidos se guardan en `/backend/uploads`. En producción, se recomienda un almacenamiento persistente o S3.
+
+Mantenimiento:
+- Realiza una limpieza periódica de la carpeta `uploads`.
+- Monitorea los logs de errores en el servidor.
+- Actualiza las dependencias críticas según las vulnerabilidades reportadas.

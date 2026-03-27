@@ -12,27 +12,14 @@ exports.getAvailability = async (req, res) => {
     }
 
     /* ======================
-       obtener día
+       obtener día (ROBUSTO)
     ====================== */
 
-    const dateObj = new Date(`${date}T00:00:00`);
+    const [y, mm, dd] = date.split("-").map(Number);
+    const dateObj = new Date(y, mm - 1, dd); 
+    const daysArr = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const day = daysArr[dateObj.getDay()];
 
-const daySpanish = dateObj.toLocaleDateString("es-CO", {
-  weekday: "long",
-  timeZone: "America/Bogota"
-});
-
-const dayMap = {
-  domingo: "sunday",
-  lunes: "monday",
-  martes: "tuesday",
-  miércoles: "wednesday",
-  jueves: "thursday",
-  viernes: "friday",
-  sábado: "saturday"
-};
-
-const day = dayMap[daySpanish];
     /* ======================
        horario del barbero
     ====================== */
@@ -52,44 +39,38 @@ const day = dayMap[daySpanish];
     const close = schedule.close_time;
 
     /* ======================
-   generar slots
-====================== */
+       generar slots
+    ====================== */
 
-const slots = [];
+    const slots = [];
+    let current = open;
 
-let current = open;
+    // Asegurar formato HH:mm:ss para comparaciones consistentes
+    if (current.length === 5) current += ":00";
+    let closeTimeStr = close;
+    if (closeTimeStr.length === 5) closeTimeStr += ":00";
 
-/* hora actual colombia */
-const now = new Date(
-  new Date().toLocaleString("en-US", { timeZone: "America/Bogota" })
-);
+    const [ch, cm, cs] = closeTimeStr.split(":").map(Number);
+    const barbershopClose = new Date(1970, 0, 1, ch, cm, cs || 0);
 
-while (current < close) {
+    while (current < closeTimeStr) {
+      const [h, m, s] = current.split(":").map(Number);
+      
+      const slotStart = new Date(1970, 0, 1, h, m, s || 0);
+      const slotEnd = new Date(slotStart);
+      slotEnd.setMinutes(slotEnd.getMinutes() + duration);
 
-  const [h, m] = current.split(":").map(Number);
+      if (slotEnd <= barbershopClose) {
+        slots.push(current.slice(0, 5)); // Enviar HH:mm al frontend
+      }
 
-  const start = new Date();
-  start.setHours(h);
-  start.setMinutes(m);
-
-  const end = new Date(start);
-  end.setMinutes(end.getMinutes() + duration);
-
-  const closeTime = new Date();
-  const [ch, cm] = close.split(":").map(Number);
-  closeTime.setHours(ch);
-  closeTime.setMinutes(cm);
-
-  if (end <= closeTime) {
-    slots.push(current);
-  }
-
-  start.setMinutes(start.getMinutes() + 30);
-
-  current = start
-    .toTimeString()
-    .slice(0,5);
-}
+      slotStart.setMinutes(slotStart.getMinutes() + 30);
+      
+      // Formatear manualmente a HH:mm:ss para la siguiente iteración
+      const nextH = String(slotStart.getHours()).padStart(2, "0");
+      const nextM = String(slotStart.getMinutes()).padStart(2, "0");
+      current = `${nextH}:${nextM}:00`;
+    }
 
     /* ======================
        citas ocupadas

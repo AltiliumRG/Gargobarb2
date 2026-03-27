@@ -1,0 +1,81 @@
+============================================================
+MANUAL DE USUARIO: GARGOBARB - PLATAFORMA PROFESIONAL
+============================================================
+
+2. INTRODUCCIÓN
+------------------------------------------------------------
+Bienvenido a GargoBarb. Esta plataforma ha sido diseñada para profesionalizar la gestión de las barberías, facilitando la administración de turnos, servicios y la presencia en línea de cada negocio.
+
+Este manual ofrece una guía paso a paso para que tanto barberos como clientes puedan utilizar todas las herramientas disponibles de manera eficiente y segura.
+
+3. REQUISITOS DEL SISTEMA
+------------------------------------------------------------
+Para asegurar un funcionamiento óptimo de la plataforma, se recomienda lo siguiente:
+- Conexión a internet estable.
+- Navegador web actualizado (Google Chrome, Firefox, Safari o Microsoft Edge).
+- La plataforma es totalmente responsiva y puede utilizarse en computadoras, tablets y teléfonos móviles.
+
+4. ACCESO AL SOFTWARE
+------------------------------------------------------------
+GargoBarb es una solución basada en la nube, por lo que no requiere descarga ni instalación:
+- Solo debe ingresar la dirección web (URL) correspondiente en su navegador.
+- Opcionalmente, puede guardar la página como acceso directo en su escritorio o pantalla de inicio del móvil para mayor comodidad.
+
+5. DESCRIPCIÓN DE LA INTERFAZ
+------------------------------------------------------------
+La interfaz está organizada de forma lógica para facilitar la navegación y el control:
+
+A. Panel de Administración (Barberos):
+Es el centro de gestión principal. A través del menú lateral, podrá navegar entre el calendario de citas, el catálogo de servicios, el registro de ventas y el constructor de sitios web.
+
+B. Interfaz de Inicio de Sesión:
+- Acceso Seguro: Ingreso mediante correo electrónico y contraseña.
+- Control de Seguridad: Para proteger su cuenta, el sistema cuenta con un límite de intentos fallidos. Si se excede, el acceso se bloquea temporalmente.
+- Opciones de Acceso: Posibilidad de iniciar sesión de forma rápida utilizando su cuenta de Google.
+
+C. Interfaz de Registro:
+- Selección de Perfil: Podrá elegir registrarse como "Cliente" o como "Barbero".
+- Validación de Contraseña: Al crear su cuenta, el sistema le indicará los requisitos necesarios para que su clave sea segura:
+    * Mínimo de 8 caracteres.
+    * Al menos una letra mayúscula y una minúscula.
+    * Al menos un número.
+    * Al menos un carácter especial (ej: @, ., _, *).
+
+D. Explorador de Barberías (Clientes):
+Presenta un catálogo visual de los locales disponibles. Cada tarjeta de barbería muestra la ubicación exacta, el propietario y el estado actual del sitio (si está publicado o en edición).
+
+6. FUNCIONALIDADES PRINCIPALES
+------------------------------------------------------------
+A. Gestión para el Barbero:
+- Configuración de Servicios: Defina su oferta de servicios con precios y tiempos de duración precisos.
+- Constructor de Sitios: Personalice la imagen de su negocio (colores, fuentes, logos) y publique su propia página web profesional.
+- Seguimiento de Ventas: Registre sus ingresos diarios de manera organizada para un mejor control financiero.
+
+B. Experiencia del Cliente:
+- Reserva de Citas: Visualización en tiempo real de los horarios disponibles para agendar un turno sin necesidad de llamadas telefónicas.
+- Gestión de Perfil: Control de citas pasadas y futuras desde su propio panel personal.
+
+7. SOPORTE Y RESOLUCIÓN DE PROBLEMAS
+------------------------------------------------------------
+- Errores de Acceso: Verifique que no haya espacios adicionales en su correo o contraseña.
+- Publicación de Sitio: Si su sitio no es visible para el público, asegúrese de haber presionado el botón "Publicar" dentro del constructor.
+- Asistencia Técnica: Para cualquier consulta adicional, puede contactarnos en soporte@gargobarb.com.
+
+8. SEGURIDAD Y PRIVACIDAD
+------------------------------------------------------------
+GargoBarb implementa altos estándares de seguridad para proteger sus datos:
+- Encriptación de Datos: La información personal y financiera se maneja de forma segura y privada.
+- Cierre de Sesión Automático: El sistema protege su cuenta cerrando sesiones inactivas tras un tiempo predeterminado.
+
+9. ACTUALIZACIONES Y MANTENIMIENTO
+------------------------------------------------------------
+La plataforma se actualiza automáticamente para ofrecer siempre las últimas mejoras y parches de seguridad. Generalmente, estas actualizaciones no interrumpen su operación diaria.
+
+10. GLOSARIO DE TÉRMINOS
+------------------------------------------------------------
+- Dashboard: Entorno principal de administración de su negocio.
+- Site Builder: Herramienta visual para editar y gestionar el diseño de su página web.
+- Slug: Identificador único de su barbería en la plataforma (ej: gargobarb.com/nombre-barberia).
+
+---
+© 2026 GargoBarb - Gestión profesional para el barbero moderno.

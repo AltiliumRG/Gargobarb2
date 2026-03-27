@@ -29,8 +29,9 @@ export default function PropertiesPanel() {
     site,
   } = useBuilder();
 
-  const { activeBarbershop, services, setServices } = useBarber();
+  const { activeBarbershop, services, setServices, products, setProducts } = useBarber();
   const [loadingServices, setLoadingServices] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [savingId, setSavingId] = useState(null);
 
   // Load services if a barbershop is active
@@ -49,8 +50,21 @@ export default function PropertiesPanel() {
       }
     };
 
+    const loadProducts = async () => {
+      try {
+        setLoadingProducts(true);
+        const res = await getProductsByBarbershop(activeBarbershop.id);
+        setProducts(res.data);
+      } catch (err) {
+        console.error("❌ Error loading products:", err);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
     loadServices();
-  }, [activeBarbershop?.id, setServices]);
+    loadProducts();
+  }, [activeBarbershop?.id, setServices, setProducts]);
 
   // If no section is selected, show Global Settings
   if (!selectedSectionId) {
@@ -106,7 +120,17 @@ export default function PropertiesPanel() {
       case "contact":
         return <ContactEditor {...commonProps} />;
       case "cart":
-        return <CartEditor {...commonProps} />;
+        return (
+          <CartEditor 
+            {...commonProps} 
+            activeBarbershop={activeBarbershop} 
+            products={products} 
+            setProducts={setProducts} 
+            loadingProducts={loadingProducts}
+            savingId={savingId}
+            setSavingId={setSavingId}
+          />
+        );
       default:
         return (
           <div className="p-10 text-center text-gray-500 italic">

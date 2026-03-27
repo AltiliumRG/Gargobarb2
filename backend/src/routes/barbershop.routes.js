@@ -93,9 +93,6 @@ router.post(
   barbershopController.saveSchedules
 );
 
-router.get(
-  "/barbershops/:barbershopId/schedules",
-  barbershopController.getSchedules
-);
+// Ruta redundante eliminada
 
 module.exports = router;
