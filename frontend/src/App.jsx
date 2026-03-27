@@ -8,6 +8,9 @@ import AuthRedirect from "./pages/AuthRedirect";
 import PrivateRoute from "./auth/PrivateRoute";
 
 import Landing from "./pages/Landing";
+import SiteEditorInfo from "./pages/public/SiteEditorInfo";
+import AppointmentsInfo from "./pages/public/AppointmentsInfo";
+import CustomDomainInfo from "./pages/public/CustomDomainInfo";
 import BarberPublicPage from "./pages/public/BarberPublicPage";
 import CheckoutPage from "./pages/public/CheckoutPage";
 import BookAppointment from "./pages/public/BookAppointment";
@@ -62,6 +65,9 @@ const App = () => {
             LANDING
         ======================================================== */}
         <Route path="/" element={<Landing />} />
+        <Route path="/features/site-editor" element={<SiteEditorInfo />} />
+        <Route path="/features/appointments" element={<AppointmentsInfo />} />
+        <Route path="/features/custom-domain" element={<CustomDomainInfo />} />
         <Route path="/dashboard" element={<AuthRedirect />} />
 
         {/* ========================================================
