@@ -186,26 +186,26 @@ const Landing = () => {
                                 icon: <Layout className="text-[#D4AF37]" size={32} />,
                                 title: "Editor de Sitios",
                                 desc: "Crea una página web impresionante en minutos con nuestro editor visual drag & drop.",
-                                onClick: () => navigate("/editor")
+                                path: "/features/site-editor"
                             },
                             {
                                 icon: <Smartphone className="text-blue-400" size={32} />,
                                 title: "Gestión de Citas",
                                 desc: "Permite que tus clientes reserven 24/7 sin llamadas, todo automatizado.",
-                                onClick: () => navigate("/editor")
+                                path: "/features/appointments"
                             },
                             {
                                 icon: <Globe className="text-green-400" size={32} />,
                                 title: "Dominio Propio",
-                                desc: "Consigue una dirección profesional para que te encuentren los usuarios."
+                                desc: "Consigue una dirección profesional para que te encuentren los usuarios.",
+                                path: "/features/custom-domain"
                             }
                         ].map((feature, i) => (
                             <motion.div
                                 key={i}
                                 whileHover={{ y: -10 }}
-                                className={styles.featureCard}
-                                onClick={feature.onClick}
-                                style={{ cursor: feature.onClick ? "pointer" : "default" }}
+                                className={`${styles.featureCard} cursor-pointer`}
+                                onClick={() => navigate(feature.path)}
                             >
                                 <div className="mb-6 p-4 bg-transparent/40 rounded-2xl inline-block group-hover:scale-110 transition-transform">
                                     {feature.icon}

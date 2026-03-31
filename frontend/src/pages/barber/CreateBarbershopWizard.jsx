@@ -1,25 +1,28 @@
-// frontend/src/pages/barber/CreateBarbershopWizard.jsx
+import { useEffect } from "react";
 import { useWizard } from "../../context/WizardContext";
 import StepBasicInfo from "../../components/wizard/StepBasicInfo";
-import StepFeatures from "../../components/wizard/StepFeatures";
 import StepDesign from "../../components/wizard/StepDesign";
 import StepConfirm from "../../components/wizard/StepConfirm";
 
 function WizardSteps() {
-  const { step, nextStep, prevStep, TOTAL_STEPS } = useWizard();
+  const { step, nextStep, prevStep, TOTAL_STEPS, resetWizard } = useWizard();
+
+  useEffect(() => {
+    resetWizard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const renderStep = () => {
     switch (step) {
       case 0: return <StepBasicInfo />;
-      case 1: return <StepFeatures />;
-      case 2: return <StepDesign />;
-      case 3: return <StepConfirm />;
+      case 1: return <StepDesign />;
+      case 2: return <StepConfirm />;
       default: return null;
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-4 md:p-6 w-full">
       <div className="flex mb-8">
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <div
@@ -30,7 +33,7 @@ function WizardSteps() {
         ))}
       </div>
 
-      <div className="bg-gray-900 rounded-xl p-6">
+      <div className="bg-gray-900 rounded-xl p-4 md:p-6 w-full overflow-hidden">
         {renderStep()}
       </div>
 
