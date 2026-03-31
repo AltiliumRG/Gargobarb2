@@ -8,10 +8,10 @@ import { Eye, EyeOff, Upload, User, Scissors } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 
 // Validation Utilities
-import { 
-  validateRegisterForm, 
-  getPasswordStatus, 
-  EMAIL_REGEX 
+import {
+  validateRegisterForm,
+  getPasswordStatus,
+  EMAIL_REGEX
 } from "../utils/auth.validate";
 
 const AuthBackground = "/AuthBackground.jpg";
@@ -47,7 +47,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
-  
+
   // Validation State (Computed from utilities)
   const [emailValid, setEmailValid] = useState(null);
   const [passwordMatch, setPasswordMatch] = useState(null);
@@ -59,7 +59,7 @@ const Register = () => {
   // ============================================================
   // Handlers
   // ============================================================
-  
+
   const handleChange = (e) => {
     let value = e.target.value;
     if (/^\s/.test(value)) value = value.trimStart();
@@ -75,7 +75,7 @@ const Register = () => {
   const handlePasswordChange = (e) => {
     const value = e.target.value;
     const status = getPasswordStatus(value, form.confirmPassword);
-    
+
     if (status.error) {
       toast.error(status.error);
       return;
@@ -103,7 +103,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // External Validation Logic
     const validationError = validateRegisterForm(form, cookiesAccepted);
     if (validationError) return toast.error(validationError);
@@ -115,7 +115,7 @@ const Register = () => {
           formData.append(key, typeof form[key] === 'string' ? form[key].trim() : form[key]);
         }
       });
-      
+
       if (form.imageFile) formData.append("image", form.imageFile);
 
       await api.post("/auth/register", formData, {
@@ -152,6 +152,8 @@ const Register = () => {
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative px-4 py-8"
       style={{ backgroundImage: `url(${AuthBackground})` }}
     >
+
+      <button className="bg-[#d4af37b5] text-black px-4 py-2 rounded-lg absolute top-4 left-4 border border-[#D4AF37] z-50" onClick={() => navigate('/')}>Volver</button>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
       <Toaster position="top-center" />
       <motion.form

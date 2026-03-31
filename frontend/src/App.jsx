@@ -8,6 +8,7 @@ import AuthRedirect from "./pages/AuthRedirect";
 import PrivateRoute from "./auth/PrivateRoute";
 
 import Landing from "./pages/Landing";
+import EditorPreview from "./pages/client/EditorPreview";
 import BarberPublicPage from "./pages/public/BarberPublicPage";
 import CheckoutPage from "./pages/public/CheckoutPage";
 import BookAppointment from "./pages/public/BookAppointment";
@@ -63,6 +64,7 @@ const App = () => {
         ======================================================== */}
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<AuthRedirect />} />
+        <Route path="/editor" element={<EditorPreview />} />
 
         {/* ========================================================
             AUTH

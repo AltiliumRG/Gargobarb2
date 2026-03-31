@@ -185,12 +185,14 @@ const Landing = () => {
                             {
                                 icon: <Layout className="text-[#D4AF37]" size={32} />,
                                 title: "Editor de Sitios",
-                                desc: "Crea una página web impresionante en minutos con nuestro editor visual drag & drop."
+                                desc: "Crea una página web impresionante en minutos con nuestro editor visual drag & drop.",
+                                onClick: () => navigate("/editor")
                             },
                             {
                                 icon: <Smartphone className="text-blue-400" size={32} />,
                                 title: "Gestión de Citas",
-                                desc: "Permite que tus clientes reserven 24/7 sin llamadas, todo automatizado."
+                                desc: "Permite que tus clientes reserven 24/7 sin llamadas, todo automatizado.",
+                                onClick: () => navigate("/editor")
                             },
                             {
                                 icon: <Globe className="text-green-400" size={32} />,
@@ -202,6 +204,8 @@ const Landing = () => {
                                 key={i}
                                 whileHover={{ y: -10 }}
                                 className={styles.featureCard}
+                                onClick={feature.onClick}
+                                style={{ cursor: feature.onClick ? "pointer" : "default" }}
                             >
                                 <div className="mb-6 p-4 bg-transparent/40 rounded-2xl inline-block group-hover:scale-110 transition-transform">
                                     {feature.icon}

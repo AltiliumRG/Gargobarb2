@@ -18,6 +18,8 @@ const Login = () => {
     password: "",
   });
 
+
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -152,10 +154,15 @@ const Login = () => {
   };
 
   return (
+
     <div
+
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative"
       style={{ backgroundImage: `url(${AuthBackground})` }}
     >
+
+      <button className="bg-[#d4af37b5] text-black px-4 py-2 rounded-lg absolute top-4 left-4 border border-[#D4AF37]" onClick={() => navigate('/')}>Volver</button>
+
       <Toaster position="top-center" />
 
       <motion.form
@@ -240,12 +247,13 @@ const Login = () => {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-9 text-gray-400 hover:text-yellow-500"
           >
+
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
           <div className="flex justify-end mt-2">
-            <button 
-              type="button" 
-              onClick={() => navigate("/forgot-password")} 
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
               className="text-xs text-yellow-500 hover:text-white transition"
             >
               ¿Olvidaste tu contraseña?
