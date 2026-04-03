@@ -407,3 +407,48 @@ exports.registerVisit = async (req, res) => {
     res.status(500).json({ error: "Error registrando visita" });
   }
 };
+
+/* ============================================================
+   💳 CONFIGURACIÓN DE PAGO
+============================================================ */
+
+/**
+ * Saves payment method and banking data on the barbershop's site.
+ *
+ * @route PUT /api/barbershops/:id/payment
+ */
+exports.updatePaymentConfig = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { payment_method, payment_data } = req.body;
+    const user = req.user;
+
+    const { Barbershop: BarbershopModel, BarbershopSite: BarbershopSiteModel } = require("../models");
+
+    const barbershop = await BarbershopModel.findByPk(id, {
+      include: [{ model: BarbershopSiteModel, as: "site" }],
+    });
+
+    if (!barbershop) {
+      return res.status(404).json({ error: "Barbería no encontrada" });
+    }
+
+    if (user.role_id !== 1 && barbershop.user_id !== user.id) {
+      return res.status(403).json({ error: "No tienes permisos" });
+    }
+
+    if (!barbershop.site) {
+      return res.status(404).json({ error: "Sitio de la barbería no encontrado" });
+    }
+
+    await barbershop.site.update({
+      payment_method: payment_method || null,
+      payment_data: payment_data || null,
+    });
+
+    res.json({ message: "Configuración de pago guardada correctamente" });
+  } catch (error) {
+    console.error("❌ updatePaymentConfig Error:", error);
+    res.status(500).json({ error: "Error al guardar la configuración de pago" });
+  }
+};

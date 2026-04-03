@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBarbershop } from "../../api/barber.api";
+import { createBarbershop, updatePaymentConfig } from "../../api/barber.api";
 import { useWizard } from "../../context/WizardContext";
 import toast from "react-hot-toast";
 
@@ -37,6 +37,19 @@ export default function StepConfirm() {
         throw new Error("No se recibió el ID de la barberia");
       }
 
+      // 💳 Guardar configuración de pago en el sitio
+      if (data.paymentMethod) {
+        try {
+          await updatePaymentConfig(barbershopId, {
+            payment_method: data.paymentMethod,
+            payment_data: data.paymentData || {},
+          });
+        } catch (payErr) {
+          console.warn("⚠️ Pago guardado con advertencia:", payErr);
+          // No falla el flujo principal si el pago falla
+        }
+      }
+
       toast.success("¡Barbería creada con éxito!", { id: loadingToast });
 
       // 🚀 REDIRIGIR AL EDITOR
@@ -49,6 +62,14 @@ export default function StepConfirm() {
     }
   };
 
+  // Etiqueta del método de pago elegido
+  const paymentLabels = {
+    nequi: "📱 Nequi",
+    transfer: "🏦 Transferencia Bancaria",
+    card: "💳 Tarjeta Débito/Crédito",
+    efectivo: "💵 Efectivo en Local",
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-8 mt-6 bg-gradient-to-b from-gray-900 to-black backdrop-blur-xl border border-white/5 rounded-3xl shadow-[0_0_50px_rgba(250,204,21,0.05)] text-center relative overflow-hidden group">
       {/* Decorative Glow */}
@@ -59,9 +80,17 @@ export default function StepConfirm() {
       </div>
       
       <h2 className="text-4xl font-black text-white mb-4 tracking-tight drop-shadow-sm">¿Todo listo para crear tu barbería?</h2>
-      <p className="text-gray-400 mb-10 max-w-md text-lg leading-relaxed">
+      <p className="text-gray-400 mb-6 max-w-md text-lg leading-relaxed">
         Estás a un paso de crear tu barbería digital de forma profesional. Revísalo todo y comienza a recibir clientes hoy mismo.
       </p>
+
+      {/* Summary of Payment */}
+      {data.paymentMethod && (
+        <div className="mb-8 flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-sm font-bold">
+          <span>{paymentLabels[data.paymentMethod] || data.paymentMethod}</span>
+          <span className="text-gray-500 font-normal">configurado como método de pago</span>
+        </div>
+      )}
 
       <button
         onClick={() => setShowModal(true)}
@@ -119,3 +148,4 @@ export default function StepConfirm() {
     </div>
   );
 }
+

@@ -1,16 +1,15 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useBarber } from "../../context/BarberContext";
-import { createCart } from "../../api/cart.api";
 import toast from "react-hot-toast";
 
 export default function CartRenderer({ section, content, styles, site, preview }) {
   const { products: contextProducts } = useBarber();
+  const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [clientName, setClientName] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const DEFAULT_PRODUCTS = [
     { id: 'def1', name: 'Cera Fijadora Profesional', price: 15000, description: 'Cera de alta fijación con acabado mate.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
@@ -70,40 +69,48 @@ export default function CartRenderer({ section, content, styles, site, preview }
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleCheckout = async (e) => {
-    e.preventDefault();
-    if (!clientName.trim() || !clientPhone.trim()) {
-      toast.error("Por favor completa tu nombre y teléfono.");
+  const handleProceedToCheckout = () => {
+    if (preview) {
+      toast("Vista previa — el pago no está disponible en modo edición.", { icon: "🔒" });
       return;
     }
-    if (cart.length === 0) return;
-
-    setIsLoading(true);
-    try {
-      const payload = {
-        site_id: site?.id || 1, // Fallback if site is missing in preview
-        client_name: clientName,
-        client_phone: clientPhone,
-        items: cart,
-        total: cartTotal
-      };
-
-      await createCart(payload);
-      
-      toast.success("¡Pedido creado correctamente!");
-      
-      setCart([]);
-      setIsCheckoutOpen(false);
-      setIsCartOpen(false);
-      setClientName("");
-      setClientPhone("");
-      
-    } catch (error) {
-      console.error("Error al crear pedido:", error);
-      toast.error("Hubo un error al procesar tu pedido.");
-    } finally {
-      setIsLoading(false);
+    if (!site?.id) {
+      toast.error("No se pudo identificar el sitio de la barbería.");
+      return;
     }
+
+    setIsNavigating(true);
+    setProgress(0);
+
+    const duration = 5000;
+    const intervalTime = 50;
+    const steps = duration / intervalTime;
+    let currentStep = 0;
+
+    const interval = setInterval(() => {
+      currentStep++;
+      setProgress((currentStep / steps) * 100);
+      if (currentStep >= steps) {
+        clearInterval(interval);
+      }
+    }, intervalTime);
+
+    setTimeout(() => {
+      navigate(`/checkout/${site.id}`, {
+        state: {
+          items: cart,
+          total: cartTotal,
+          siteId: site.id,
+          siteSlug: site.slug,
+          paymentConfig: {
+            method: site.payment_method || null,
+            data:   site.payment_data   || {},
+          },
+        },
+      });
+      setIsNavigating(false);
+      setProgress(0);
+    }, duration);
   };
 
   const title = content?.title || "Carrito de Compras";
@@ -186,10 +193,10 @@ export default function CartRenderer({ section, content, styles, site, preview }
 
       {/* FLOATING CART BUTTON OMNIPRESENT ON MOBILE */}
       {cart.length > 0 && !isCartOpen && (
-        <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center md:hidden px-4 pointer-events-none">
+        <div className="fixed bottom-10 md:bottom-6 left-0 right-0 z-[100] flex justify-center md:hidden px-4 pointer-events-none">
           <button
             onClick={() => setIsCartOpen(true)}
-            className="w-full max-w-sm py-4 rounded-xl shadow-2xl font-black flex justify-between items-center px-6 transition hover:scale-105 active:scale-95 pointer-events-auto border border-black/10 animate-bounce-slow"
+            className="w-full max-w-sm py-4 rounded-2xl shadow-2xl font-black flex justify-between items-center px-6 transition hover:scale-105 active:scale-95 pointer-events-auto border border-black/10 animate-bounce-slow"
             style={{ backgroundColor: buttonColor, color: "#000" }}
           >
             <div className="flex items-center gap-3">
@@ -206,8 +213,8 @@ export default function CartRenderer({ section, content, styles, site, preview }
 
       {/* CART OVERLAY / MODAL */}
       {isCartOpen && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/60 z-50 flex justify-end animate-in fade-in duration-300">
-          <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-[#0b1220] w-full max-w-md h-full shadow-2xl flex flex-col border-l border-white/10 slide-in-from-right-8 fade-in duration-300">
+        <div className="fixed inset-0 backdrop-blur-md bg-black/70 z-[110] flex justify-end animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-[#0b1220] w-full md:max-w-md h-[100dvh] shadow-2xl flex flex-col border-l border-white/10 slide-in-from-right-8 outline-none">
             {/* Header */}
             <div className="p-6 border-b border-gray-200/50 dark:border-gray-800/50 flex justify-between items-center bg-white/50 dark:bg-black/20 backdrop-blur-md sticky top-0 z-10">
               <div className="flex items-center gap-4">
@@ -294,14 +301,28 @@ export default function CartRenderer({ section, content, styles, site, preview }
                   <span className="text-3xl font-black text-gray-900 dark:text-white leading-none tracking-tight">{formatPrice(cartTotal)}</span>
                 </div>
                 <button
-                  className="w-full mt-4 py-4 rounded-2xl font-black shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-3 text-lg border border-black/10"
+                  id="btn-proceder-pago"
+                  className="w-full mt-4 py-4 rounded-2xl font-black shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-3 text-lg border border-black/10 disabled:opacity-75 disabled:cursor-wait"
                   style={{ backgroundColor: buttonColor, color: "#000" }}
-                  onClick={() => setIsCheckoutOpen(true)}
+                  onClick={handleProceedToCheckout}
+                  disabled={isNavigating}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  Proceder al Pago
+                  {isNavigating ? (
+                    <>
+                      <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Redirigiendo...
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Proceder al Pago
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => setIsCartOpen(false)}
@@ -314,54 +335,28 @@ export default function CartRenderer({ section, content, styles, site, preview }
           </div>
         </div>
       )}
-      {/* CHECKOUT MODAL */}
-      {isCheckoutOpen && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/60 z-[60] flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2rem] p-8 shadow-2xl relative">
-            <button 
-              onClick={() => setIsCheckoutOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-            
-            <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-6">Finalizar Compra</h3>
-            
-            <form onSubmit={handleCheckout} className="space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Tu Nombre</label>
-                <input 
-                  type="text" 
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  placeholder="Ej. Juan Pérez"
-                  className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500 transition-colors"
-                  required
-                />
+      {/* PANTALLA DE CARGA (FULL SCREEN) */}
+      {isNavigating && (
+        <div className="fixed inset-0 z-[999] bg-[#060a10] flex flex-col items-center justify-center animate-in fade-in duration-300">
+          <div className="flex flex-col items-center max-w-sm w-full px-8">
+            {/* Glow Container */}
+            <div className="relative inline-flex items-center justify-center w-28 h-28 mb-8">
+              <div className="absolute inset-0 bg-yellow-500/20 rounded-full blur-2xl animate-pulse"></div>
+              <div className="relative w-20 h-20 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(250,204,21,0.3)] animate-bounce">
+                <span className="text-4xl text-white">💳</span>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Tu Teléfono</label>
-                <input 
-                  type="tel" 
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
-                  placeholder="Ej. 3001234567"
-                  className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500 transition-colors"
-                  required
-                />
-              </div>
-              
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full mt-6 py-4 rounded-xl font-black shadow-lg transition-all hover:-translate-y-1 active:scale-95 flex justify-center items-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0"
-                style={{ backgroundColor: buttonColor, color: "#000" }}
-              >
-                {isLoading ? "Procesando..." : `Confirmar Pedido - ${formatPrice(cartTotal)}`}
-              </button>
-            </form>
+            </div>
+
+            <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight mb-2 text-center">Preparando Pago</h2>
+            <p className="text-gray-500 text-center text-sm mb-10 font-medium">Conectando entorno seguro...</p>
+            
+            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden relative shadow-inner">
+              <div 
+                className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-yellow-300 transition-all duration-75 ease-linear"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <p className="mt-4 font-mono font-black text-yellow-500 text-2xl tracking-widest">{Math.round(progress)}%</p>
           </div>
         </div>
       )}

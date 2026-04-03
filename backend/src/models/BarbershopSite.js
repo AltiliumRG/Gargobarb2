@@ -53,6 +53,19 @@ is_published: {
   type: DataTypes.BOOLEAN,
   defaultValue: false,
 },
+    /* 💳 CONFIGURACIÓN DE PAGO
+       El barbero elige cómo cobrar productos del carrito.
+    */
+    payment_method: {
+      type: DataTypes.ENUM("card", "transfer", "nequi", "efectivo"),
+      allowNull: true,
+      defaultValue: null,
+    },
+    payment_data: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   {
     tableName: "barbershop_sites",

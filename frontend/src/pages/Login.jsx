@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 import api from "../api/api";
@@ -156,8 +156,6 @@ const Login = () => {
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative"
       style={{ backgroundImage: `url(${AuthBackground})` }}
     >
-      <Toaster position="top-center" />
-
       <motion.form
         onSubmit={handleSubmit}
         initial={{ opacity: 0, y: 40 }}

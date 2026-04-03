@@ -124,7 +124,7 @@ function Topbar({ toggleSidebar }) {
    LAYOUT PRINCIPAL PRO
 ============================================================ */
 export default function BarberLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <BarberProvider>
@@ -134,36 +134,44 @@ export default function BarberLayout() {
           {/* FONDO GLOBAL UNIFICADO */}
           <div className="
             h-screen
+            w-full
             flex
             text-white
             overflow-hidden
             bg-[radial-gradient(circle_at_top,_#0f172a_0%,_#0b1220_50%,_#05070f_100%)]
+            relative
           ">
+
+            {/* OVERLAY PARA MÓVIL CUANDO EL SIDEBAR ESTÁ ABIERTO */}
+            {sidebarOpen && (
+              <div 
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[50] lg:hidden"
+                onClick={() => setSidebarOpen(false)}
+              ></div>
+            )}
 
             {/* SIDEBAR */}
             <div className={`
-              transition-all duration-300
-              ${sidebarOpen ? "w-auto" : "w-0 overflow-hidden"}
+              fixed lg:relative
+              top-0 left-0 h-full
+              transition-transform duration-300 ease-in-out z-[60]
+              ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0 lg:w-0"}
+              w-64 lg:w-auto shrink-0
             `}>
-              {sidebarOpen && <BarberSidebar />}
+              <BarberSidebar />
             </div>
 
-            {/* CONTENIDO */}
-            <div className="flex-1 flex flex-col backdrop-blur-sm">
+            {/* CONTENIDO PRINCIPAL */}
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
 
               <Topbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
               {/* CONTENIDO CENTRAL */}
-              <main
-  className="
-    flex-1
-    overflow-auto
-    relative
-    bg-transparent
-  "
->
-  <Outlet />
-</main>
+              <main className="flex-1 overflow-x-hidden overflow-y-auto relative bg-transparent scroll-smooth">
+                <div className="w-full max-w-[1400px] mx-auto min-h-full">
+                  <Outlet />
+                </div>
+              </main>
 
             </div>
 

@@ -3,7 +3,7 @@
 import { createContext, useContext, useState } from "react";
 
 const WizardContext = createContext();
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 3; // 0: Info+Mapa | 1: Pago | 2: Confirmar
 
 export function WizardProvider({ children }) {
 
@@ -28,7 +28,11 @@ export function WizardProvider({ children }) {
     place_id: null,
     formatted_address: "",
 
-    /* ⚙️ Paso 2 — Funcionalidades */
+    /* 💳 Paso 1 — Configuración de Pagos */
+    paymentMethod: null,
+    paymentData: {},
+
+    /* ⚙️ Funcionalidades */
     features: {
       services: true,
       gallery: true,
@@ -36,7 +40,7 @@ export function WizardProvider({ children }) {
       appointments: true,
     },
 
-    /* 🎨 Paso 3 — Diseño */
+    /* 🎨 Paso 2 — Diseño */
     template: "default",
     primaryColor: "#111827",
     secondaryColor: "#facc15",
@@ -54,7 +58,7 @@ export function WizardProvider({ children }) {
   };
 
   // -------------------------------
-  // ✅ VALIDACIÓN PASO 0
+  // ✅ VALIDACIÓN POR PASO
   // -------------------------------
   const isStepValid = () => {
 
@@ -68,6 +72,11 @@ export function WizardProvider({ children }) {
         data.latitude &&
         data.longitude
       );
+    }
+
+    if (step === 1) {
+      // Requiere método de pago seleccionado
+      return !!data.paymentMethod;
     }
 
     return true;
@@ -105,6 +114,8 @@ export function WizardProvider({ children }) {
       longitude: null,
       place_id: null,
       formatted_address: "",
+      paymentMethod: null,
+      paymentData: {},
       features: {
         services: true,
         gallery: true,
@@ -128,6 +139,7 @@ export function WizardProvider({ children }) {
         prevStep,
         resetWizard,
         TOTAL_STEPS,
+        isStepValid,
       }}
     >
       {children}
