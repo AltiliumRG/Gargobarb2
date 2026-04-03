@@ -116,74 +116,96 @@ ${form.message}`
       )}
 
       {/* NAME */}
-      <input
-        placeholder="Nombre completo"
-        value={form.name}
-        onChange={(e) => handleChange("name", e.target.value)}
-        className="
-          w-full p-4 rounded-xl
-          bg-black/40
-          border border-white/10
-          focus:border-yellow-400
-          focus:ring-2 focus:ring-yellow-400/30
-          outline-none transition
-        "
-      />
+      <div className="relative">
+  <input
+    value={form.name}
+    onChange={(e) => handleChange("name", e.target.value)}
+    placeholder=" "
+    className="
+      peer w-full p-4 pt-6 rounded-xl
+      bg-black/30
+      border border-white/10
+      outline-none transition-all
+    "
+    onFocus={(e) => {
+      e.target.style.borderColor = primaryColor;
+    }}
+    onBlur={(e) => {
+      e.target.style.borderColor = "rgba(255,255,255,0.1)";
+    }}
+  />
+  <label className="
+    absolute left-4 top-2 text-xs text-gray-400 transition-all
+    peer-placeholder-shown:top-4
+    peer-placeholder-shown:text-sm
+    peer-placeholder-shown:text-gray-500
+    peer-focus:top-2
+    peer-focus:text-xs
+  ">
+    Nombre completo
+  </label>
+</div>
 
       {/* CLIENT EMAIL */}
-      <input
-        type="email"
-        placeholder="Tu correo electrónico"
-        value={form.userEmail}
-        onChange={(e) => handleChange("userEmail", e.target.value)}
-        className="
-          w-full p-4 rounded-xl
-          bg-black/40
-          border border-white/10
-          focus:border-yellow-400
-          focus:ring-2 focus:ring-yellow-400/30
-          outline-none transition
-        "
-      />
+      <div className="relative">
+  <input
+    type="email"
+    value={form.userEmail}
+    onChange={(e) => handleChange("userEmail", e.target.value)}
+    placeholder=" "
+    className="peer w-full p-4 pt-6 rounded-xl bg-black/30 border border-white/10 outline-none transition-all"
+    onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
+  />
+  <label className="absolute left-4 top-2 text-xs text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs">
+    Tu correo electrónico
+  </label>
+</div>
 
       {/* MESSAGE */}
-      <textarea
-        placeholder="Escribe tu mensaje..."
-        rows={5}
-        value={form.message}
-        onChange={(e) => handleChange("message", e.target.value)}
-        className="
-          w-full p-4 rounded-xl
-          bg-black/40
-          border border-white/10
-          focus:border-yellow-400
-          focus:ring-2 focus:ring-yellow-400/30
-          outline-none transition
-          resize-none
-        "
-      />
+      <div className="relative">
+  <textarea
+    rows={5}
+    value={form.message}
+    onChange={(e) => handleChange("message", e.target.value)}
+    placeholder=" "
+    className="peer w-full p-4 pt-6 rounded-xl bg-black/30 border border-white/10 outline-none transition-all resize-none"
+    onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
+  />
+  <label className="absolute left-4 top-2 text-xs text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs">
+    Escribe tu mensaje
+  </label>
+</div>
 
       {/* BUTTON */}
       <button
-        type="submit"
-        disabled={loading}
-        className="
-          relative w-full py-4 rounded-2xl
-          font-bold text-black
-          transition-all duration-300
-          hover:scale-[1.02]
-          active:scale-95
-          disabled:opacity-50
-        "
-        style={{ background: primaryColor }}
-      >
-        {loading ? "Preparando mensaje..." : "Enviar mensaje"}
+  type="submit"
+  disabled={loading}
+  className="
+    relative w-full py-4 rounded-2xl
+    font-bold text-black
+    transition-all duration-300
+    hover:scale-[1.03]
+    active:scale-95
+    disabled:opacity-50
+    overflow-hidden
+  "
+  style={{ background: primaryColor }}
+>
+  <span className="relative z-10">
+    {loading ? "Preparando mensaje..." : "Enviar mensaje"}
+  </span>
 
-        <div
-          className="absolute inset-0 rounded-2xl blur-xl opacity-30"
-          style={{ background: primaryColor }}
-        />
-      </button>
+  {/* glow */}
+  <div
+    className="absolute inset-0 blur-2xl opacity-40 animate-pulse"
+    style={{ background: primaryColor }}
+  />
+
+  {/* shine */}
+  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 hover:opacity-100 transition" />
+</button>
 
     </form>
   );
@@ -217,43 +239,61 @@ export default function ContactRenderer({
     site?.primary_color || styles.primaryColor || "#facc15";
 
   return (
-    <section style={baseStyle}>
-      <div className="max-w-4xl mx-auto">
+  <section
+    style={{
+      ...baseStyle,
+      background: "transparent",
+    }}
+    className="relative overflow-hidden"
+  >
+    {/* 🔥 GLOW GLOBAL */}
+    <div className="absolute inset-0 pointer-events-none">
+      <div
+        className="w-[700px] h-[700px] blur-[140px] rounded-full absolute left-1/2 -translate-x-1/2 top-10 opacity-20"
+        style={{ background: primaryColor }}
+      />
+    </div>
+
+    <div className="relative max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-start">
+
+      {/* ================= LEFT INFO ================= */}
+      <div className="text-left">
 
         {/* TITLE */}
-        <h2 className="text-4xl font-bold mb-6">
+        <h2 className="text-4xl md:text-5xl font-bold mb-6">
           {title || "Contacto"}
         </h2>
 
         {/* DESCRIPTION */}
         {text && (
-          <p className="opacity-80 mb-8">
+          <p className="opacity-70 mb-8">
             {text}
           </p>
         )}
 
-        {/* INFO BLOCK */}
-        <div className="space-y-2 mb-8">
+        {/* INFO */}
+        <div className="space-y-4 text-sm md:text-base">
+
           {phone && (
-            <p>
-              <strong>Tel:</strong> {phone}
+            <p className="opacity-80">
+              📞 <strong>Tel:</strong> {phone}
             </p>
           )}
 
           {email && (
-            <p>
-              <strong>Email:</strong> {email}
+            <p className="opacity-80">
+              📧 <strong>Email:</strong> {email}
             </p>
           )}
 
           {address && (
-            <p>
-              <strong>Dirección:</strong> {address}
+            <p className="opacity-80">
+              📍 <strong>Dirección:</strong> {address}
             </p>
           )}
         </div>
 
-        {/* CTA BUTTON */}
+        {/* WHATSAPP */}
         {(showWhatsapp || phone) && (
           <a
             href={
@@ -263,7 +303,11 @@ export default function ContactRenderer({
             }
             target="_blank"
             rel="noreferrer"
-            className="inline-block px-6 py-3 rounded-lg font-semibold mb-10"
+            className="
+              inline-block mt-8 px-6 py-3 rounded-xl font-semibold
+              transition-all duration-300
+              hover:scale-105 active:scale-95
+            "
             style={{
               background: primaryColor,
               color: "#000",
@@ -273,31 +317,49 @@ export default function ContactRenderer({
           </a>
         )}
 
-        {/* MAP */}
-        {showMap && address && (
-          <div className="w-full h-72 rounded-xl overflow-hidden shadow-lg mb-10">
-            <iframe
-              title="map"
-              width="100%"
-              height="100%"
-              loading="lazy"
-              style={{ border: 0 }}
-              src={`https://www.google.com/maps?q=${encodeURIComponent(
-                address
-              )}&output=embed`}
-            />
-          </div>
-        )}
-
-        {/* FORM */}
-        
-          {formEnabled && (
-  <ContactForm
-    primaryColor={primaryColor}
-    email={email}
-  />
-)}
       </div>
-    </section>
-  );
+
+      {/* ================= RIGHT FORM ================= */}
+      <div className="relative">
+
+        {/* CARD GLASS */}
+        <div className="
+          backdrop-blur-xl
+          bg-white/5
+          border border-white/10
+          rounded-3xl
+          p-6 md:p-8
+          shadow-2xl
+        ">
+          {formEnabled && (
+            <ContactForm
+              primaryColor={primaryColor}
+              email={email}
+            />
+          )}
+        </div>
+
+      </div>
+
+    </div>
+
+    {/* ================= MAP FULL WIDTH ================= */}
+    {showMap && address && (
+      <div className="max-w-6xl mx-auto mt-16">
+        <div className="w-full h-80 rounded-2xl overflow-hidden border border-white/10 shadow-xl">
+          <iframe
+            title="map"
+            width="100%"
+            height="100%"
+            loading="lazy"
+            style={{ border: 0 }}
+            src={`https://www.google.com/maps?q=${encodeURIComponent(
+              address
+            )}&output=embed`}
+          />
+        </div>
+      </div>
+    )}
+  </section>
+);
 }

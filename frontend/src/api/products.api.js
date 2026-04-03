@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./axios";
 
 // Crear producto
 export const createProduct = async (data) => {

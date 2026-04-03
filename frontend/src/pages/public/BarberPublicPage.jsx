@@ -151,13 +151,18 @@ export default function BarberPublicPage() {
 
       {/* ================= SECCIONES ================= */}
       {sections.map((section) => (
+        
         <div key={section.id} id={section.type}>
           <SectionRendererUniversal
             section={section}
             site={site}
             preview={false}
+            slug={slug}
+            
           />
+          
         </div>
+        
       ))}
 
       {/* ================= FOOTER ================= */}

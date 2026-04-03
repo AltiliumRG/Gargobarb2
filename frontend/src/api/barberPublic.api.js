@@ -3,7 +3,7 @@
 // Endpoints públicos (sin auth)
 // ===============================================
 
-import api from "./api";
+import api from "./axios";
 
 // -----------------------------------------------
 // Obtener barbería pública por slug

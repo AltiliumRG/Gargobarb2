@@ -7,6 +7,7 @@ export default function CartRenderer({ section, content, styles, site, preview }
   const { products: contextProducts } = useBarber();
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
+    const safeContent = content || {};
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -20,8 +21,9 @@ export default function CartRenderer({ section, content, styles, site, preview }
 
   const displayProducts = useMemo(() => {
     // If we have content.items (from DB), map over them and enforce an image fallback.
-    const rawDefaultItems = content?.items !== undefined ? content.items : DEFAULT_PRODUCTS;
-    const defaultItems = rawDefaultItems.map((item, idx) => ({
+const rawDefaultItems = Array.isArray(safeContent.items) && safeContent.items.length > 0
+  ? safeContent.items
+  : DEFAULT_PRODUCTS;    const defaultItems = rawDefaultItems.map((item, idx) => ({
       ...item,
       image: item.image || DEFAULT_PRODUCTS[idx]?.image
     }));
@@ -244,6 +246,9 @@ export default function CartRenderer({ section, content, styles, site, preview }
                 </div>
               ) : (
                 cart.map(item => {
+                  console.log("🧠 CONTENT:", content);
+console.log("🧠 SAFE CONTENT:", safeContent);
+console.log("🧠 PRODUCTS:", displayProducts);
                   return (
                     <div key={item.id} className="flex gap-4 p-4 bg-white dark:bg-gray-800/40 rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-sm hover:shadow-md transition group">
                       <div className="w-20 h-20 bg-gray-100 dark:bg-gray-900 rounded-2xl overflow-hidden flex-shrink-0 relative">

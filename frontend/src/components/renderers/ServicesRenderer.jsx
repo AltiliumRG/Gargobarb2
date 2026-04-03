@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const API_BASE = "http://localhost:4000";
 
-export default function ServicesRenderer({ section }) {
+export default function ServicesRenderer({ section, slug}) {
   const { services } = useBarber();
   const navigate = useNavigate();
 
@@ -76,11 +76,13 @@ export default function ServicesRenderer({ section }) {
                     </span>
 
                     <button
-                      onClick={() =>
-                        navigate(`/checkout/${srv.id}`, {
-                          state: { service: srv }
-                        })
-                      }
+                      onClick={(e) => {
+  e.stopPropagation();
+
+  navigate(`/b/${slug}/book`, {
+    state: { service: srv }
+  });
+}}
                       className="px-5 py-2 text-sm font-semibold rounded-lg bg-yellow-500 text-black hover:bg-yellow-400 transition"
                     >
                       Reservar

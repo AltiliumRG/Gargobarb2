@@ -7,7 +7,7 @@ import { WizardProvider } from "../context/WizardContext";
 import { BuilderProvider } from "../context/BuilderContext";
 
 import { useAuth } from "../auth/AuthContext";
-import api from "../api/api";
+import api from "../api/axios";
 
 /* ============================================================
    TOPBAR PROFESIONAL ULTRA CLEAN

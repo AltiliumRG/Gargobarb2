@@ -40,6 +40,45 @@ const AboutUs = () => {
                     </motion.div>
                 ))}
             </div>
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="mt-20"
+            >
+                <div className="text-center mb-12">
+                    <h2 className="text-4xl font-black uppercase tracking-tighter mb-4">Desarrolladores</h2>
+                    <div className="w-24 h-1.5 bg-yellow-500 mx-auto rounded-full" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    {[
+                        { name: "David Quintero", img: "/David Quintero.jpg", quote: "\"La tecnología es el pincel con el que pintamos el futuro del estilo.\"" },
+                        { name: "Leider Quirama", img: "/Leider Quirama.jpg", quote: "\"Innovar no es solo crear algo nuevo, es mejorar la vida de los demás.\"" },
+                        { name: "Miguel sanchez", img: "/Miguel sanchez.webp", quote: "\"El código es poesía en movimiento que resuelve problemas reales.\"" }
+                    ].map((dev, i) => (
+                        <motion.div
+                            key={i}
+                            whileHover={{ y: -10 }}
+                            className={`p-8 rounded-[3rem] text-center border transition-all ${isClassic ? "bg-zinc-900 border-white/5 hover:border-yellow-500/20" : "bg-white border-gray-100 shadow-xl hover:shadow-2xl"}`}
+                        >
+                            <div className="relative w-40 h-40 mx-auto mb-6">
+                                <div className="absolute inset-0 bg-yellow-500 rounded-full blur-2xl opacity-20 animate-pulse" />
+                                <img
+                                    src={dev.img}
+                                    alt={dev.name}
+                                    className="relative w-full h-full object-cover rounded-full border-4 border-yellow-500 shadow-2xl"
+                                />
+                            </div>
+                            <h3 className="text-2xl font-black mb-2">{dev.name}</h3>
+                            <p className={`text-sm italic leading-relaxed ${isClassic ? "text-gray-400" : "text-gray-600"}`}>
+                                {dev.quote}
+                            </p>
+                        </motion.div>
+                    ))}
+                </div>
+            </motion.div>
         </div>
     );
 };

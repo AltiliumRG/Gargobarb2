@@ -110,7 +110,7 @@
           }
         },
         {
-          "type": "cart",
+          "type": "carrito",
           "order": 7,
           "content": {
             "title": "Carrito de Compras",

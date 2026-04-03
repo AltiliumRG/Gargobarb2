@@ -1,5 +1,5 @@
 import { useAuth } from "../../auth/AuthContext";
-import api from "../../api/api";
+import api from "../../api/axios";
 
 export default function BarberTopbar({ toggleSidebar }) {
   const { user, setUser } = useAuth();

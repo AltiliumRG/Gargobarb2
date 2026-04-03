@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import api from "../../api/axios";
 import { useAuth } from "../../auth/AuthContext";
 import { Pencil, Trash2, Save, PlusCircle, Search, Scissors } from "lucide-react";
 

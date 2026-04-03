@@ -10,7 +10,7 @@ const { User } = require("../models");//modelo de usuario
 // ============================================================
 exports.verifyToken = async (req, res, next) => {
   
-  const token = req.cookies?.access_token;
+const token = req.cookies?.access_token;
 
   //validacion de que haya token
   if (!token) {

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { LogOut, Settings, HelpCircle, Info, Phone } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import api from "../../api/api";
+import api from "../../api/axios";
 
 const Home = () => {
   const { user, logout } = useAuth();

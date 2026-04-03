@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import api from "../../api/api";
+import api from "../../api/axios";
 import toast from "react-hot-toast";
 
 // Modular Sections
@@ -50,12 +50,6 @@ const Settings = () => {
         email: user?.email || "",
     });
 
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-    });
-
     // ============================================================
     // Change Detection
     // ============================================================
@@ -65,14 +59,9 @@ const Settings = () => {
             accountData.full_name !== (user?.full_name || "") ||
             accountData.email !== (user?.email || "");
 
-        const passwordChanged =
-            passwordData.currentPassword !== "" ||
-            passwordData.newPassword !== "" ||
-            passwordData.confirmPassword !== "";
-
         const themeChanged = localTheme !== theme;
 
-        return accountChanged || passwordChanged || themeChanged;
+        return accountChanged || themeChanged;
     };
 
     // ============================================================
@@ -95,7 +84,7 @@ const Settings = () => {
                 setTheme(localTheme);
             }
 
-            // 2. Profile Update
+            // Profile Update
             const accountChanged =
                 accountData.username !== (user?.username || "") ||
                 accountData.full_name !== (user?.full_name || "") ||
@@ -104,18 +93,6 @@ const Settings = () => {
             if (accountChanged) {
                 const res = await api.put("/users/profile", accountData);
                 login(res.data.user);
-            }
-
-            // 3. Password Update
-            if (passwordData.newPassword) {
-                if (passwordData.newPassword !== passwordData.confirmPassword) {
-                    throw new Error("Las contraseñas no coinciden");
-                }
-                await api.put("/auth/update-password", {
-                    currentPassword: passwordData.currentPassword,
-                    newPassword: passwordData.newPassword
-                });
-                setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
             }
 
             toast.success("Todos los cambios guardados correctamente");
@@ -164,8 +141,7 @@ const Settings = () => {
                 return (
                     <SecuritySection 
                         {...commonProps} 
-                        passwordData={passwordData} 
-                        setPasswordData={setPasswordData} 
+                        user={user} 
                     />
                 );
             case "apariencia":
@@ -190,8 +166,8 @@ const Settings = () => {
     };
 
     return (
-        <div className={`min-h-screen transition-colors duration-500 ${isClassic ? "bg-[#0F0F0F] text-white" : "bg-[#F8F6F2] text-[#1C1C1C]"}`}>
-            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row h-screen overflow-hidden">
+        <div className={`min-h-screen transition-colors duration-500 ${isClassic ? "text-white" : "text-[#1C1C1C]"}`}>
+            <div className="w-full mx-auto flex flex-col lg:flex-row h-screen overflow-hidden">
                 
                 {/* SIDEBAR */}
                 <aside className={`

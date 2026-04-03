@@ -14,6 +14,7 @@ const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+
 const { errorHandler } = require("./middleware/error.middleware");
 
 // --- Router Imports ---
@@ -32,7 +33,9 @@ const siteUploadRoutes = require("./routes/siteUpload.routes");
 const availabilityRoutes = require("./routes/availability.routes");
 const productRoutes = require("./routes/product.routes");
 const shoppingCartRoutes = require("./routes/shoppingCart.routes");
+
 const orderRoutes = require("./routes/order.routes");
+
 
 const app = express();
 
@@ -43,7 +46,6 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
   next();
 });
-
 app.use(
   helmet({
     crossOriginOpenerPolicy: false,
@@ -68,7 +70,7 @@ app.use(
     credentials: true,
   })
 );
-
+app.use("/api/stats", statsRoutes);
 // --- Rate Limiting Strategy ---
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -79,7 +81,7 @@ const globalLimiter = rateLimit({
 // Google Login needs a more relaxed limit to avoid inter-app communication issues
 const googleLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 50, 
+  max: 50,
 });
 
 app.use((req, res, next) => {
@@ -92,8 +94,8 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // --- API Health Check ---
 app.get("/api/health", (req, res) => {
-  res.json({ 
-    ok: true, 
+  res.json({
+    ok: true,
     status: "API is healthy and running 🚀",
     timestamp: new Date().toISOString()
   });
@@ -108,7 +110,7 @@ app.use("/api/barbershops", barbershopRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/b", barberPublicRoutes); // Short URL for public sites
-app.use("/api/upload", uploadRoutes);
+app.use("/api/uploads", uploadRoutes);
 app.use("/api/uploads", siteUploadRoutes);
 app.use("/api/sites", siteRoutes);
 app.use("/api/sales", saleRoutes);

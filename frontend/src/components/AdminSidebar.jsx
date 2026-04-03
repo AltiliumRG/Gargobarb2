@@ -13,7 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
-import api from "../api/api";
+import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 
 const menuItems = [

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api from "../../api/api";
+import api from "../../api/axios";
 import { getAllUsers } from "../../api/admin.api";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, Edit, Trash2, Search, Users, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";

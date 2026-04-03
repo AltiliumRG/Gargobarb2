@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./axios";
 
 export const uploadSiteImage = (file) => {
   const formData = new FormData();

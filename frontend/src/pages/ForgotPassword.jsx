@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { Mail, KeyRound, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import api from "../api/api";
+import api from "../api/axios";
 import { getPasswordStatus } from "../utils/auth.validate";
 
 const AuthBackground = "/AuthBackground.jpg";

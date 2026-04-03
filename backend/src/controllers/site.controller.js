@@ -15,7 +15,7 @@ const slugify = require("../utils/slugify");
 exports.createSiteForBarbershop = async (req, res) => {
   try {
     const { barbershopId } = req.params;
-
+    
     const barbershop = await Barbershop.findByPk(barbershopId);
     if (!barbershop) {
       return res.status(404).json({ error: "Barbería no encontrada" });

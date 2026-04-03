@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { UserPlus, Trash2, Edit3, Search } from "lucide-react";
-import api from "../../api/api";
+import api from "../../api/axios";
 
 const ManageClients = () => {
   const [owners, setOwners] = useState([]);
