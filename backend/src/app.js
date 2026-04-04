@@ -33,7 +33,7 @@ const siteUploadRoutes = require("./routes/siteUpload.routes");
 const availabilityRoutes = require("./routes/availability.routes");
 const productRoutes = require("./routes/product.routes");
 const shoppingCartRoutes = require("./routes/shoppingCart.routes");
-
+const statsRoutes = require("./routes/stats.routes");
 const orderRoutes = require("./routes/order.routes");
 
 

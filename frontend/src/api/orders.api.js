@@ -3,7 +3,7 @@
 // Endpoints de ÓRDENES / COMPRAS
 // ===============================================
 
-import api from "./api";
+import api from "./axios";
 
 // -----------------------------------------------
 // Crear orden (pública — desde el checkout del cliente)
