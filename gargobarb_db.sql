@@ -129,6 +129,9 @@ CREATE TABLE IF NOT EXISTS barbershop_sites (
     status ENUM('draft', 'published') DEFAULT 'draft',
     is_visible BOOLEAN DEFAULT TRUE,
     is_published BOOLEAN DEFAULT FALSE,
+    -- 💳 CONFIGURACIÓN DE PAGO (wizard paso 1)
+    payment_method ENUM('card', 'transfer', 'nequi', 'efectivo') DEFAULT NULL,
+    payment_data JSON DEFAULT NULL,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (barbershop_id) REFERENCES barbershops(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -212,6 +215,27 @@ CREATE TABLE IF NOT EXISTS sales (
 
 -- Reactivar llaves foráneas
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- 11. TABLA DE ÓRDENES / COMPRAS (orders)
+--     Registra cada compra del carrito hecha por un cliente.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS orders (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    site_id BIGINT UNSIGNED NOT NULL,
+    client_name VARCHAR(255) NOT NULL,
+    client_email VARCHAR(255) DEFAULT NULL,
+    client_phone VARCHAR(50) DEFAULT NULL,
+    items JSON NOT NULL,
+    total DECIMAL(12, 2) NOT NULL,
+    payment_method ENUM('card', 'transfer', 'nequi', 'efectivo') NOT NULL,
+    transaction_ref VARCHAR(100) DEFAULT NULL,
+    status ENUM('pending', 'completed', 'cancelled', 'refunded') DEFAULT 'completed',
+    notes TEXT DEFAULT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (site_id) REFERENCES barbershop_sites(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- ============================================================
 -- 🧪 DATOS DE PRUEBA (Test Data)

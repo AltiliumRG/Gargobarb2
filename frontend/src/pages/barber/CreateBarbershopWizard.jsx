@@ -1,11 +1,18 @@
 import { useEffect } from "react";
 import { useWizard } from "../../context/WizardContext";
 import StepBasicInfo from "../../components/wizard/StepBasicInfo";
+import StepPayment from "../../components/wizard/StepPayment";
 import StepDesign from "../../components/wizard/StepDesign";
 import StepConfirm from "../../components/wizard/StepConfirm";
 
+const STEP_LABELS = [
+  { label: "Ubicación", icon: "📍" },
+  { label: "Pagos",     icon: "💳" },
+  { label: "Confirmar", icon: "✅" },
+];
+
 function WizardSteps() {
-  const { step, nextStep, prevStep, TOTAL_STEPS, resetWizard } = useWizard();
+  const { step, nextStep, prevStep, TOTAL_STEPS, resetWizard, isStepValid } = useWizard();
 
   useEffect(() => {
     resetWizard();
@@ -15,7 +22,7 @@ function WizardSteps() {
   const renderStep = () => {
     switch (step) {
       case 0: return <StepBasicInfo />;
-      case 1: return <StepDesign />;
+      case 1: return <StepPayment />;
       case 2: return <StepConfirm />;
       default: return null;
     }
@@ -23,13 +30,36 @@ function WizardSteps() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-6 w-full">
-      <div className="flex mb-8">
+      {/* Progress Bar */}
+      <div className="flex mb-3">
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <div
             key={i}
-            className={`flex-1 h-2 mx-1 rounded-full ${i <= step ? "bg-yellow-500" : "bg-gray-700"
-              }`}
+            className={`flex-1 h-1.5 mx-1 rounded-full transition-all duration-500 ${
+              i <= step ? "bg-yellow-500" : "bg-gray-700"
+            }`}
           />
+        ))}
+      </div>
+
+      {/* Step Labels */}
+      <div className="flex mb-8">
+        {STEP_LABELS.map((s, i) => (
+          <div
+            key={i}
+            className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 ${
+              i === step ? "opacity-100" : i < step ? "opacity-60" : "opacity-25"
+            }`}
+          >
+            <span className="text-xs">{s.icon}</span>
+            <span
+              className={`text-[9px] uppercase tracking-widest font-black ${
+                i === step ? "text-yellow-400" : "text-gray-500"
+              }`}
+            >
+              {s.label}
+            </span>
+          </div>
         ))}
       </div>
 
@@ -48,7 +78,8 @@ function WizardSteps() {
         {step < TOTAL_STEPS - 1 && (
           <button
             onClick={nextStep}
-            className="px-8 py-2 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-all shadow-lg"
+            disabled={!isStepValid()}
+            className="px-8 py-2 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Siguiente
           </button>

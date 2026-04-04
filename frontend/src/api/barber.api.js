@@ -46,3 +46,11 @@ export const updateBarbershop = (id, data) => {
 export const deleteBarbershop = (id) => {
   return api.delete(`/barbershops/${id}`);
 };
+
+// -----------------------------------------------
+// 💳 Guardar configuración de pago de la barbería
+// PUT /api/barbershops/:id/payment
+// -----------------------------------------------
+export const updatePaymentConfig = (barbershopId, data) => {
+  return api.put(`/barbershops/${barbershopId}/payment`, data);
+};

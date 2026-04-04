@@ -34,6 +34,9 @@ const availabilityRoutes = require("./routes/availability.routes");
 const productRoutes = require("./routes/product.routes");
 const shoppingCartRoutes = require("./routes/shoppingCart.routes");
 const statsRoutes = require("./routes/stats.routes");
+const orderRoutes = require("./routes/order.routes");
+
+
 const app = express();
 
 // --- Security & Policy Headers ---
@@ -78,7 +81,7 @@ const globalLimiter = rateLimit({
 // Google Login needs a more relaxed limit to avoid inter-app communication issues
 const googleLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 50, 
+  max: 50,
 });
 
 app.use((req, res, next) => {
@@ -91,8 +94,8 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // --- API Health Check ---
 app.get("/api/health", (req, res) => {
-  res.json({ 
-    ok: true, 
+  res.json({
+    ok: true,
     status: "API is healthy and running 🚀",
     timestamp: new Date().toISOString()
   });
@@ -107,7 +110,7 @@ app.use("/api/barbershops", barbershopRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/b", barberPublicRoutes); // Short URL for public sites
-app.use("/api/uploads", uploadRoutes); 
+app.use("/api/uploads", uploadRoutes);
 app.use("/api/uploads", siteUploadRoutes);
 app.use("/api/sites", siteRoutes);
 app.use("/api/sales", saleRoutes);
@@ -117,6 +120,7 @@ app.use("/api/dashboard", require("./modules/dashboard/dashboard.routes"));
 app.use("/api/templates", require("./routes/template.routes"));
 app.use("/api/products", productRoutes);
 app.use("/api/shopping-carts", shoppingCartRoutes);
+app.use("/api/orders", orderRoutes);
 
 // --- Global Error Handling ---
 app.use(errorHandler);

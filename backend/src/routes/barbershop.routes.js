@@ -93,6 +93,15 @@ router.post(
   barbershopController.saveSchedules
 );
 
+/* ============================================================
+   💳 CONFIGURACIÓN DE PAGO
+============================================================ */
+router.put(
+  "/:id/payment",
+  requireRole(1, 2),
+  barbershopController.updatePaymentConfig
+);
+
 // Ruta redundante eliminada
 
 module.exports = router;

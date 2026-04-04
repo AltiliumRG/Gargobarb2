@@ -9,7 +9,7 @@ export default function BarberPublicPage() {
 
   const [site, setSite] = useState(null);
 
-  const { setServices, setActiveBarbershop } = useBarber();
+  const { setServices, setActiveBarbershop, setProducts } = useBarber();
 
   /* ===============================
      CARGAR SITIO POR SLUG
@@ -46,6 +46,17 @@ export default function BarberPublicPage() {
 
           } catch (err) {
             console.error("Error cargando servicios:", err);
+          }
+
+          try {
+            const productsRes = await fetch(
+              `http://localhost:4000/api/products/barbershop/${siteData.barbershop_id}`
+            );
+            const productsData = await productsRes.json();
+            console.log("PRODUCTS API:", productsData);
+            setProducts(Array.isArray(productsData) ? productsData : []);
+          } catch (err) {
+            console.error("Error cargando productos:", err);
           }
 
         }

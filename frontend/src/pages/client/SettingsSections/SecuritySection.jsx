@@ -5,16 +5,16 @@ import toast from "react-hot-toast";
 import api from "../../../api/axios";
 import { getPasswordStatus } from "../../../utils/auth.validate";
 
-export default function SecuritySection({ 
+export default function SecuritySection({
     user,
-    handleBack, 
-    isClassic 
+    handleBack,
+    isClassic
 }) {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    
+
     const [form, setForm] = useState({
         code: "",
         newPassword: "",
@@ -83,8 +83,8 @@ export default function SecuritySection({
             <div>
                 <h2 className="text-2xl font-bold mb-1">Seguridad y Contraseña</h2>
                 <p className={isClassic ? "text-gray-400" : "text-gray-500"}>
-                    {step === 1 
-                        ? "Te enviaremos un código de seguridad a tu correo para verificar tu identidad y permitirte establecer una nueva contraseña." 
+                    {step === 1
+                        ? "Te enviaremos un código de seguridad a tu correo para verificar tu identidad y permitirte establecer una nueva contraseña."
                         : "Ingresa el código de 6 dígitos que enviamos a tu correo y tu nueva contraseña."}
                 </p>
             </div>
