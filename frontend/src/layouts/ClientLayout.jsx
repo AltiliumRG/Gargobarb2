@@ -16,7 +16,7 @@ const ClientLayout = () => {
   return (
     <div
       className={`min-h-screen transition-colors duration-500 bg-cover bg-center bg-fixed relative ${isClassic ? "text-white" : "text-[#1C1C1C]"}`}
-      style={{ backgroundImage: `url('/barber-shop-background-zwpfeo9qfr3kalod.jpg')` }}
+      style={{ backgroundImage: `url('/barbershopwallpaper.jpg')` }}
     >
       <div className={`absolute inset-0 z-0 ${isClassic ? "bg-[#0F0F0F]/85" : "bg-[#F8F6F2]/85"} backdrop-blur-sm pointer-events-none`}></div>
       <div className="relative z-10 min-h-screen flex flex-col">

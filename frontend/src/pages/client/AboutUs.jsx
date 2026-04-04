@@ -54,9 +54,9 @@ const AboutUs = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     {[
-                        { name: "David Quintero", img: "/David Quintero.jpg", quote: "\"La tecnología es el pincel con el que pintamos el futuro del estilo.\"" },
-                        { name: "Leider Quirama", img: "/Leider Quirama.jpg", quote: "\"Innovar no es solo crear algo nuevo, es mejorar la vida de los demás.\"" },
-                        { name: "Miguel sanchez", img: "/Miguel sanchez.webp", quote: "\"El código es poesía en movimiento que resuelve problemas reales.\"" }
+                        { name: "David Quintero", img: "/David Quintero.jpeg", quote: "\"La tecnología es el pincel con el que pintamos el futuro del estilo.\"" },
+                        { name: "Leider Quirama", img: "/Leider Quirama.jpeg", quote: "\"Innovar no es solo crear algo nuevo, es mejorar la vida de los demás.\"" },
+                        { name: "Miguel sanchez", img: "/Miguel Sanchez.jpeg", quote: "\"El código es poesía en movimiento que resuelve problemas reales.\"" }
                     ].map((dev, i) => (
                         <motion.div
                             key={i}

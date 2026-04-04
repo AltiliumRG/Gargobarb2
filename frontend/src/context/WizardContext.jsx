@@ -1,6 +1,7 @@
 // frontend/src/context/WizardContext.jsx
 
 import { createContext, useContext, useState } from "react";
+import toast from "react-hot-toast";
 
 const WizardContext = createContext();
 const TOTAL_STEPS = 3;
@@ -77,7 +78,25 @@ export function WizardProvider({ children }) {
   // ➡️ NEXT
   // -------------------------------
   const nextStep = () => {
-    if (!isStepValid()) return;
+    console.log("➡️ Intentando avanzar desde paso:", step);
+    console.log("📍 Datos actuales:", data);
+
+    if (step === 0) {
+      if (!data.name) {
+        console.warn("❌ Falta nombre");
+        return toast.error("El nombre del negocio es obligatorio.");
+      }
+      if (!data.department || !data.city) {
+        console.warn("❌ Falta ubicación (Depto/Ciudad)");
+        return toast.error("Selecciona departamento y ciudad.");
+      }
+      if (!data.address || !data.latitude || !data.longitude) {
+        console.warn("❌ Falta dirección/coordenadas", { address: data.address, lat: data.latitude, lng: data.longitude });
+        return toast.error("Debes seleccionar una ubicación válida en el mapa.");
+      }
+    }
+
+    console.log("✅ Validación exitosa. Pasando al paso:", step + 1);
     if (step < TOTAL_STEPS - 1) setStep(step + 1);
   };
 

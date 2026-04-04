@@ -17,7 +17,12 @@ export default function Toolbar() {
   const selectedSection = sections.find(
     (s) => s.id === selectedSectionId
   );
+  // 🔥 CONTROL DE SECCIONES ÚNICAS
+const SINGLE_SECTIONS = ["hero", "contact", "testimonials"];
 
+const hasSection = (type) => {
+  return sections.some((s) => s.type === type);
+};
   return (
     <aside className="h-full flex flex-col text-white bg-gradient-to-b from-[#0f141a] to-[#0b0f14] border-r border-gray-800">
 
@@ -84,43 +89,85 @@ export default function Toolbar() {
   <Block
     title="Hero"
     desc="Imagen principal destacada"
-    onClick={() => addSection("hero")}
+    onClick={() => {
+    if (hasSection("hero")) {
+      toast("⚠️ Solo puedes tener un Hero");
+      return;
+    }
+    addSection("hero");
+  }}
   />
 
   <Block
     title="Servicios"
     desc="Lista de servicios y precios"
-    onClick={() => addSection("services")}
+    onClick={() => {
+    if (hasSection("services")) {
+      toast("⚠️ Solo puedes tener un Servicios");
+      return;
+    }
+    addSection("services");
+  }}
   />
 
   <Block
     title="Galería"
     desc="Trabajos realizados"
-    onClick={() => addSection("gallery")}
+    onClick={() => {
+    if (hasSection("gallery")) {
+      toast("⚠️ Solo puedes tener un Galería");
+      return;
+    }
+    addSection("gallery");
+  }}
   />
 
   <Block
     title="Sobre nosotros"
     desc="Información institucional"
-    onClick={() => addSection("about")}
+    onClick={() => {
+    if (hasSection("about")) {
+      toast("⚠️ Solo puedes tener un Sobre nosotros");
+      return;
+    }
+    addSection("about");
+  }}
   />
 
   <Block
     title="Testimonios"
     desc="Opiniones de clientes"
-    onClick={() => addSection("testimonials")}
+    onClick={() => {
+    if (hasSection("testimonials")) {
+      toast("⚠️ Solo puedes tener un Testimonios");
+      return;
+    }
+    addSection("testimonials");
+  }}
   />
 
   <Block
     title="Contacto"
     desc="Formulario y WhatsApp"
-    onClick={() => addSection("contact")}
+    onClick={() => {
+    if (hasSection("contact")) {
+      toast("⚠️ Solo puedes tener un Contacto");
+      return;
+    }
+    addSection("contact");
+  }}
   />
 
   <Block
     title="Carrito"
     desc="Catálogo y compras"
-    onClick={() => addSection("cart")}
+    onClick={() => {
+    if (hasSection("carrito")) {
+      toast("⚠️ Solo puedes tener un Carrito");
+      return;
+    }
+    addSection("carrito");
+  }}
   />
 
 </div>

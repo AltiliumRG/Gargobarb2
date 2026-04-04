@@ -120,7 +120,7 @@ export default function PropertiesPanel() {
         return <GalleryEditor {...commonProps} />;
       case "contact":
         return <ContactEditor {...commonProps} />;
-      case "cart":
+      case "carrito":
         return (
           <CartEditor 
             {...commonProps} 

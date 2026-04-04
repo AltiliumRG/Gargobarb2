@@ -1,4 +1,4 @@
-import axios from "./api"; // Use the more robust instance with refresh logic
+import axios from "./axios"; // Use the more robust instance with refresh logic
 
 export const getServicesByBarbershop = (barbershopId) =>
   axios.get(`/services/barbershop/${barbershopId}`);

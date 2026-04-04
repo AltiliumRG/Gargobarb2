@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
-import api from "../api/api";
+import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 const AuthBackground = "/AuthBackground.jpg";
 

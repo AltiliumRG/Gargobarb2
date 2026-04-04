@@ -14,6 +14,7 @@ const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+
 const { errorHandler } = require("./middleware/error.middleware");
 
 // --- Router Imports ---
@@ -32,7 +33,7 @@ const siteUploadRoutes = require("./routes/siteUpload.routes");
 const availabilityRoutes = require("./routes/availability.routes");
 const productRoutes = require("./routes/product.routes");
 const shoppingCartRoutes = require("./routes/shoppingCart.routes");
-
+const statsRoutes = require("./routes/stats.routes");
 const app = express();
 
 // --- Security & Policy Headers ---
@@ -42,7 +43,6 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
   next();
 });
-
 app.use(
   helmet({
     crossOriginOpenerPolicy: false,
@@ -67,7 +67,7 @@ app.use(
     credentials: true,
   })
 );
-
+app.use("/api/stats", statsRoutes);
 // --- Rate Limiting Strategy ---
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -107,7 +107,7 @@ app.use("/api/barbershops", barbershopRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/b", barberPublicRoutes); // Short URL for public sites
-app.use("/api/upload", uploadRoutes);
+app.use("/api/uploads", uploadRoutes); 
 app.use("/api/uploads", siteUploadRoutes);
 app.use("/api/sites", siteRoutes);
 app.use("/api/sales", saleRoutes);

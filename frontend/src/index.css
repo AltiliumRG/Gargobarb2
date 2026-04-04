@@ -85,3 +85,30 @@
 .react-calendar__tile:disabled {
   opacity: 0.25;
 }
+.card {
+  background: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+}
+
+.title {
+  color: #facc15;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.btn-yellow {
+  background: #facc15;
+  color: black;
+  padding: 8px 16px;
+  border-radius: 10px;
+}
+
+.btn-green {
+  background: #22c55e;
+  color: black;
+  padding: 8px 16px;
+  border-radius: 10px;
+}

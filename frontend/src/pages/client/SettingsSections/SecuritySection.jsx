@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Save, Lock, KeyRound, Eye, EyeOff, Send, Mail } from "lucide-react";
 import toast from "react-hot-toast";
-import api from "../../../api/api";
+import api from "../../../api/axios";
 import { getPasswordStatus } from "../../../utils/auth.validate";
 
 export default function SecuritySection({ 

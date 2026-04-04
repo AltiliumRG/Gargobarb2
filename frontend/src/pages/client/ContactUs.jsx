@@ -14,9 +14,10 @@ const ContactUs = () => {
         const formData = new FormData(e.target);
         const name = formData.get("name");
         const email = formData.get("email");
+        const userSubject = formData.get("subject");
         const message = formData.get("message");
 
-        const subject = encodeURIComponent(`Mensaje de contacto de ${name}`);
+        const subject = encodeURIComponent(`${userSubject} - de ${name}`);
         const body = encodeURIComponent(`Nombre: ${name}\nCorreo: ${email}\n\nMensaje:\n${message}`);
         
         // Gmail web compose URL
@@ -66,6 +67,17 @@ const ContactUs = () => {
                             />
                         </div>
                     </div>
+
+                    <div>
+                        <label className="block text-xs font-black text-[#C6A75E] uppercase tracking-widest mb-3">Asunto</label>
+                        <input
+                            name="subject"
+                            required
+                            className={`w-full p-5 rounded-2xl border transition-all outline-none focus:ring-2 focus:ring-yellow-500/50 ${isClassic ? "bg-zinc-900 border-white/5 text-white" : "bg-white border-gray-200"}`}
+                            placeholder="¿De qué trata tu mensaje?"
+                        />
+                    </div>
+
                     <div>
                         <label className="block text-xs font-black text-[#C6A75E] uppercase tracking-widest mb-3">Tu Mensaje</label>
                         <textarea
@@ -77,6 +89,7 @@ const ContactUs = () => {
                         />
                     </div>
                     <button
+                        type="submit"
                         className={`w-full py-6 rounded-2xl font-black uppercase tracking-widest shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3 bg-yellow-500 hover:bg-yellow-400 text-black shadow-yellow-500/20`}
                     >
                         Abrir en Gmail <Send size={20} />

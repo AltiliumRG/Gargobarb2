@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../api/api";
+import api from "../../api/axios";
 
 export default function MyBarbershop() {
   const [data, setData] = useState(null);
