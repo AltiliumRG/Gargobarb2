@@ -45,7 +45,8 @@ export default function AboutEditor({
     formData.append("avatar", file);
 
     try {
-      const res = await fetch("http://localhost:4000/api/uploads/avatar", {
+      // Usamos ruta relativa para aprovechar el proxy de Vite
+      const res = await fetch("/api/uploads/avatar", {
         method: "POST",
         credentials: "include",
         body: formData,

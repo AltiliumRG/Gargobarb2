@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyBarbershops, deleteBarbershop } from "../../api/barber.api";
-import { Trash2, Edit, Layout } from "lucide-react";
+import { Trash2, Edit, Layout, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function MyBarbershops() {
@@ -62,6 +62,14 @@ export default function MyBarbershops() {
                 >
                   <Edit size={16} />
                   Editar sitio
+                </button>
+
+                <button
+                  onClick={() => navigate(`/barber/dashboard/${shop.id}/schedule`)}
+                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 border border-white/5"
+                >
+                  <Clock size={16} />
+                  Horarios
                 </button>
 
                 <button

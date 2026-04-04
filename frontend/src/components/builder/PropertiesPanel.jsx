@@ -33,7 +33,6 @@ export default function PropertiesPanel() {
   const { activeBarbershop, services, setServices, products, setProducts } = useBarber();
   const [loadingServices, setLoadingServices] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [savingId, setSavingId] = useState(null);
 
   // Load services if a barbershop is active
   useEffect(() => {
@@ -128,8 +127,6 @@ export default function PropertiesPanel() {
             products={products} 
             setProducts={setProducts} 
             loadingProducts={loadingProducts}
-            savingId={savingId}
-            setSavingId={setSavingId}
           />
         );
       default:

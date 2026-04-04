@@ -4,9 +4,9 @@ import BarberSidebar from "../components/barber/BarberSidebar";
 
 import { BarberProvider } from "../context/BarberContext";
 import { WizardProvider } from "../context/WizardContext";
-import { BuilderProvider } from "../context/BuilderContext";
-
+import { BuilderProvider, useBuilder } from "../context/BuilderContext";
 import { useAuth } from "../auth/AuthContext";
+import { handleVerWeb as verWebAction } from "../features/ver-web/verWebHandler";
 import { Menu, Eye, Bell } from "lucide-react";
 
 /* ============================================================
@@ -15,14 +15,13 @@ import { Menu, Eye, Bell } from "lucide-react";
 function Topbar({ toggleSidebar }) {
   const { user } = useAuth();
   const location = useLocation();
+  const { site, pages } = useBuilder();
 
   const match = location.pathname.match(/(\d+)/);
   const siteId = match ? match[1] : null;
 
-  /* ── "Ver Web" queda preparada: la navegación real
-     la conectará el compañero desde /barber/preview/:id ── */
   const handleVerWeb = () => {
-    /* TODO: conectar la ruta pública del sitio */
+    verWebAction(site, pages);
   };
 
   return (

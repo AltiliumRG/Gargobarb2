@@ -149,12 +149,8 @@ function BuilderContent() {
 }
 
 /* ============================================================
-   PROVIDER PRINCIPAL
+   EXPORT PRINCIPAL (Ya envuelto en layout)
 ============================================================ */
 export default function Builder() {
-  return (
-    <BuilderProvider>
-      <BuilderContent />
-    </BuilderProvider>
-  );
+  return <BuilderContent />;
 }

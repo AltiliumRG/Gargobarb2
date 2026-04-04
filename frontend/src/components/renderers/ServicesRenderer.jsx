@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { useBarber } from "../../context/BarberContext";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = "http://localhost:4000";
+// Usamos una cadena vacía para que las rutas sean relativas y aprovechen el proxy de Vite
+const API_BASE = "";
 
 export default function ServicesRenderer({ section, slug}) {
   const { services } = useBarber();

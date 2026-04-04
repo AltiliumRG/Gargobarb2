@@ -13,9 +13,9 @@ export default function CartRenderer({ section, content, styles, site, preview }
   const [progress, setProgress] = useState(0);
 
   const DEFAULT_PRODUCTS = [
-    { id: 'def1', name: 'Cera Fijadora Profesional', price: 15000, description: 'Cera de alta fijación con acabado mate.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
-    { id: 'def2', name: 'Aceite para barba', price: 20000, description: 'Aceite hidratante de argán para suavizar la barba.', image: 'http://localhost:4000/uploads/Default/product1.jpg' },
-    { id: 'def3', name: 'Loción Aftershave', price: 12500, description: 'Refresca y calma la piel después del afeitado.', image: 'http://localhost:4000/uploads/Default/product1.jpg' }
+    { id: 'def1', name: 'Cera Fijadora Profesional', price: 15000, description: 'Cera de alta fijación con acabado mate.', image: '/uploads/Default/product1.jpg' },
+    { id: 'def2', name: 'Aceite para barba', price: 20000, description: 'Aceite hidratante de argán para suavizar la barba.', image: '/uploads/Default/product1.jpg' },
+    { id: 'def3', name: 'Loción Aftershave', price: 12500, description: 'Refresca y calma la piel después del afeitado.', image: '/uploads/Default/product1.jpg' }
   ];
 
 

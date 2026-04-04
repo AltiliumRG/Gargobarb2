@@ -1,25 +1,25 @@
 /**
  * verWebHandler.js
  * ──────────────────────────────────────────────────────
- * Aquí va la función que tu compañero completará.
- * Esta función será importada en BarberLayout.jsx para
- * hacer funcional el botón "Ver Web" del panel barbero.
- *
- * INSTRUCCIONES PARA EL COMPAÑERO:
- *  1. Completa la función handleVerWeb() abajo.
- *  2. Importa esta función en:
- *     frontend/src/layouts/BarberLayout.jsx
- *  3. Reemplaza el handleVerWeb() local del Topbar con esta.
- *
- * EJEMPLO DE IMPLEMENTACIÓN:
- *
- *   export function handleVerWeb(navigate, siteSlug) {
- *     if (!siteSlug) return;
- *     window.open(`/b/${siteSlug}`, "_blank");
- *   }
+ * Manejador para el botón "Ver Web" del panel barbero.
+ * Permite una previsualización en tiempo real con cambios no guardados.
  */
 
-// TODO: completar implementación
-export function handleVerWeb(navigate, siteId) {
-  // Tu implementación aquí
+export function handleVerWeb(site, pages) {
+  if (!site || !site.id) return;
+
+  // 1. Guardar estado actual en localStorage para la previsualización "en vivo"
+  const previewData = {
+    site,
+    pages
+  };
+
+  try {
+    localStorage.setItem(`gargobarb_preview_${site.id}`, JSON.stringify(previewData));
+    
+    // 2. Abrir la ruta de previsualización en una pestaña nueva
+    window.open(`/barber/preview/${site.id}`, "_blank");
+  } catch (err) {
+    console.error("Error al generar previsualización:", err);
+  }
 }

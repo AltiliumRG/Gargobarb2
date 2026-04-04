@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import barberPublicApi from "../../api/barberPublic.api";
 import SectionRendererUniversal from "../../components/renderers/SectionRendererUniversal";
 import { useBarber } from "../../context/BarberContext";
@@ -35,7 +36,7 @@ export default function BarberPublicPage() {
 
           try {
             const servicesRes = await fetch(
-              `http://localhost:4000/api/services/barbershop/${siteData.barbershop_id}`
+              `/api/services/barbershop/${siteData.barbershop_id}`
             );
 
             const servicesData = await servicesRes.json();
@@ -50,7 +51,7 @@ export default function BarberPublicPage() {
 
           try {
             const productsRes = await fetch(
-              `http://localhost:4000/api/products/barbershop/${siteData.barbershop_id}`
+              `/api/products/barbershop/${siteData.barbershop_id}`
             );
             const productsData = await productsRes.json();
             console.log("PRODUCTS API:", productsData);
@@ -63,7 +64,7 @@ export default function BarberPublicPage() {
 
         // registrar visita
         fetch(
-          `http://localhost:4000/api/barbershops/public/${slug}/visit`,
+          `/api/barbershops/public/${slug}/visit`,
           { method: "POST" }
         );
 
@@ -121,8 +122,17 @@ export default function BarberPublicPage() {
     >
       {/* ================= NAVBAR ================= */}
       <nav className="w-full bg-black/80 backdrop-blur text-white py-4 px-8 flex items-center justify-between shadow-lg sticky top-0 z-50">
-        <div className="text-xl font-bold tracking-wide">
-          {site.name || "Mi Barbería"}
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-full hover:bg-white/10 transition-all active:scale-90 text-yellow-400 border border-yellow-400/20"
+            title="Volver"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="text-xl font-bold tracking-wide">
+            {site.name || "Mi Barbería"}
+          </div>
         </div>
 
         <div className="flex gap-8 text-sm font-medium">

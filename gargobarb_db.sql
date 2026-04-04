@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS site_pages (
 CREATE TABLE IF NOT EXISTS site_sections (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     page_id BIGINT UNSIGNED NOT NULL,
-    type ENUM('hero', 'services', 'gallery', 'about', 'testimonials', 'contact', 'cart', 'custom') NOT NULL,
+    type ENUM('hero', 'services', 'gallery', 'about', 'testimonials', 'contact', 'carrito', 'custom') NOT NULL,
     order_index INT DEFAULT 0,
     content JSON NOT NULL,
     styles JSON,

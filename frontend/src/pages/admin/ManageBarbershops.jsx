@@ -12,8 +12,9 @@ const ManageBarbershops = () => {
   const [owners, setOwners] = useState([]);
   const [search, setSearch] = useState("");
 
-  const API = "http://localhost:4000/api/barbershops";
-  const USERS_API = "http://localhost:4000/api/users";
+  // Usamos rutas relativas para aprovechar el proxy de Vite
+  const API = "/api/barbershops";
+  const USERS_API = "/api/users";
 
   // ✅ Verificación inicial
   useEffect(() => {

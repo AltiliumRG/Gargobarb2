@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
 import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const BuilderContext = createContext();
 
@@ -294,6 +295,15 @@ const res = await api.post("/sites/builder/save", {
     if (!site?.id) return false;
 
     try {
+      // 🕵️ GUARD: Verificar si hay horarios configurados
+      const scheduleRes = await api.get(`/barbershops/${site.barbershop_id}/schedules`);
+      const schedules = scheduleRes.data || [];
+
+      if (schedules.length === 0) {
+        toast.error("No puedes publicar el sitio sin configurar los horarios de atención primero.");
+        return false;
+      }
+
       // Auto-save draft before publishing to ensure section UI state persists
       const savedOk = await saveDraft();
       if (!savedOk) return false;
@@ -302,12 +312,14 @@ const res = await api.post("/sites/builder/save", {
 
       if (res.status === 200) {
         setSite((prev) => ({ ...prev, is_published: true }));
+        toast.success("¡Sitio publicado con éxito! 🎉");
         return true;
       }
 
       return false;
     } catch (err) {
       console.error("❌ Error publishing:", err);
+      toast.error("Ocurrió un error al intentar publicar.");
       return false;
     }
   };

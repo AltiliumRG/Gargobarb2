@@ -8,6 +8,28 @@ export default function Preview() {
   const [site, setSite] = useState(null);
 
   useEffect(() => {
+    if (!siteId) return;
+
+    // 1. Intentar cargar desde localStorage (Previsualización "En Vivo")
+    const localData = localStorage.getItem(`gargobarb_preview_${siteId}`);
+
+    if (localData) {
+      try {
+        const parsed = JSON.parse(localData);
+        setSite({
+          ...parsed.site,
+          pages: parsed.pages
+        });
+
+        // Limpiar para que la próxima vez cargue lo nuevo
+        localStorage.removeItem(`gargobarb_preview_${siteId}`);
+        return;
+      } catch (err) {
+        console.error("Error parseando preview data:", err);
+      }
+    }
+
+    // 2. Fallback: Cargar desde API (Versión Guardada)
     getSiteByBarbershop(siteId).then(res => {
       setSite(res.data);
     });

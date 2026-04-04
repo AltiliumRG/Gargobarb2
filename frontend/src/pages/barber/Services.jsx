@@ -1,7 +1,7 @@
 // src/pages/barber/services.jsx
 import api from "../../api/axios";
 
-const API_URL = "http://localhost:4000/api/barbershops";
+const API_URL = "/api/barbershops";
 
 // ⚠️ Se asume que el token está en localStorage
 const authHeaders = () => ({
@@ -16,22 +16,22 @@ const authHeaders = () => ({
 
 // Crear barbería
 export const createBarbershop = (data) => {
-  return axios.post(API_URL, data, authHeaders());
+  return api.post(API_URL, data, authHeaders());
 };
 
 // Obtener barberías (según rol)
 export const getBarbershops = () => {
-  return axios.get(API_URL, authHeaders());
+  return api.get(API_URL, authHeaders());
 };
 
 // Obtener barbería por ID
 export const getBarbershopById = (id) => {
-  return axios.get(`${API_URL}/${id}`, authHeaders());
+  return api.get(`${API_URL}/${id}`, authHeaders());
 };
 
 // Actualizar barbería
 export const updateBarbershop = (id, data) => {
-  return axios.put(`${API_URL}/${id}`, data, authHeaders());
+  return api.put(`${API_URL}/${id}`, data, authHeaders());
 };
 
 // Eliminar barbería (solo admin)

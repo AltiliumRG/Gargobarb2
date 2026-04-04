@@ -1,14 +1,23 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Info, Users, Award, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Info, Users, Award, ShieldCheck, ArrowLeft } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 
 const AboutUs = () => {
+    const navigate = useNavigate();
     const { theme } = useTheme();
     const isClassic = theme === "classic";
 
     return (
-        <div className="max-w-6xl mx-auto p-8">
+        <div className="max-w-6xl mx-auto p-8 lg:p-16">
+            <button
+                onClick={() => navigate(-1)}
+                className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-2xl transition hover:scale-105 active:scale-95 border ${isClassic ? "border-white/10 hover:bg-white/5 text-gray-400" : "border-gray-200 hover:bg-gray-50 text-gray-600"}`}
+            >
+                <ArrowLeft size={18} /> Volver
+            </button>
+
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
