@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { createOrder } from "../../api/orders.api";
+import { Loader2 } from "lucide-react";
 
 /* ============================================================
    CHECKOUT PAGE  — Pasarela de pago del carrito
@@ -33,6 +34,11 @@ export default function CheckoutPage() {
   const [expiry,      setExpiry]      = useState("");
   const [cvv,         setCvv]         = useState("");
 
+  const [pseBank, setPseBank] = useState("");
+  const [pseDocType, setPseDocType] = useState("CC");
+  const [pseDocNumber, setPseDocNumber] = useState("");
+  const [buyerNequi, setBuyerNequi] = useState("");
+
   const [loading,  setLoading]  = useState(false);
   const [success,  setSuccess]  = useState(null);   // { ref, total }
   const [error,    setError]    = useState("");
@@ -44,8 +50,8 @@ export default function CheckoutPage() {
   const siteId        = state?.siteId        || null;
   const siteSlug      = state?.siteSlug      || null;
   const paymentConfig = state?.paymentConfig || {};
-  const method        = paymentConfig.method || null;
   const pData         = paymentConfig.data   || {};
+  const [selectedMethod, setSelectedMethod] = useState(paymentConfig.method || "nequi");
 
   const formatPrice = (n) =>
     new Intl.NumberFormat("es-CO", {
@@ -96,9 +102,19 @@ export default function CheckoutPage() {
     }
 
     // 3. Validaciones de Seguridad por Método de Pago
-    if (method === "card" || method === "nequi" || method === "transfer") {
-      if (!reference.trim() || reference.trim().length < 4) {
-        setError("Por seguridad, debes ingresar el número de comprobante o referencia de la transacción.");
+    if (selectedMethod === "card") {
+      if (cardNumber.length < 15 || !cardHolder || !expiry || !cvv) {
+        setError("Por favor completa los datos de la tarjeta correctamente para proceder. (Simulación)");
+        return;
+      }
+    } else if (selectedMethod === "nequi") {
+      if (buyerNequi.length < 10) {
+        setError("Ingresa un número de celular de Nequi válido (mínimo 10 dígitos).");
+        return;
+      }
+    } else if (selectedMethod === "transfer") {
+      if (!pseBank || pseDocNumber.length < 5) {
+        setError("Por favor selecciona tu banco e ingresa tu número de documento para PSE.");
         return;
       }
     }
@@ -125,15 +141,20 @@ export default function CheckoutPage() {
         shipping_address: shippingAddress.trim(),
         items,
         total,
-        payment_method: method || "efectivo",
-        notes: reference.trim() || null,
+        payment_method: selectedMethod || "efectivo",
+        notes: (selectedMethod === "card") ? "Simulacion - Tarjeta" :
+               (selectedMethod === "nequi") ? `Simulacion Nequi: ${buyerNequi}` :
+               (selectedMethod === "transfer") ? `Simulacion PSE: ${pseBank} - ${pseDocType} ${pseDocNumber}` : "Pago en Efectivo",
       };
 
       const res = await createOrder(payload);
 
       if (res.data?.ok) {
+        const mockRef = (selectedMethod === "card") ? `CARD-${Math.floor(Math.random()*1000000)}` :
+                        (selectedMethod === "transfer") ? `PSE-${Math.floor(Math.random()*100000000)}` :
+                        (selectedMethod === "nequi") ? `NEQ-${Math.floor(Math.random()*100000000)}` : `ORD-${Math.floor(Math.random()*100000)}`;
         setSuccess({
-          ref:   res.data.order?.transaction_ref,
+          ref:   res.data.order?.transaction_ref || mockRef,
           total: res.data.order?.total || total,
         });
       } else {
@@ -181,7 +202,7 @@ export default function CheckoutPage() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">Método</span>
               <span className="font-bold text-white">
-                {METHOD_LABELS[method]?.emoji} {METHOD_LABELS[method]?.label || method}
+                {METHOD_LABELS[selectedMethod]?.emoji} {METHOD_LABELS[selectedMethod]?.label || selectedMethod}
               </span>
             </div>
           </div>
@@ -204,7 +225,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const methodInfo = METHOD_LABELS[method] || { label: "Pago", emoji: "💰", color: "#facc15" };
+  const methodInfo = METHOD_LABELS[selectedMethod] || { label: "Pago", emoji: "💰", color: "#facc15" };
 
   return (
     <div className="min-h-screen bg-[#060a10] text-white" style={{ fontFamily: "Inter, sans-serif" }}>
@@ -279,13 +300,13 @@ export default function CheckoutPage() {
           </div>
 
           {/* Payment method badge */}
-          {method && (
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border"
+          {selectedMethod && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-500"
               style={{ borderColor: methodInfo.color + "40", backgroundColor: methodInfo.color + "10" }}>
               <span className="text-2xl">{methodInfo.emoji}</span>
               <div>
                 <p className="text-xs font-black uppercase tracking-widest" style={{ color: methodInfo.color }}>
-                  Método de Pago
+                  Método Seleccionado
                 </p>
                 <p className="text-sm font-bold text-white">{methodInfo.label}</p>
               </div>
@@ -298,129 +319,244 @@ export default function CheckoutPage() {
         ═══════════════════════════════════════ */}
         <div className="space-y-5">
 
-          {/* ── NEQUI ── */}
-          {method === "nequi" && (
-            <div className="bg-purple-500/10 border border-purple-500/25 rounded-2xl p-6 space-y-4">
+          {/* ── SELECTOR DE MÉTODO DE PAGO ── */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 font-black">
+                Elige tu Método de Pago
+              </h3>
+              <span className="text-green-400 text-xs flex items-center gap-1 font-bold">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                   <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Seguro
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {Object.entries(METHOD_LABELS).map(([k, v]) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setSelectedMethod(k)}
+                  className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${
+                    selectedMethod === k
+                      ? "bg-white/10 border-white shadow-[0_0_20px_rgba(255,255,255,0.1)] scale-100"
+                      : "bg-black/30 border-white/5 hover:border-white/20 hover:bg-white/5 scale-[0.98]"
+                  }`}
+                  style={selectedMethod === k ? { borderColor: v.color } : {}}
+                >
+                  <span className="text-3xl mb-2 hover:scale-110 transition-transform duration-300">{v.emoji}</span>
+                  <span className={`text-xs font-bold text-center ${selectedMethod === k ? "text-white" : "text-gray-400"}`}>
+                    {v.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── NEQUI (GATEWAY REAL) ── */}
+          {selectedMethod === "nequi" && (
+            <div className="bg-purple-500/10 border border-purple-500/25 rounded-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-300">
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-3xl">📱</span>
                 <div>
-                  <p className="font-black text-purple-300">Paga con Nequi</p>
-                  <p className="text-xs text-purple-400/60">Transfiere al número de abajo y confirma tu pedido</p>
+                  <p className="font-black text-purple-300">Pago con Nequi</p>
+                  <p className="text-[10px] text-purple-400/60 uppercase tracking-widest flex items-center gap-1">
+                     Pasarela Integrada Segura ✓
+                  </p>
                 </div>
               </div>
-              <div className="bg-black/30 rounded-xl p-4 space-y-2">
-                {pData.nequi_number && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">Número Nequi</span>
-                    <span className="font-black text-white text-lg tracking-widest">{pData.nequi_number}</span>
-                  </div>
-                )}
-                {pData.account_holder && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">Titular</span>
-                    <span className="font-bold text-white">{pData.account_holder}</span>
-                  </div>
-                )}
-                <div className="flex justify-between items-center border-t border-white/10 pt-2 mt-2">
-                  <span className="text-xs text-gray-500">Monto a transferir</span>
-                  <span className="font-black text-yellow-400">{formatPrice(total)}</span>
+              <div className="space-y-3">
+                <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5 flex justify-between">
+                  <span>Tu Celular con Nequi</span>
+                  <span className="text-purple-400">🔒</span>
+                </label>
+                <div className="flex items-center bg-black/40 border border-white/10 rounded-xl overflow-hidden focus-within:border-purple-500/50 transition shadow-inner">
+                  <span className="pl-4 pr-2 text-gray-500 font-black">+57</span>
+                  <input
+                    type="tel" placeholder="300 000 0000"
+                    autoComplete="off"
+                    value={buyerNequi} onChange={(e) => setBuyerNequi(e.target.value.replace(/\D/g, '').substring(0,10))}
+                    className="w-full p-3 bg-transparent text-white placeholder-gray-600 focus:outline-none font-mono text-lg tracking-widest"
+                  />
                 </div>
               </div>
-              <p className="text-xs text-purple-300/60">
-                ⚠️ Después de transferir, ingresa el número de comprobante en el campo de referencia.
+              <p className="text-[11px] text-purple-300/80 bg-purple-500/5 p-3 rounded-lg border border-purple-500/10 leading-relaxed">
+                <span className="font-black">¿Cómo funciona?</span> Ingresa tu número. Al confirmar, "simularemos" enviar una solicitud de cobro a tu celular para que apruebes el pago automáticamente en tu App Nequi.
               </p>
             </div>
           )}
 
-          {/* ── TRANSFERENCIA ── */}
-          {method === "transfer" && (
-            <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-5 space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">🏦</span>
-                <p className="font-black text-emerald-300">Datos Bancarios</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  ["Banco",   pData.bank_name],
-                  ["Tipo",    pData.account_type],
-                  ["Cuenta",  pData.account_number],
-                  ["Titular", pData.account_holder],
-                  ["Cédula",  pData.cedula],
-                ].filter(([, v]) => v).map(([k, v]) => (
-                  <div key={k} className="bg-black/30 rounded-xl p-3">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">{k}</p>
-                    <p className="font-bold text-white text-sm">{v}</p>
+          {/* ── TRANSFERENCIA PSE (GATEWAY REAL) ── */}
+          {selectedMethod === "transfer" && (
+            <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">🏦</span>
+                  <div>
+                    <p className="font-black text-emerald-300">Pagos Seguros en Línea (PSE)</p>
+                    <p className="text-[10px] text-emerald-400/60 uppercase tracking-widest flex items-center gap-1">
+                      Pasarela Oficial PSE ✓
+                    </p>
                   </div>
-                ))}
-              </div>
-              <div className="flex justify-between items-center bg-black/30 rounded-xl p-3">
-                <span className="text-xs text-gray-500">Valor a transferir</span>
-                <span className="font-black text-yellow-400">{formatPrice(total)}</span>
-              </div>
-            </div>
-          )}
-
-          {/* ── TARJETA (DATOS DEL BARBERO) ── */}
-          {method === "card" && (
-            <div className="bg-blue-500/10 border border-blue-500/25 rounded-2xl p-6 space-y-4">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-3xl">💳</span>
-                <div>
-                  <p className="font-black text-blue-300">Pago con Tarjeta</p>
-                  <p className="text-xs text-blue-400/60">Transfiere a la cuenta asociada</p>
                 </div>
               </div>
               
-              {/* Visual card of the Barber */}
-              <div className="relative bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 text-white rounded-2xl p-6 h-44 flex flex-col justify-between shadow-[0_20px_50px_rgba(59,130,246,0.3)] overflow-hidden">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
-                <div className="relative">
-                  <p className="text-xs font-black uppercase tracking-widest opacity-80">{pData.bank_name || "Banco"}</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
+                    Selecciona tu Banco
+                  </label>
+                  <select
+                    value={pseBank}
+                    onChange={(e) => setPseBank(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30 transition text-sm appearance-none cursor-pointer hover:bg-white/5 shadow-inner"
+                    style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
+                  >
+                    <option value="" disabled>Selecciona una opción...</option>
+                    <option value="Bancolombia">Bancolombia</option>
+                    <option value="Nequi">Nequi</option>
+                    <option value="Davivienda">Davivienda / DaviPlata</option>
+                    <option value="Banco de Bogota">Banco de Bogotá</option>
+                    <option value="BBVA Colombia">BBVA Colombia</option>
+                    <option value="Banco Falabella">Banco Falabella</option>
+                    <option value="Nu">NuBank (Nu)</option>
+                    <option value="Lulo Bank">Lulo Bank</option>
+                    <option value="RappiPay">RappiPay</option>
+                    <option value="Banco de Occidente">Banco de Occidente</option>
+                  </select>
                 </div>
-                <div className="relative">
-                  <p className="text-lg tracking-[0.25em] font-mono font-bold">
-                    {pData.account_number ? pData.account_number.replace(/(.{4})/g, "$1 ").trim() : "•••• •••• •••• ••••"}
-                  </p>
-                </div>
-                <div className="relative flex justify-between text-sm font-bold">
-                  <span>{pData.account_holder || "NOMBRE DEL TITULAR"}</span>
-                  <span className="text-xs opacity-80 uppercase">{pData.account_type || "CUENTA"}</span>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-1">
+                    <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
+                      Tipo ID
+                    </label>
+                    <select
+                      value={pseDocType}
+                      onChange={(e) => setPseDocType(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-emerald-500/50 transition text-sm appearance-none cursor-pointer shadow-inner"
+                      style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem top 50%', backgroundSize: '0.5rem auto' }}
+                    >
+                      <option value="CC">CC</option>
+                      <option value="CE">CE</option>
+                      <option value="NIT">NIT</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
+                      Número Documento
+                    </label>
+                    <input
+                      type="tel" placeholder="Ej. 1000123456"
+                      autoComplete="off"
+                      value={pseDocNumber} onChange={(e) => setPseDocNumber(e.target.value.replace(/\D/g, '').substring(0,12))}
+                      className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition text-sm shadow-inner"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center bg-black/30 rounded-xl p-3 border border-white/5 mt-4">
-                <span className="text-xs text-gray-400">Total a pagar</span>
-                <span className="font-black text-yellow-400 text-lg">{formatPrice(total)}</span>
-              </div>
-              <p className="text-[11px] text-blue-300/70 text-center">
-                ⚠️ Realiza la transferencia a la cuenta señalada arriba y escribe el número de comprobante abajo.
+              <p className="text-[11px] text-emerald-300/80 bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10 leading-relaxed">
+                Al continuar, <strong className="text-emerald-400">simularemos</strong> redirigirte a la sucursal virtual de tu banco para procesar el débito a través de la red segura ACH.
               </p>
             </div>
           )}
 
-          {/* ── EFECTIVO ── */}
-          {method === "efectivo" && (
-            <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-6 space-y-3">
+          {/* ── TARJETA SIMULADA (UI REALISTA) ── */}
+          {selectedMethod === "card" && (
+            <div className="bg-blue-500/10 border border-blue-500/25 rounded-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-3xl">💳</span>
+                <div>
+                  <p className="font-black text-blue-300">Pago con Tarjeta</p>
+                  <p className="text-[10px] text-blue-400/60 uppercase tracking-widest">Pasarela Segura (Simulación)</p>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5 flex justify-between">
+                    <span>Número de Tarjeta</span>
+                    <span className="text-blue-400">🔒</span>
+                  </label>
+                  <input
+                    type="tel" placeholder="0000 0000 0000 0000"
+                    autoComplete="off"
+                    value={cardNumber} onChange={(e) => {
+                      // Eliminar todo lo que NO sea dígito
+                      const val = e.target.value.replace(/\D/g, '').substring(0,16);
+                      // Agrupar de a 4 sin dejar espacios errantes
+                      const formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+                      setCardNumber(formatted);
+                    }}
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 transition font-mono text-sm tracking-widest"
+                    maxLength={19}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
+                    Titular de la Tarjeta
+                  </label>
+                  <input
+                    type="text" placeholder="Ej. Juan Pérez"
+                    autoComplete="off"
+                    value={cardHolder} onChange={(e) => setCardHolder(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 transition text-sm"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
+                      Vencimiento
+                    </label>
+                    <input
+                      type="tel" placeholder="MM/YY"
+                      autoComplete="off"
+                      value={expiry} onChange={(e) => {
+                        const val = e.target.value.replace(/\\D/g, '').substring(0,4);
+                        if (val.length >= 3) {
+                          setExpiry(val.substring(0,2) + '/' + val.substring(2,4));
+                        } else {
+                          setExpiry(val);
+                        }
+                      }}
+                      className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 transition font-mono text-sm"
+                      maxLength={5}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5 flex justify-between">
+                      <span>CVV</span>
+                      <span className="text-gray-600 cursor-help" title="Código reverso">ℹ️</span>
+                    </label>
+                    <input
+                      type="password" placeholder="•••"
+                      value={cvv} onChange={(e) => setCvv(e.target.value.replace(/\\D/g, '').substring(0,4))}
+                      className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 transition font-mono text-lg tracking-widest"
+                      maxLength={4}
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── EFECTIVO / CONTRA ENTREGA ── */}
+          {selectedMethod === "efectivo" && (
+            <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-6 space-y-3 animate-in fade-in zoom-in-95 duration-300">
               <div className="flex items-center gap-3">
                 <span className="text-3xl">💵</span>
                 <div>
-                  <p className="font-black text-amber-300">Pago en Efectivo</p>
-                  <p className="text-xs text-amber-400/60">Acércate al local para pagar</p>
+                  <p className="font-black text-amber-300">Pago Contra Entrega</p>
+                  <p className="text-xs text-amber-400/60">Paga al recibir / en caja</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                Registra tu pedido ahora y preséntate en la barbería con el total de{" "}
-                <span className="font-black text-yellow-400">{formatPrice(total)}</span> en efectivo.
-                Ellos confirmarán tu orden al recibirte.
-              </p>
-            </div>
-          )}
-
-          {/* ── SIN MÉTODO (barbero no configuró) ── */}
-          {!method && (
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <p className="text-center text-gray-400">
-                El barbero aún no ha configurado un método de pago.
+              <p className="text-sm text-gray-300 leading-relaxed bg-black/20 p-4 rounded-xl border border-white/5">
+                Al confirmar tu pedido, prepararemos tus productos para que puedas pagar{" "}
+                <span className="font-black text-yellow-400">{formatPrice(total)}</span> en efectivo al momento de recibir la orden o en nuestro local. 
               </p>
             </div>
           )}
@@ -430,26 +566,29 @@ export default function CheckoutPage() {
             <h3 className="text-xs uppercase tracking-widest text-gray-500 font-black">
               Tus Datos de Contacto
             </h3>
-            <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
-                Nombre Completo *
-              </label>
-              <input
-                type="text" placeholder="Ej. Juan Pérez"
-                value={clientName} onChange={(e) => setClientName(e.target.value)}
-                className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/10 transition text-sm"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
+                  Nombre Completo *
+                </label>
+                <input
+                  type="text" placeholder="Ej. Juan Pérez"
+                  value={clientName} onChange={(e) => setClientName(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/30 transition text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
+                  Teléfono *
+                </label>
+                <input
+                  type="tel" placeholder="Ej. 3001234567"
+                  value={clientPhone} onChange={(e) => setClientPhone(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 transition text-sm"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
-                Teléfono *
-              </label>
-              <input
-                type="tel" placeholder="Ej. 3001234567"
-                value={clientPhone} onChange={(e) => setClientPhone(e.target.value)}
-                className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 transition text-sm"
-              />
-            </div>
+            
             <div>
               <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
                 Correo Electrónico (opcional)
@@ -467,23 +606,11 @@ export default function CheckoutPage() {
               <input
                 type="text" placeholder="Ej. Cl 10 # 50-20, Medellín"
                 value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)}
-                className="w-full p-3 rounded-xl bg-gradient-to-r from-black/20 to-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 transition text-sm shadow-inner"
+                className="w-full p-3 rounded-xl bg-gradient-to-r from-black/20 to-black/40 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-500/50 transition text-sm shadow-inner"
               />
             </div>
 
-            {/* Campo de referencia solo para métodos digitales */}
-            {(method === "nequi" || method === "transfer" || method === "card") && (
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5">
-                  Número de Comprobante / Referencia *
-                </label>
-                <input
-                  type="text" placeholder="Ej. 1234567890"
-                  value={reference} onChange={(e) => setReference(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 transition text-sm"
-                />
-              </div>
-            )}
+
           </div>
 
           {/* Error */}
@@ -500,21 +627,15 @@ export default function CheckoutPage() {
           <button
             id="btn-proceder-pago"
             onClick={handlePay}
-            disabled={loading || !method}
-            className="w-full py-4 rounded-2xl font-black text-lg shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-            style={{
-              background: loading ? "#555" : "linear-gradient(135deg, #facc15, #f59e0b)",
-              color: "#000",
-              boxShadow: loading ? "none" : "0 10px 40px rgba(250,204,21,0.35)",
-            }}
+            disabled={loading || !selectedMethod}
+            className={`w-full py-4 rounded-2xl font-black text-lg shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${
+              loading ? "bg-gray-700 text-gray-400" : "bg-gradient-to-r from-yellow-500 to-yellow-600 text-black shadow-yellow-500/20"
+            }`}
           >
             {loading ? (
               <>
-                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Procesando pedido...
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Validando y procesando transacción segura (Simulando)...
               </>
             ) : (
               <>
@@ -564,4 +685,5 @@ export default function CheckoutPage() {
       )}
     </div>
   );
-}
+} 
+

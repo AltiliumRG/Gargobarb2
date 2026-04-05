@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { UserPlus, Trash2, Edit3, Search } from "lucide-react";
+import { UserPlus, Trash2, Edit3, Search, Loader2 } from "lucide-react";
 import api from "../../api/axios";
 
 const ManageClients = () => {
@@ -8,6 +8,8 @@ const ManageClients = () => {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ full_name: "", email: "", password: "" });
   const [editingId, setEditingId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   // ✅ Cargar dueños (rol 2)
   const fetchOwners = async () => {
@@ -27,6 +29,7 @@ const ManageClients = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setIsSubmitting(true);
     try {
       if (editingId) {
         await api.put(`/users/${editingId}`, {
@@ -50,17 +53,22 @@ const ManageClients = () => {
     } catch (error) {
       console.error("❌ Error al guardar dueño:", error);
       alert(error.response?.data?.message || "Error al guardar el dueño");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // ✅ Eliminar dueño
   const deleteOwner = async (id) => {
     if (!confirm("¿Seguro que deseas eliminar este dueño?")) return;
+    setDeletingId(id);
     try {
       await api.delete(`/users/${id}`);
       fetchOwners();
     } catch (error) {
       console.error("❌ Error al eliminar dueño:", error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -141,10 +149,15 @@ const ManageClients = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
           type="submit"
-          className="mt-5 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-semibold rounded-lg shadow-md hover:shadow-yellow-500/40 transition-all mx-auto"
+          disabled={isSubmitting}
+          className="mt-5 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-semibold rounded-lg shadow-md hover:shadow-yellow-500/40 transition-all mx-auto disabled:opacity-50"
         >
-          <UserPlus size={20} />
-          {editingId ? "Guardar Cambios" : "Agregar Dueño"}
+          {isSubmitting ? (
+            <Loader2 className="animate-spin" size={20} />
+          ) : (
+            <UserPlus size={20} />
+          )}
+          {isSubmitting ? "Guardando..." : (editingId ? "Guardar Cambios" : "Agregar Dueño")}
         </motion.button>
       </motion.form>
 
@@ -191,10 +204,11 @@ const ManageClients = () => {
                     <Edit3 size={20} />
                   </button>
                   <button
+                    disabled={deletingId === owner.id}
                     onClick={() => deleteOwner(owner.id)}
-                    className="text-red-500 hover:text-red-400 transition-all"
+                    className="text-red-500 hover:text-red-400 transition-all min-w-[20px] flex items-center justify-center"
                   >
-                    <Trash2 size={20} />
+                    {deletingId === owner.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={20} />}
                   </button>
                 </td>
               </motion.tr>

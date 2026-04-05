@@ -2,7 +2,7 @@ import { useBuilder } from "../../context/BuilderContext";
 import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-export default function HeroRenderer({ section, preview }) {
+export default function HeroRenderer({ section, preview, site }) {
   const navigate = useNavigate();
   const { slug } = useParams();
   const builder = useBuilder?.();
@@ -145,11 +145,12 @@ export default function HeroRenderer({ section, preview }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (preview) {
-                if (slug) {
-                  navigate(`/b/${slug}/book`);
+              if (!isEditing) {
+                const targetSlug = slug || site?.slug;
+                if (targetSlug) {
+                  navigate(`/b/${targetSlug}/book`);
                 } else {
-                  console.log("Reservar clickeado en modo preview interno");
+                  console.log("Reservar clickeado (sin slug válido)");
                 }
               }
             }}

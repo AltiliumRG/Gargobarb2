@@ -1,18 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getBarbershopById, updateBarbershop } from "../../api/barber.api";
-import { Building2, Home, Globe, MapPin, Save } from "lucide-react";
-import LocationPickerGoogle from "../../components/Maps/LocationPickerGoogle";
-import { SwitchPro } from "../../components/builder/PropertyEditors/Shared/SwitchPro";
-import toast from "react-hot-toast";
+import { 
+    LayoutDashboard, 
+    User, 
+    ShieldCheck, 
+    Store, 
+    ArrowLeft,
+    Settings as SettingsIcon,
+    CreditCard
+} from "lucide-react";
+import { useAuth } from "../../auth/AuthContext";
+import { toast } from "react-hot-toast";
+
+// Modular Sections
+import BarbershopSection from "./SettingsSections/BarbershopSection";
+import ProfileSection from "./SettingsSections/ProfileSection";
+import SecuritySection from "./SettingsSections/SecuritySection";
+import PaymentSection from "./SettingsSections/PaymentSection";
 
 export default function Settings() {
   const { barbershopId } = useParams();
+  const navigate = useNavigate();
+  const { user, login } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState("barberia");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  
+  // Barbershop State
   const [departments, setDepartments] = useState([]);
   const [cities, setCities] = useState([]);
-  
   const [formData, setFormData] = useState({
     name: "",
     country: "Colombia",
@@ -22,7 +40,10 @@ export default function Settings() {
     address: "",
     latitude: null,
     longitude: null,
-    is_active: true
+    logo_url: null,
+    is_active: true,
+    payment_method: "",
+    payment_data: null
   });
 
   // Load Barbershop Data
@@ -38,7 +59,10 @@ export default function Settings() {
           address: res.data.address || "",
           latitude: res.data.latitude,
           longitude: res.data.longitude,
-          is_active: res.data.is_active
+          logo_url: res.data.logo_url,
+          is_active: res.data.is_active,
+          payment_method: res.data.site?.payment_method || "",
+          payment_data: res.data.site?.payment_data || null
         });
       } catch (err) {
         console.error("❌ Error loading barbershop:", err);
@@ -61,11 +85,8 @@ export default function Settings() {
   // Load Cities when department changes
   useEffect(() => {
     if (!formData.department) return;
-    
-    // Find department ID if not set (on initial load)
     const depObj = departments.find(d => d.name === formData.department);
     const depId = depObj?.id || formData.departmentId;
-
     if (depId) {
       fetch(`/api/geo/cities/${depId}`)
         .then(res => res.json())
@@ -78,163 +99,110 @@ export default function Settings() {
     setFormData(prev => ({ ...prev, ...newData }));
   };
 
-  const handleSave = async () => {
+  const handleSaveBarbershop = async () => {
     setSaving(true);
     try {
       await updateBarbershop(barbershopId, formData);
-      toast.success("Configuración guardada correctamente");
+      toast.success("Configuración de barbería guardada");
     } catch (err) {
-      console.error("❌ Error saving settings:", err);
-      toast.error(err.response?.data?.error || "Error al guardar los cambios");
+      toast.error(err.response?.data?.error || "Error al guardar cambios");
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64 text-gray-400 font-medium">Cargando configuración...</div>;
+    return (
+      <div className="flex flex-col justify-center items-center h-[60vh] text-gray-500 gap-4">
+        <div className="w-12 h-12 border-4 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
+        <p className="font-bold animate-pulse uppercase tracking-widest text-xs">Cargando Configuración...</p>
+      </div>
+    );
   }
 
+  const tabs = [
+    { id: "barberia", label: "Mi Barbería", icon: <Store size={18} /> },
+    { id: "pagos", label: "Finanzas y Pagos", icon: <CreditCard size={18} /> },
+    { id: "perfil", label: "Mi Perfil", icon: <User size={18} /> },
+    { id: "seguridad", label: "Seguridad", icon: <ShieldCheck size={18} /> },
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20">
+    <div className="max-w-6xl mx-auto pb-20">
       
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Configuración</h1>
-          <p className="text-gray-400 mt-1">Administra los datos básicos y la visibilidad de tu negocio.</p>
+      {/* HEADER */}
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="flex items-center gap-4">
+            <button 
+                onClick={() => navigate(-1)}
+                className="p-3 rounded-2xl bg-white/5 border border-white/10 text-gray-400 hover:text-white transition hover:bg-white/10"
+            >
+                <ArrowLeft size={20} />
+            </button>
+            <div>
+                <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic flex items-center gap-3">
+                    Configuración <SettingsIcon className="text-yellow-500 animate-spin-slow" />
+                </h1>
+                <p className="text-gray-500 font-medium">Gestiona tu negocio y cuenta personal desde un solo lugar.</p>
+            </div>
         </div>
-        
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-8 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-2xl transition-all shadow-lg shadow-yellow-500/20 disabled:opacity-50 active:scale-95"
-        >
-          <Save size={18} />
-          {saving ? "Guardando..." : "Guardar cambios"}
-        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="flex flex-col lg:flex-row gap-10">
         
-        {/* COLUMNA IZQUIERDA: DATOS Y VISIBILIDAD */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* VISIBILIDAD CARD */}
-          <div className="bg-white/5 p-6 rounded-3xl border border-white/10 space-y-4">
-             <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-500">
-                  <Globe size={20} />
-                </div>
-                <h3 className="font-bold text-white">Estado del sitio</h3>
-             </div>
-             
-             <SwitchPro 
-               label="Barbería Visible (Pública)"
-               checked={formData.is_active}
-               onChange={(val) => updateData({ is_active: val })}
-             />
-             <p className="text-xs text-gray-500 italic leading-relaxed">
-               Si desactivas esta opción, tu sitio web no será accesible para los clientes y no aparecerá en los listados.
-             </p>
-          </div>
+        {/* SIDEBAR TABS */}
+        <aside className="lg:w-72 shrink-0">
+            <nav className="flex flex-col gap-2 p-2 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
+                {tabs.map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`
+                            flex items-center gap-4 px-6 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all
+                            ${activeTab === tab.id 
+                                ? "bg-yellow-500 text-black shadow-lg shadow-yellow-500/20 scale-105 z-10" 
+                                : "text-gray-500 hover:text-white hover:bg-white/5"}
+                        `}
+                    >
+                        {tab.icon}
+                        {tab.label}
+                    </button>
+                ))}
+            </nav>
+        </aside>
 
-          {/* DATOS BASICOS CARD */}
-          <div className="bg-white/5 p-6 rounded-3xl border border-white/10 space-y-6">
-            <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
-                  <Building2 size={20} />
-                </div>
-                <h3 className="font-bold text-white">Información General</h3>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-[10px] uppercase tracking-widest font-black text-gray-500 mb-2 block">Nombre del Negocio</label>
-                <input
-                  className="w-full p-4 rounded-xl bg-black/40 border border-white/10 text-white focus:border-yellow-500 outline-none transition"
-                  placeholder="Ej: Empire Barber Studio"
-                  value={formData.name}
-                  onChange={(e) => updateData({ name: e.target.value })}
+        {/* MAIN CONTENT AREA */}
+        <main className="flex-1 min-w-0">
+            {activeTab === "barberia" && (
+                <BarbershopSection 
+                    formData={formData}
+                    updateData={updateData}
+                    handleSave={handleSaveBarbershop}
+                    saving={saving}
+                    departments={departments}
+                    cities={cities}
                 />
-              </div>
+            )}
+            
+            {activeTab === "perfil" && (
+                <ProfileSection user={user} login={login} />
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-[10px] uppercase text-gray-500 mb-2 block">País</label>
-                  <select
-                    className="w-full p-4 rounded-xl bg-black/40 border border-white/10 text-white outline-none"
-                    value={formData.country}
-                    onChange={(e) => updateData({ country: e.target.value })}
-                  >
-                    <option value="Colombia">Colombia</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-[10px] uppercase text-gray-500 mb-2 block">Departamento</label>
-                  <select
-                    className="w-full p-4 rounded-xl bg-black/40 border border-white/10 text-white outline-none"
-                    value={formData.department}
-                    onChange={(e) => {
-                      const selected = departments.find(d => d.name === e.target.value);
-                      updateData({
-                        department: selected?.name || "",
-                        departmentId: selected?.id || null,
-                        city: ""
-                      });
-                    }}
-                  >
-                    <option value="">Selecciona...</option>
-                    {departments.map(dep => (
-                      <option key={dep.id} value={dep.name}>{dep.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-[10px] uppercase text-gray-500 mb-2 block">Ciudad</label>
-                  <select
-                    className="w-full p-4 rounded-xl bg-black/40 border border-white/10 text-white outline-none"
-                    disabled={!formData.department}
-                    value={formData.city}
-                    onChange={(e) => updateData({ city: e.target.value })}
-                  >
-                    <option value="">Selecciona...</option>
-                    {cities.map(city => (
-                      <option key={city.id} value={city.name}>{city.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* COLUMNA DERECHA: MAPA Y DIRECCION */}
-        <div className="space-y-6">
-          <div className="bg-white/5 p-6 rounded-3xl border border-white/10 space-y-6 h-full">
-            <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
-                  <MapPin size={20} />
-                </div>
-                <h3 className="font-bold text-white">Ubicación Geográfica</h3>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-[10px] uppercase text-gray-500 mb-2 block flex items-center gap-2">
-                  <Home size={12} /> Dirección Exacta
-                </label>
-                <LocationPickerGoogle
-                  data={formData}
-                  updateData={updateData}
+            {activeTab === "seguridad" && (
+                <SecuritySection user={user} />
+            )}
+            
+            {activeTab === "pagos" && (
+                <PaymentSection 
+                    barbershopId={barbershopId}
+                    initialMethod={formData.payment_method}
+                    initialData={formData.payment_data}
                 />
-              </div>
-            </div>
-          </div>
-        </div>
+            )}
+        </main>
 
       </div>
     </div>
   );
 }
+

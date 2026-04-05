@@ -281,6 +281,7 @@ const res = await api.post("/sites/builder/save", {
     primary_color: site.primary_color,
     secondary_color: site.secondary_color,
     font_family: site.font_family,
+    logo_url: site.logo_url,
   },
 });
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Send, MapPin, Mail, Phone, ArrowLeft } from "lucide-react";
+import { Send, MapPin, Mail, Phone, ArrowLeft, Loader2 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import toast from "react-hot-toast";
 
@@ -13,6 +13,7 @@ const ContactUs = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setLoading(true);
         const formData = new FormData(e.target);
         const name = formData.get("name");
         const email = formData.get("email");
@@ -28,6 +29,8 @@ const ContactUs = () => {
         window.open(gmailUrl, '_blank');
         toast.success("Abriendo Gmail para completar el envío...");
         e.target.reset();
+        
+        setTimeout(() => setLoading(false), 2000);
     };
 
     return (
@@ -99,9 +102,19 @@ const ContactUs = () => {
                     </div>
                     <button
                         type="submit"
-                        className={`w-full py-6 rounded-2xl font-black uppercase tracking-widest shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3 bg-yellow-500 hover:bg-yellow-400 text-black shadow-yellow-500/20`}
+                        disabled={loading}
+                        className={`w-full py-6 rounded-2xl font-black uppercase tracking-widest shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3 bg-yellow-500 hover:bg-yellow-400 text-black shadow-yellow-500/20 disabled:opacity-50`}
                     >
-                        Abrir en Gmail <Send size={20} />
+                        {loading ? (
+                            <>
+                                <Loader2 size={24} className="animate-spin" />
+                                Abriendo...
+                            </>
+                        ) : (
+                            <>
+                                Abrir en Gmail <Send size={20} />
+                            </>
+                        )}
                     </button>
                 </form>
 

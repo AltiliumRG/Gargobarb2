@@ -32,6 +32,12 @@ const defaultStats = {
   statusDistribution: [],
   busyHours: [],
   cancelRate: 0,
+  webActivity: {
+    totalVisits: 0,
+    uniqueVisitors: 0,
+    avgDurationSeconds: 0,
+    avgDurationFormatted: "0:00"
+  },
 };
 
 const COLORS = ["#22c55e", "#facc15", "#ef4444"];
@@ -149,6 +155,13 @@ export default function Stats() {
           <Card title="Cancelación %" value={`${stats.cancelRate}%`} />
         </div>
 
+        {/* ACTIVIDAD WEB 🌐 */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card title="Total Visitas" value={stats.webActivity?.totalVisits || 0} icon="🌐" />
+          <Card title="Visitantes Únicos" value={stats.webActivity?.uniqueVisitors || 0} icon="👤" />
+          <Card title="Tiempo Promedio" value={stats.webActivity?.avgDurationFormatted || "0:00"} icon="⏱️" />
+        </div>
+
         {/* GRAFICAS */}
         <div className="grid md:grid-cols-2 gap-6">
 
@@ -253,10 +266,13 @@ function Btn({ onClick, text }) {
   );
 }
 
-function Card({ title, value }) {
+function Card({ title, value, icon }) {
   return (
-    <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
-      <p className="text-sm opacity-60">{title}</p>
+    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 hover:border-yellow-400/50 transition-all group">
+      <div className="flex justify-between items-start mb-2">
+        <p className="text-sm opacity-60 group-hover:opacity-100 transition-opacity">{title}</p>
+        {icon && <span className="text-xl">{icon}</span>}
+      </div>
       <h2 className="text-2xl font-bold text-yellow-400">{value}</h2>
     </div>
   );

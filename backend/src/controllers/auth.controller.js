@@ -46,7 +46,10 @@ exports.register = async (req, res) => {
     const { username, email, password, full_name, phone, role_id } = req.body;
 
     let avatar_url = null;
-    if (req.file) avatar_url = `/uploads/${req.file.filename}`;
+    if (req.file) {
+      const emailFolder = email.replace(/[^a-zA-Z0-9.@_-]/g, "_");
+      avatar_url = `/uploads/${emailFolder}/${req.file.filename}`;
+    }
 
     const user = await authService.register({
       username,

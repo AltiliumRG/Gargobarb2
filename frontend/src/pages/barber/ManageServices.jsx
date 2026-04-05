@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { getServicesByBarbershop, createService, updateService, deleteService } from "../../api/services.api";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 
 export default function ManageServices() {
   const [barbershop, setBarbershop] = useState(null);
   const [services, setServices] = useState([]);
   const [editingService, setEditingService] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -55,6 +58,7 @@ export default function ManageServices() {
 
     if (!barbershop) return;
 
+    setIsSaving(true);
     try {
       if (editingService) {
         await updateService(editingService.id, form);
@@ -82,6 +86,8 @@ export default function ManageServices() {
     } catch (err) {
       console.error(err);
       toast.error("Error guardando servicio");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -102,6 +108,8 @@ export default function ManageServices() {
      ELIMINAR
   ========================= */
   const handleDelete = async (id) => {
+    if (!window.confirm("¿Eliminar este servicio?")) return;
+    setDeletingId(id);
     try {
       await deleteService(id);
       toast.success("Servicio eliminado");
@@ -112,6 +120,8 @@ export default function ManageServices() {
     } catch (err) {
       console.error(err);
       toast.error("Error eliminando servicio");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -166,9 +176,17 @@ export default function ManageServices() {
 
         <button
           type="submit"
-          className="w-full py-4 bg-yellow-500 text-black font-bold rounded-xl hover:scale-[1.02] transition"
+          disabled={isSaving}
+          className="w-full py-4 bg-yellow-500 text-black font-bold rounded-xl hover:scale-[1.02] transition flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          {editingService ? "Actualizar Servicio" : "Crear Servicio"}
+          {isSaving ? (
+            <>
+              <Loader2 className="animate-spin" size={20} />
+              Guardando...
+            </>
+          ) : (
+            editingService ? "Actualizar Servicio" : "Crear Servicio"
+          )}
         </button>
       </form>
 
@@ -191,15 +209,16 @@ export default function ManageServices() {
             <div className="flex gap-4 mt-4">
               <button
                 onClick={() => handleEdit(s)}
-                className="px-4 py-2 bg-blue-500 rounded-lg"
+                className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition"
               >
                 Editar
               </button>
               <button
+                disabled={deletingId === s.id}
                 onClick={() => handleDelete(s.id)}
-                className="px-4 py-2 bg-red-500 rounded-lg"
+                className="px-4 py-2 bg-red-500 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-2 min-w-[100px] disabled:opacity-50"
               >
-                Eliminar
+                {deletingId === s.id ? <Loader2 size={16} className="animate-spin" /> : "Eliminar"}
               </button>
             </div>
           </div>

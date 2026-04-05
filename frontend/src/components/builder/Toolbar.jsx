@@ -1,7 +1,12 @@
+import { useState } from "react";
 import { useBuilder } from "../../context/BuilderContext";
+import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function Toolbar() {
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+
   const {
     site,
     sections = [],
@@ -224,31 +229,43 @@ const hasSection = (type) => {
 
       {/* FOOTER */}
       <div className="border-t border-gray-800 p-6 bg-[#0b0f14] space-y-4">
-
         <button
           onClick={async () => {
+            setIsSaving(true);
             const ok = await saveDraft();
+            setIsSaving(false);
             ok
               ? toast.success("💾 Cambios guardados")
               : toast.error("Error guardando");
           }}
-          className="w-full py-3 rounded-2xl font-semibold transition bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 shadow-xl hover:scale-[1.02] active:scale-95"
+          disabled={isSaving}
+          className="w-full py-3 rounded-2xl font-semibold transition bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 shadow-xl hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          💾 Guardar borrador
+          {isSaving ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <>💾 Guardar borrador</>
+          )}
         </button>
 
         <button
           onClick={async () => {
+            setIsPublishing(true);
             const ok = await publishSite();
+            setIsPublishing(false);
             ok
               ? toast.success("🚀 Sitio publicado")
               : toast.error("Error al publicar");
           }}
-          className="w-full py-3 rounded-2xl font-bold transition bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-xl hover:scale-[1.02] active:scale-95"
+          disabled={isPublishing}
+          className="w-full py-3 rounded-2xl font-bold transition bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-xl hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          🚀 Publicar sitio
+          {isPublishing ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <>🚀 Publicar sitio</>
+          )}
         </button>
-
       </div>
     </aside>
   );

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyBarbershops, deleteBarbershop } from "../../api/barber.api";
-import { Trash2, Edit, Layout, Clock } from "lucide-react";
+import { Trash2, Edit, Layout, Clock, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function MyBarbershops() {
   const [shops, setShops] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
   const navigate = useNavigate();
 
   const fetchShops = () => {
@@ -21,6 +22,7 @@ export default function MyBarbershops() {
       return;
     }
 
+    setDeletingId(id);
     try {
       await deleteBarbershop(id);
       toast.success("Barbería eliminada correctamente");
@@ -28,6 +30,8 @@ export default function MyBarbershops() {
     } catch (error) {
       console.error("Error deleting barbershop:", error);
       toast.error("Error al eliminar la barbería");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -73,11 +77,12 @@ export default function MyBarbershops() {
                 </button>
 
                 <button
+                  disabled={deletingId === shop.id}
                   onClick={() => handleDelete(shop.id)}
-                  className="w-12 h-10.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20"
+                  className="w-12 h-10.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20 disabled:opacity-50"
                   title="Eliminar barbería"
                 >
-                  <Trash2 size={18} />
+                  {deletingId === shop.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
                 </button>
               </div>
             </div>

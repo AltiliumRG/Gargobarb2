@@ -1,8 +1,14 @@
 import { useAuth } from "../../auth/AuthContext";
 import api from "../../api/axios";
+import { useState } from "react";
+import { Bell } from "lucide-react";
+import NotificationMenu from "./NotificationMenu";
+import { useNotifications } from "../../context/NotificationContext";
 
 export default function BarberTopbar({ toggleSidebar }) {
   const { user, setUser } = useAuth();
+  const { unreadCount } = useNotifications();
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const logout = async () => {
     try {
@@ -33,6 +39,25 @@ export default function BarberTopbar({ toggleSidebar }) {
 
       {/* RIGHT */}
       <div className="flex items-center gap-4">
+        
+        {/* BELL NOTIFICATIONS */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="p-2 text-gray-400 hover:text-yellow-500 transition relative"
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-[#0f141b]">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
+          {showNotifications && (
+            <NotificationMenu onClose={() => setShowNotifications(false)} />
+          )}
+        </div>
 
         {/* USER */}
         <div className="flex items-center gap-2 bg-gray-900 px-3 py-1 rounded">

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Loader2 } from "lucide-react";
 import ReactCalendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
@@ -19,6 +19,7 @@ const serviceFromState = location.state?.service;
   const [availableSlots, setAvailableSlots] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [isBooking, setIsBooking] = useState(false);
   const today = new Date().toISOString().split("T")[0];
 
   const [selectedDate, setSelectedDate] = useState(null);
@@ -135,6 +136,8 @@ useEffect(() => {
       return;
     }
 
+    setIsBooking(true);
+
     try {
       await api.post("/appointments", {
         barbershop_id: barbershop.id,
@@ -150,6 +153,8 @@ useEffect(() => {
     } catch (err) {
       console.error(err);
       toast.error(err?.response?.data?.error || "Error creando cita");
+    } finally {
+      setIsBooking(false);
     }
   };
 
@@ -364,9 +369,19 @@ useEffect(() => {
         {/* BOTON */}
         <button
           type="submit"
-          className="w-full py-4 rounded-xl font-bold text-black bg-yellow-500 hover:bg-yellow-400 hover:scale-[1.02] transition"
+          disabled={isBooking}
+          className={`w-full py-4 rounded-xl font-bold text-black bg-yellow-500 hover:bg-yellow-400 hover:scale-[1.02] transition flex items-center justify-center gap-2 ${
+            isBooking ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
-          Confirmar cita
+          {isBooking ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Reservando...
+            </>
+          ) : (
+            "Confirmar cita"
+          )}
         </button>
 
       </form>

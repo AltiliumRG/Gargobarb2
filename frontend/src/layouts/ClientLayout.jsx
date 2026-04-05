@@ -10,6 +10,7 @@ import Settings from "../pages/client/Settings";
 import Faqs from "../pages/client/Faqs";
 import MyAppointments from "../pages/client/MyAppointments";
 import MyOrders from "../pages/client/MyOrders";
+import ClientHeader from "../components/ClientHeader";
 
 const ClientLayout = () => {
   const { theme } = useTheme();
@@ -22,6 +23,7 @@ const ClientLayout = () => {
     >
       <div className={`absolute inset-0 z-0 ${isClassic ? "bg-[#0F0F0F]/85" : "bg-[#F8F6F2]/85"} backdrop-blur-sm pointer-events-none`}></div>
       <div className="relative z-10 min-h-screen flex flex-col">
+        <ClientHeader />
         <Routes>
           <Route path="home" element={<Home />} />
           <Route path="about-us" element={<AboutUs />} />

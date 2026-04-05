@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
@@ -256,12 +256,20 @@ const Login = () => {
           whileTap={{ scale: 0.97 }}
           type="submit"
           disabled={loading || isBlocked()}
-          className={`w-full py-3 rounded-xl text-black font-semibold shadow-lg transition ${loading || isBlocked()
-            ? "bg-yellow-400/60 cursor-not-allowed"
-            : "bg-gradient-to-r from-yellow-500 to-yellow-700 hover:shadow-yellow-500/40"
-            }`}
+          className={`w-full py-3 rounded-xl text-black font-bold shadow-lg transition flex items-center justify-center gap-2 ${
+            loading || isBlocked()
+              ? "bg-yellow-400/60 cursor-not-allowed"
+              : "bg-gradient-to-r from-yellow-500 to-yellow-700 hover:shadow-yellow-500/40"
+          }`}
         >
-          {loading ? "Entrando..." : "Iniciar sesión"}
+          {loading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Entrando...
+            </>
+          ) : (
+            "Iniciar sesión"
+          )}
         </motion.button>
 
         <div

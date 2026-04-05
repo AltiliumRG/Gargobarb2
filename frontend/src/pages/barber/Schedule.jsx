@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../api/axios";
+import { Loader2 } from "lucide-react";
 
 /* =========================
    DÍAS BASE
@@ -35,6 +36,7 @@ export default function Schedule() {
 
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   /* ================= LOAD ================= */
 
@@ -102,23 +104,19 @@ export default function Schedule() {
   /* ================= SAVE ================= */
 
   const handleSave = async () => {
-
+    setIsSaving(true);
     try {
-
       await api.post(
         `/barbershops/${barbershopId}/schedules`,
         { schedules }
       );
-
       toast.success("Horarios guardados correctamente");
-
     } catch (error) {
-
       console.error("Error guardando horarios:", error);
       toast.error("Error guardando horarios");
-
+    } finally {
+      setIsSaving(false);
     }
-
   };
 
   /* ================= LOADING ================= */
@@ -198,9 +196,17 @@ export default function Schedule() {
 
       <button
         onClick={handleSave}
-        className="mt-8 bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-xl font-bold transition active:scale-95"
+        disabled={isSaving}
+        className="mt-8 bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-4 rounded-xl font-bold transition active:scale-95 flex items-center justify-center gap-2 min-w-[200px] disabled:opacity-50"
       >
-        Guardar horarios
+        {isSaving ? (
+          <>
+            <Loader2 size={20} className="animate-spin" />
+            Guardando...
+          </>
+        ) : (
+          "Guardar horarios"
+        )}
       </button>
 
     </div>

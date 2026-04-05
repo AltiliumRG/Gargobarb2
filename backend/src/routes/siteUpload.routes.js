@@ -10,7 +10,8 @@ router.post("/site-image", verifyToken, upload.single("image"), async (req, res)
       return res.status(400).json({ error: "Archivo requerido" });
     }
 
-    const fileUrl = `${process.env.UPLOADS_URL || `${req.protocol}://${req.get("host")}/uploads`}/${req.file.filename}`;
+    const emailFolder = req.user.email.replace(/[^a-zA-Z0-9.@_-]/g, "_");
+    const fileUrl = `${process.env.UPLOADS_URL || `${req.protocol}://${req.get("host")}/uploads`}/${emailFolder}/${req.file.filename}`;
 
     res.json({
       message: "Imagen subida correctamente",

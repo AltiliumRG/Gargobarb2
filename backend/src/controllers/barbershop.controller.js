@@ -26,7 +26,7 @@ const slugify = require("../utils/slugify");
  */
 exports.createBarbershop = async (req, res) => {
   try {
-    const { name, address, city, user_id, country, department, latitude, longitude, features } = req.body;
+    const { name, address, city, user_id, country, department, latitude, longitude, logo_url, features } = req.body;
     const user = req.user;
 
     if (!name || !address || !city) {
@@ -89,6 +89,7 @@ exports.createBarbershop = async (req, res) => {
         address,
         latitude: latitude || null,
         longitude: longitude || null,
+        logo_url: logo_url || null,
       }, { transaction });
 
       // Create associated website for the barbershop
@@ -176,11 +177,17 @@ exports.getBarbershopById = async (req, res) => {
     const { id } = req.params;
 
     const barbershop = await Barbershop.findByPk(id, {
-      include: {
-        model: User,
-        as: "owner",
-        attributes: ["id", "full_name", "email", "username"],
-      },
+      include: [
+        {
+          model: User,
+          as: "owner",
+          attributes: ["id", "full_name", "email", "username"],
+        },
+        {
+          model: BarbershopSite,
+          as: "site",
+        }
+      ],
     });
 
     if (!barbershop) {
@@ -203,7 +210,7 @@ exports.getBarbershopById = async (req, res) => {
 exports.updateBarbershop = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, city, user_id, country, department, latitude, longitude, is_active } = req.body;
+    const { name, address, city, user_id, country, department, latitude, longitude, logo_url, is_active } = req.body;
     const user = req.user;
 
     const barbershop = await Barbershop.findByPk(id);
@@ -231,6 +238,7 @@ exports.updateBarbershop = async (req, res) => {
       department: department !== undefined ? department : barbershop.department,
       latitude: latitude !== undefined ? latitude : barbershop.latitude,
       longitude: longitude !== undefined ? longitude : barbershop.longitude,
+      logo_url: logo_url !== undefined ? logo_url : barbershop.logo_url,
       is_active: is_active !== undefined ? is_active : barbershop.is_active,
     });
 

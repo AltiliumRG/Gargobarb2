@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { X, Calendar, Clock } from "lucide-react";
+import { X, Calendar, Clock, Loader2 } from "lucide-react";
 import ReactCalendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ export default function RescheduleModal({ appt, onClose, onSuccess }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [form, setForm] = useState({
     date: "",
@@ -69,6 +70,7 @@ export default function RescheduleModal({ appt, onClose, onSuccess }) {
       return;
     }
     
+    setIsSubmitting(true);
     try {
       await api.put(`/appointments/${appt.id}/reschedule`, {
         date: form.date,
@@ -80,6 +82,8 @@ export default function RescheduleModal({ appt, onClose, onSuccess }) {
       console.error(err);
       const msg = err.response?.data?.error || "Error al reprogramar cita.";
       toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -183,14 +187,21 @@ export default function RescheduleModal({ appt, onClose, onSuccess }) {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={!form.date || !form.time}
+              disabled={!form.date || !form.time || isSubmitting}
               className={`flex-1 py-4 rounded-xl font-bold transition flex justify-center items-center gap-2
-                ${(!form.date || !form.time) 
+                ${(!form.date || !form.time || isSubmitting) 
                   ? "bg-zinc-800 text-gray-500 cursor-not-allowed" 
                   : "bg-gradient-to-r from-yellow-500 to-yellow-400 text-black hover:scale-[1.02] active:scale-95 shadow-[0_0_20px_rgba(234,179,8,0.3)]"
                 }`}
             >
-              Confirmar Cambio
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                "Confirmar Cambio"
+              )}
             </button>
           </div>
 

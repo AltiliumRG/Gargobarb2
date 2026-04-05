@@ -7,6 +7,7 @@ import { AuthProvider } from "./auth/AuthContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { BarberProvider } from "./context/BarberContext.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { NotificationProvider } from "./context/NotificationContext.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <AuthProvider>
           <ThemeProvider>
             <BarberProvider>
-              <App />
+              <NotificationProvider>
+                <App />
+              </NotificationProvider>
             </BarberProvider>
           </ThemeProvider>
         </AuthProvider>

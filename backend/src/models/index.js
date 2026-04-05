@@ -12,6 +12,7 @@ const ShoppingCart = require("./ShoppingCart");
 const Product = require("./Product");
 const Order = require("./Order");
 const Notification = require("./Notification");
+const BarbershopVisit = require("./BarbershopVisit");
 /* ===============================
    USER → BARBERSHOPS
 ================================*/
@@ -153,6 +154,12 @@ Order.belongsTo(BarbershopSite, {
 User.hasMany(Notification, { foreignKey: "user_id" });
 Notification.belongsTo(User, { foreignKey: "user_id" });
 
+/* ===============================
+   ANALYTICS
+================================*/
+Barbershop.hasMany(BarbershopVisit, { foreignKey: "barbershop_id", as: "visits" });
+BarbershopVisit.belongsTo(Barbershop, { foreignKey: "barbershop_id" });
+
 module.exports = {
   sequelize,
   Barbershop,
@@ -167,5 +174,6 @@ module.exports = {
   ShoppingCart,
   Product,
   Order,
-  Notification
+  Notification,
+  BarbershopVisit
 };

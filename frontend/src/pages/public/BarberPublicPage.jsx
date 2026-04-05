@@ -34,11 +34,29 @@ export default function BarberPublicPage() {
           setActiveBarbershop({ id: siteData.barbershop_id });
         }
 
-        // registrar visita
-        fetch(
-          `/api/barbershops/public/${slug}/visit`,
-          { method: "POST" }
-        );
+        // REGISTER VISIT (New Analytics)
+        const visitorId = localStorage.getItem("gargobarb_visitor_id") || crypto.randomUUID();
+        localStorage.setItem("gargobarb_visitor_id", visitorId);
+
+        const visitRes = await api.post("/analytics/track", {
+          barbershop_id: siteData.barbershop_id,
+          visitor_id: visitorId,
+          page: "home"
+        });
+
+        const visitId = visitRes.data.visit_id;
+
+        // Duration heartbeat (every 10s)
+        let seconds = 0;
+        const interval = setInterval(() => {
+          seconds += 10;
+          api.post("/analytics/duration", {
+            visit_id: visitId,
+            duration_seconds: seconds
+          }).catch(() => {}); // silent fail
+        }, 10000);
+
+        return () => clearInterval(interval);
 
       } catch (err) {
         console.error("Error cargando sitio:", err);

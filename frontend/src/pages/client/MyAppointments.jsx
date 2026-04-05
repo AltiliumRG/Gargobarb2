@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
 import { useTheme } from "../../context/ThemeContext";
-import { ArrowLeft, Calendar, Clock, Edit2, X, XCircle, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Edit2, X, XCircle, MapPin, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import RescheduleModal from "../../components/appointments/RescheduleModal";
 
@@ -19,6 +19,7 @@ export default function MyAppointments() {
   const [currentAppt, setCurrentAppt] = useState(null);
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
+  const [cancellingId, setCancellingId] = useState(null);
 
   const loadAppointments = async () => {
     try {
@@ -39,13 +40,16 @@ export default function MyAppointments() {
 
   const handleCancel = async (id) => {
     if (!window.confirm("¿Seguro que deseas cancelar esta cita?")) return;
+    setCancellingId(id);
     try {
       await api.put(`/appointments/${id}/status`, { status: "cancelada" });
       toast.success("Cita cancelada correctamente.");
-      loadAppointments();
+      await loadAppointments();
     } catch (err) {
       console.error(err);
       toast.error("Hubo un error al cancelar la cita.");
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -170,9 +174,19 @@ export default function MyAppointments() {
                   </button>
                   <button
                     onClick={() => handleCancel(appt.id)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-red-950/30 text-red-400 hover:bg-red-500 hover:text-white transition text-sm font-bold border border-red-900/50"
+                    disabled={cancellingId === appt.id}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border transition text-sm font-bold ${
+                      cancellingId === appt.id
+                        ? "bg-red-500/10 text-red-500 border-red-500/30 cursor-not-allowed"
+                        : "bg-red-950/30 text-red-400 hover:bg-red-500 hover:text-white border-red-900/50"
+                    }`}
                   >
-                    <XCircle size={14} /> Cancelar
+                    {cancellingId === appt.id ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <XCircle size={14} />
+                    )}
+                    {cancellingId === appt.id ? "Cancelando..." : "Cancelar"}
                   </button>
                 </div>
               )}

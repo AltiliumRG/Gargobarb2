@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
-import { Search, Package, MapPin, CheckCircle, Clock, Truck, ShieldAlert } from "lucide-react";
+import { Search, Package, MapPin, CheckCircle, Clock, Truck, ShieldAlert, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function Orders() {
   const { barbershopId } = useParams();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
+  const [refundingId, setRefundingId] = useState(null);
 
   const fetchOrders = async () => {
     try {
@@ -31,25 +33,31 @@ export default function Orders() {
   }, [barbershopId]);
 
   const handleUpdateShipping = async (id, newStatus) => {
+    setUpdatingId(id);
     try {
       await api.put(`/orders/${id}/status`, { shipping_status: newStatus });
       toast.success("Estado de envío actualizado");
-      fetchOrders();
+      await fetchOrders();
     } catch (error) {
       console.error(error);
       toast.error("Error al actualizar envío");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
   const handleRefund = async (id) => {
     if (!window.confirm("¿Seguro que deseas reembolsar esta orden?")) return;
+    setRefundingId(id);
     try {
       await api.put(`/orders/${id}/status`, { status: "refunded", shipping_status: "pending" });
       toast.success("Orden rembolsada con éxito");
-      fetchOrders();
+      await fetchOrders();
     } catch (error) {
       console.error(error);
       toast.error("Error al reembolsar");
+    } finally {
+      setRefundingId(null);
     }
   };
 
@@ -137,18 +145,33 @@ export default function Orders() {
                     <div className="space-y-3">
                       <div className="flex gap-2">
                         {order.shipping_status === "pending" && (
-                          <button onClick={() => handleUpdateShipping(order.id, "processing")} className="flex-1 bg-blue-500 text-white text-xs font-bold px-3 py-2.5 rounded-xl hover:bg-blue-600 transition flex items-center justify-center gap-2">
-                             <Clock size={14} /> Procesar Pedido
+                          <button 
+                            disabled={updatingId === order.id}
+                            onClick={() => handleUpdateShipping(order.id, "processing")} 
+                            className="flex-1 bg-blue-500 text-white text-xs font-bold px-3 py-2.5 rounded-xl hover:bg-blue-600 transition flex items-center justify-center gap-2"
+                          >
+                             {updatingId === order.id ? <Loader2 size={14} className="animate-spin" /> : <Clock size={14} />} 
+                             {updatingId === order.id ? "Procesando..." : "Procesar Pedido"}
                           </button>
                         )}
                         {order.shipping_status === "processing" && (
-                          <button onClick={() => handleUpdateShipping(order.id, "shipped")} className="flex-1 bg-yellow-500 text-black text-xs font-black px-3 py-2.5 rounded-xl hover:bg-yellow-400 transition flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
-                             <Truck size={14} /> Marcar como Enviado 🚀
+                          <button 
+                            disabled={updatingId === order.id}
+                            onClick={() => handleUpdateShipping(order.id, "shipped")} 
+                            className="flex-1 bg-yellow-500 text-black text-xs font-black px-3 py-2.5 rounded-xl hover:bg-yellow-400 transition flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(234,179,8,0.3)]"
+                          >
+                             {updatingId === order.id ? <Loader2 size={14} className="animate-spin" /> : <Truck size={14} />} 
+                             {updatingId === order.id ? "Enviando..." : "Marcar como Enviado 🚀"}
                           </button>
                         )}
                         {order.shipping_status === "shipped" && (
-                          <button onClick={() => handleUpdateShipping(order.id, "delivered")} className="flex-1 bg-green-500 text-white text-xs font-bold px-3 py-2.5 rounded-xl hover:bg-green-600 transition flex items-center justify-center gap-2">
-                             <CheckCircle size={14} /> Confirmar Entrega ✅
+                          <button 
+                            disabled={updatingId === order.id}
+                            onClick={() => handleUpdateShipping(order.id, "delivered")} 
+                            className="flex-1 bg-green-500 text-white text-xs font-bold px-3 py-2.5 rounded-xl hover:bg-green-600 transition flex items-center justify-center gap-2"
+                          >
+                             {updatingId === order.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />} 
+                             {updatingId === order.id ? "Entregando..." : "Confirmar Entrega ✅"}
                           </button>
                         )}
                         {order.shipping_status === "delivered" && (
@@ -159,8 +182,13 @@ export default function Orders() {
                       </div>
                       
                       {order.shipping_status !== "delivered" && (
-                         <button onClick={() => handleRefund(order.id)} className="w-full bg-transparent border border-red-500/50 text-red-400 hover:bg-red-500/10 text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl transition flex items-center justify-center gap-2">
-                           <ShieldAlert size={14} /> Rembolsar Dinero
+                         <button 
+                           disabled={refundingId === order.id}
+                           onClick={() => handleRefund(order.id)} 
+                           className="w-full bg-transparent border border-red-500/50 text-red-400 hover:bg-red-500/10 text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl transition flex items-center justify-center gap-2"
+                         >
+                           {refundingId === order.id ? <Loader2 size={14} className="animate-spin" /> : <ShieldAlert size={14} />} 
+                           {refundingId === order.id ? "Reembolsando..." : "Rembolsar Dinero"}
                          </button>
                       )}
                     </div>

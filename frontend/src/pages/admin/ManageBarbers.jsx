@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Scissors, Edit3, Trash2, UserPlus, Search } from "lucide-react";
+import { Scissors, Edit3, Trash2, UserPlus, Search, Loader2 } from "lucide-react";
 
 const ManageBarbers = () => {
   const [barbers, setBarbers] = useState([]);
@@ -13,6 +13,8 @@ const ManageBarbers = () => {
   });
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   // ✅ Cargar barberos
   const fetchBarbers = async () => {
@@ -40,6 +42,7 @@ const ManageBarbers = () => {
 
     const body = JSON.stringify({ ...form, role: "barber" });
 
+    setIsSubmitting(true);
     try {
       await fetch(url, {
         method,
@@ -57,17 +60,22 @@ const ManageBarbers = () => {
       setEditingId(null);
     } catch (error) {
       console.error("Error al guardar barbero:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // ✅ Eliminar barbero
   const deleteBarber = async (id) => {
     if (!confirm("¿Seguro que deseas eliminar este barbero?")) return;
+    setDeletingId(id);
     try {
       await fetch(`http://localhost:5000/api/users/${id}`, { method: "DELETE" });
       fetchBarbers();
     } catch (error) {
       console.error("Error al eliminar barbero:", error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -154,10 +162,15 @@ const ManageBarbers = () => {
         </div>
         <button
           type="submit"
-          className="mt-4 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-semibold rounded-lg shadow-md hover:shadow-yellow-500/40 transition-all"
+          disabled={isSubmitting}
+          className="mt-4 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-semibold rounded-lg shadow-md hover:shadow-yellow-500/40 transition-all disabled:opacity-50"
         >
-          <UserPlus size={18} />
-          {editingId ? "Guardar Cambios" : "Agregar Barbero"}
+          {isSubmitting ? (
+            <Loader2 className="animate-spin" size={18} />
+          ) : (
+            <UserPlus size={18} />
+          )}
+          {isSubmitting ? "Guardando..." : (editingId ? "Guardar Cambios" : "Agregar Barbero")}
         </button>
       </motion.form>
 
@@ -208,10 +221,11 @@ const ManageBarbers = () => {
                     <Edit3 size={20} />
                   </button>
                   <button
+                    disabled={deletingId === b._id}
                     onClick={() => deleteBarber(b._id)}
-                    className="text-red-500 hover:text-red-400 transition"
+                    className="text-red-500 hover:text-red-400 transition min-w-[20px] flex items-center justify-center"
                   >
-                    <Trash2 size={20} />
+                    {deletingId === b._id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={20} />}
                   </button>
                 </td>
               </motion.tr>

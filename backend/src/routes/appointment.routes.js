@@ -36,7 +36,7 @@ router.get(
 ============================================================ */
 router.put(
   "/:id/status",
-  requireRole(1, 2),
+  requireRole(1, 2, 3),
   appointmentController.updateStatus
 );
 

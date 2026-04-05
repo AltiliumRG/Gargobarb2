@@ -85,8 +85,9 @@ exports.createOrder = async (req, res) => {
     try {
       const barbershop = await Barbershop.findByPk(site.barbershop_id);
       if (barbershop && barbershop.user_id) {
-        await Notification.create({
-          user_id: barbershop.user_id,
+        const { notify } = require("../services/notification.service");
+        await notify({
+          userId: barbershop.user_id,
           type: "order_new",
           title: "¡Nueva Venta Realizada!",
           message: `Has recibido un nuevo pedido de ${client_name} por un total de $${total}.`,
@@ -212,6 +213,28 @@ exports.updateOrderStatus = async (req, res) => {
     if (shipping_status) order.shipping_status = shipping_status;
 
     await order.save();
+    
+    // 🔔 Notificar al cliente sobre el cambio de estado del pedido
+    if (order.client_email) {
+      try {
+        const { User } = require("../models");
+        const { notify } = require("../services/notification.service");
+        
+        const clientUser = await User.findOne({ where: { email: order.client_email } });
+        if (clientUser) {
+          const statusText = status ? `estado a ${status}` : (shipping_status ? `estado de envío a ${shipping_status}` : "actualizado");
+          await notify({
+            userId: clientUser.id,
+            type: "order_update",
+            title: "Actualización de tu Pedido",
+            message: `Tu pedido con referencia ${order.transaction_ref} ha cambiado su ${statusText}.`,
+            metadata: { order_id: order.id }
+          });
+        }
+      } catch (notifyError) {
+        console.warn("⚠️ Error al notificar actualización de pedido:", notifyError);
+      }
+    }
 
     res.json({ ok: true, message: "Estado actualizado", order });
   } catch (error) {

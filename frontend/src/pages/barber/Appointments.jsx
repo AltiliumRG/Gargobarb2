@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import RescheduleModal from "../../components/appointments/RescheduleModal";
 
@@ -17,6 +17,8 @@ export default function Appointments() {
   // Reschedule State
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [currentAppt, setCurrentAppt] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   /* ================= FETCH DATA ================= */
   const fetchData = useCallback(async () => {
@@ -45,13 +47,16 @@ export default function Appointments() {
 
   /* ================= STATUS UPDATE ================= */
   const changeStatus = async (id, status) => {
+    setUpdatingId(`${id}-${status}`);
     try {
       await api.put(`/appointments/${id}/status`, { status });
       toast.success("Estado actualizado");
-      fetchData();
+      await fetchData();
     } catch (err) {
       console.error("Error actualizando estado:", err);
       toast.error("Error actualizando estado");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -59,13 +64,16 @@ export default function Appointments() {
   const deleteAppointment = async (id) => {
     if (!window.confirm("¿Eliminar cita?")) return;
 
+    setDeletingId(id);
     try {
       await api.delete(`/appointments/${id}`);
       toast.success("Cita eliminada");
-      fetchData();
+      await fetchData();
     } catch (err) {
       console.error("Error eliminando cita:", err);
       toast.error("Error eliminando cita");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -148,13 +156,42 @@ export default function Appointments() {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <button onClick={() => changeStatus(appt.id, "confirmada")} className="flex-1 py-2 bg-green-600 rounded-lg text-xs font-bold">Confirmar</button>
-                  <button onClick={() => changeStatus(appt.id, "completada")} className="flex-1 py-2 bg-blue-600 rounded-lg text-xs font-bold">Completar</button>
-                  <button onClick={() => changeStatus(appt.id, "cancelada")} className="flex-1 py-2 bg-red-600 rounded-lg text-xs font-bold">Cancelar</button>
+                  <button 
+                    disabled={updatingId === `${appt.id}-confirmada`}
+                    onClick={() => changeStatus(appt.id, "confirmada")} 
+                    className="flex-1 py-2 bg-green-600 rounded-lg text-xs font-bold flex items-center justify-center gap-2"
+                  >
+                    {updatingId === `${appt.id}-confirmada` ? <Loader2 size={12} className="animate-spin" /> : "Confirmar"}
+                  </button>
+                  <button 
+                    disabled={updatingId === `${appt.id}-completada`}
+                    onClick={() => changeStatus(appt.id, "completada")} 
+                    className="flex-1 py-2 bg-blue-600 rounded-lg text-xs font-bold flex items-center justify-center gap-2"
+                  >
+                    {updatingId === `${appt.id}-completada` ? <Loader2 size={12} className="animate-spin" /> : "Completar"}
+                  </button>
+                  <button 
+                    disabled={updatingId === `${appt.id}-cancelada`}
+                    onClick={() => changeStatus(appt.id, "cancelada")} 
+                    className="flex-1 py-2 bg-red-600 rounded-lg text-xs font-bold flex items-center justify-center gap-2"
+                  >
+                    {updatingId === `${appt.id}-cancelada` ? <Loader2 size={12} className="animate-spin" /> : "Cancelar"}
+                  </button>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => openReschedule(appt)} className="flex-1 py-2 bg-yellow-500 text-black rounded-lg text-xs font-bold">Posponer</button>
-                  <button onClick={() => deleteAppointment(appt.id)} className="px-4 py-2 bg-zinc-800 rounded-lg text-xs font-bold text-red-500">Eliminar</button>
+                  <button 
+                    onClick={() => openReschedule(appt)} 
+                    className="flex-1 py-2 bg-yellow-500 text-black rounded-lg text-xs font-bold"
+                  >
+                    Posponer
+                  </button>
+                  <button 
+                    disabled={deletingId === appt.id}
+                    onClick={() => deleteAppointment(appt.id)} 
+                    className="px-4 py-2 bg-zinc-800 rounded-lg text-xs font-bold text-red-500 flex items-center justify-center gap-2"
+                  >
+                    {deletingId === appt.id ? <Loader2 size={12} className="animate-spin" /> : "Eliminar"}
+                  </button>
                 </div>
               </div>
             ))
@@ -198,39 +235,43 @@ export default function Appointments() {
                 </td>
                 <td className="p-4 text-right space-x-2">
                   <button
+                    disabled={updatingId === `${appt.id}-confirmada`}
                     onClick={() => changeStatus(appt.id, "confirmada")}
-                    className="px-2 py-1 bg-green-600 rounded text-xs hover:scale-105 transition"
+                    className="px-2 py-1 bg-green-600 rounded text-xs hover:scale-105 transition min-w-[28px] h-[26px] inline-flex items-center justify-center"
                     title="Confirmar"
                   >
-                    ✔
+                    {updatingId === `${appt.id}-confirmada` ? <Loader2 size={12} className="animate-spin" /> : "✔"}
                   </button>
                   <button
+                    disabled={updatingId === `${appt.id}-completada`}
                     onClick={() => changeStatus(appt.id, "completada")}
-                    className="px-2 py-1 bg-blue-600 rounded text-xs hover:scale-105 transition"
+                    className="px-2 py-1 bg-blue-600 rounded text-xs hover:scale-105 transition min-w-[28px] h-[26px] inline-flex items-center justify-center"
                     title="Completar"
                   >
-                    ✓
+                    {updatingId === `${appt.id}-completada` ? <Loader2 size={12} className="animate-spin" /> : "✓"}
                   </button>
                   <button
+                    disabled={updatingId === `${appt.id}-cancelada`}
                     onClick={() => changeStatus(appt.id, "cancelada")}
-                    className="px-2 py-1 bg-red-600 rounded text-xs hover:scale-105 transition"
+                    className="px-2 py-1 bg-red-600 rounded text-xs hover:scale-105 transition min-w-[28px] h-[26px] inline-flex items-center justify-center"
                     title="Cancelar"
                   >
-                    ✖
+                    {updatingId === `${appt.id}-cancelada` ? <Loader2 size={12} className="animate-spin" /> : "✖"}
                   </button>
                   <button
                     onClick={() => openReschedule(appt)}
-                    className="px-2 py-1 bg-yellow-500 text-black rounded text-xs hover:scale-105 transition"
+                    className="px-2 py-1 bg-yellow-500 text-black rounded text-xs hover:scale-105 transition min-w-[28px] h-[26px] inline-flex items-center justify-center"
                     title="Posponer"
                   >
                     📝
                   </button>
                   <button
+                    disabled={deletingId === appt.id}
                     onClick={() => deleteAppointment(appt.id)}
-                    className="px-2 py-1 bg-gray-700 rounded text-xs hover:scale-105 transition"
+                    className="px-2 py-1 bg-gray-700 rounded text-xs hover:scale-105 transition min-w-[28px] h-[26px] inline-flex items-center justify-center text-red-500"
                     title="Eliminar permanentemente"
                   >
-                    🗑
+                    {deletingId === appt.id ? <Loader2 size={12} className="animate-spin" /> : "🗑"}
                   </button>
                 </td>
               </tr>

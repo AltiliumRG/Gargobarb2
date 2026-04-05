@@ -26,6 +26,11 @@ exports.getBuilder = async (req, res) => {
       return res.status(404).json({ error: "Site no encontrado" });
     }
 
+    // Incluimos logo_url de la barbería en el objeto site para el builder
+    const siteData = site.toJSON();
+    siteData.logo_url = barbershop.logo_url;
+    siteData.name = barbershop.name; // Aseguramos el nombre sincronizado
+
     const pages = await SitePage.findAll({
       where: { site_id: site.id },
       order: [["order_index", "ASC"]],
@@ -62,7 +67,7 @@ exports.getBuilder = async (req, res) => {
     );
 
     res.json({
-      site,
+      site: siteData,
       pages: pagesWithSections,
     });
 
@@ -100,6 +105,21 @@ exports.saveBuilder = async (req, res) => {
           transaction,
         }
       );
+
+      // 🔥 También actualizar la Barbería vinculada
+      const site = await BarbershopSite.findByPk(siteId, { transaction });
+      if (site) {
+        await Barbershop.update(
+          {
+            name: siteMetadata.name !== undefined ? siteMetadata.name : undefined,
+            logo_url: siteMetadata.logo_url !== undefined ? siteMetadata.logo_url : undefined,
+          },
+          {
+            where: { id: site.barbershop_id },
+            transaction,
+          }
+        );
+      }
     }
 
     for (const page of pages) {

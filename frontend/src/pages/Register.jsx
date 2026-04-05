@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import api from "../api/axios";
 import { GoogleLogin } from "@react-oauth/google";
-import { Eye, EyeOff, Upload, User, Scissors } from "lucide-react";
+import { Eye, EyeOff, Upload, User, Scissors, Loader2 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 
 // Validation Utilities
@@ -47,6 +47,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Validation State (Computed from utilities)
   const [emailValid, setEmailValid] = useState(null);
@@ -108,6 +109,8 @@ const Register = () => {
     const validationError = validateRegisterForm(form, cookiesAccepted);
     if (validationError) return toast.error(validationError);
 
+    setLoading(true);
+
     try {
       const formData = new FormData();
       Object.keys(form).forEach(key => {
@@ -127,6 +130,8 @@ const Register = () => {
     } catch (err) {
       console.error("❌ Error en registro:", err);
       toast.error(err.response?.data?.error || "Error al registrarse");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -292,10 +297,21 @@ const Register = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
             type="submit"
-            disabled={!passwordMatch}
-            className={`w-full font-semibold py-3 rounded-xl shadow-lg transition ${passwordMatch ? "bg-gradient-to-r from-yellow-500 to-yellow-700 text-black hover:shadow-yellow-500/40" : "bg-gray-700 text-gray-400 cursor-not-allowed"}`}
+            disabled={!passwordMatch || loading}
+            className={`w-full font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 ${
+              passwordMatch && !loading
+                ? "bg-gradient-to-r from-yellow-500 to-yellow-700 text-black hover:shadow-yellow-500/40"
+                : "bg-gray-700 text-gray-400 cursor-not-allowed opacity-50"
+            }`}
           >
-            Registrarme
+            {loading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Registrando...
+              </>
+            ) : (
+              "Registrarme"
+            )}
           </motion.button>
           <div className="flex justify-center mt-5">
             <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-transform hover:scale-105">

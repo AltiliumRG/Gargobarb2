@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createBarbershop, updatePaymentConfig } from "../../api/barber.api";
 import { useWizard } from "../../context/WizardContext";
+import { Loader2, Check } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function StepConfirm() {
   const navigate = useNavigate();
   const { data } = useWizard();
   const [showModal, setShowModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = async () => {
     // 🛑 VALIDACIÓN VISIBLE PARA EL USUARIO
@@ -16,6 +18,8 @@ export default function StepConfirm() {
       console.error("❌ Datos incompletos:", data);
       return;
     }
+
+    setIsCreating(true);
 
     // ✅ Payload ENRIQUECIDO
     const payload = {
@@ -59,6 +63,8 @@ export default function StepConfirm() {
       const errorMsg = error.response?.data?.error || "Error al conectar con el servidor";
       toast.error(errorMsg, { id: loadingToast });
       console.error("❌ Error API:", error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -129,15 +135,26 @@ export default function StepConfirm() {
             
             <div className="flex flex-col gap-3">
               <button 
-                onClick={() => { setShowModal(false); handleCreate(); }}
-                className="w-full bg-yellow-500 text-black font-black py-4 px-6 rounded-2xl hover:bg-yellow-400 transition hover:shadow-[0_0_30px_rgba(250,204,21,0.4)] flex items-center justify-center gap-2 hover:-translate-y-0.5"
+                onClick={handleCreate}
+                disabled={isCreating}
+                className="w-full bg-yellow-500 text-black font-black py-4 px-6 rounded-2xl hover:bg-yellow-400 transition hover:shadow-[0_0_30px_rgba(250,204,21,0.4)] flex items-center justify-center gap-2 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sí, crearla ahora
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Creando sitio...
+                  </>
+                ) : (
+                  <>
+                    Sí, crearla ahora
+                    <Check className="w-5 h-5" strokeWidth={3} />
+                  </>
+                )}
               </button>
               <button 
                 onClick={() => setShowModal(false)}
-                className="w-full bg-transparent text-gray-500 font-bold py-3 px-6 rounded-2xl hover:text-white hover:bg-white/5 transition"
+                disabled={isCreating}
+                className="w-full bg-transparent text-gray-500 font-bold py-3 px-6 rounded-2xl hover:text-white hover:bg-white/5 transition disabled:opacity-20"
               >
                 Cancelar
               </button>

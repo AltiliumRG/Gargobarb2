@@ -1,5 +1,6 @@
 import React from "react";
 import { InputPro } from "../Shared/InputPro";
+import { UploadDropzone } from "../Shared/UploadDropzone";
 
 export default function GlobalSettings({ site, updateSiteSettings }) {
   return (
@@ -13,13 +14,23 @@ export default function GlobalSettings({ site, updateSiteSettings }) {
           <h3 className="text-sm font-semibold text-yellow-400 tracking-wide">
             Identidad & Estilo
           </h3>
-
           <div>
             <label className="block text-xs text-gray-400 mb-2">Nombre del Sitio</label>
             <InputPro
               placeholder="Nombre de tu barbería"
               value={site?.name}
               onChange={(val) => updateSiteSettings({ name: val })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-400 mb-2">Logo de la Barbería</label>
+            <UploadDropzone
+              label="Cambiar Logo"
+              sublabel="Recomendado 1:1"
+              onUpload={(url) => updateSiteSettings({ logo_url: url })}
+              onRemove={() => updateSiteSettings({ logo_url: null })}
+              currentImage={site?.logo_url}
             />
           </div>
 

@@ -10,8 +10,9 @@ router.post("/avatar", verifyToken, upload.single("avatar"), async (req, res) =>
   try {
     if (!req.file) return res.status(400).json({ error: "No se envió archivo." });
 
-    // Construir URL pública
-    const fileUrl = `${process.env.UPLOADS_URL || `${req.protocol}://${req.get("host")}/uploads`}/${req.file.filename}`;
+    // Construir URL pública con subcarpeta de usuario
+    const emailFolder = req.user.email.replace(/[^a-zA-Z0-9.@_-]/g, "_");
+    const fileUrl = `${process.env.UPLOADS_URL || `${req.protocol}://${req.get("host")}/uploads`}/${emailFolder}/${req.file.filename}`;
 
     // Actualizar user
     const user = await User.findByPk(req.user.id);

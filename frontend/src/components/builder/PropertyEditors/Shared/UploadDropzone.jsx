@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { uploadSiteImage } from "../../../../api/upload.api";
 
 export function UploadDropzone({ label, sublabel, onUpload, currentImage, onRemove }) {
+  const [loading, setLoading] = useState(false);
+
   const uploadImageAndSet = async (file) => {
     if (!file) return;
+    setLoading(true);
     try {
       const res = await uploadSiteImage(file);
       onUpload(res.data.url);
     } catch (err) {
       console.error("❌ Upload error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -16,13 +22,26 @@ export function UploadDropzone({ label, sublabel, onUpload, currentImage, onRemo
     <div className="bg-[#0b1220] border border-gray-800 rounded-2xl p-6 space-y-4">
       {label && <h4 className="text-sm text-gray-400">{label}</h4>}
       
-      <label className="relative flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-700 hover:border-yellow-400 rounded-xl p-6 cursor-pointer transition bg-gray-900/50 hover:bg-gray-900">
-        <span className="text-sm text-gray-400">{sublabel || "Click o arrastra imagen"}</span>
-        <span className="text-xs text-gray-600">Recomendado: alta resolución</span>
+      <label 
+        className={`relative flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-xl p-6 transition bg-gray-900/50 
+          ${loading ? 'border-yellow-400/50 cursor-not-allowed opacity-50' : 'border-gray-700 hover:border-yellow-400 cursor-pointer hover:bg-gray-900'}`}
+      >
+        {loading ? (
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
+            <span className="text-xs text-yellow-500 font-medium">Subiendo imagen...</span>
+          </div>
+        ) : (
+          <>
+            <span className="text-sm text-gray-400">{sublabel || "Click o arrastra imagen"}</span>
+            <span className="text-xs text-gray-600">Recomendado: alta resolución</span>
+          </>
+        )}
         <input
           type="file"
           accept="image/*"
           className="hidden"
+          disabled={loading}
           onChange={(e) => uploadImageAndSet(e.target.files[0])}
         />
       </label>

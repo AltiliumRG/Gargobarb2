@@ -9,7 +9,8 @@ import {
     Save,
     X,
     Menu,
-    ArrowLeft
+    ArrowLeft,
+    Loader2
 } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -220,9 +221,10 @@ const Settings = () => {
                                 className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl font-black uppercase text-xs transition-all shadow-lg ${hasUnsavedChanges()
                                     ? (isClassic ? "bg-[#C6A75E] text-black animate-pulse" : "bg-black text-white animate-pulse")
                                     : (isClassic ? "bg-zinc-800 text-gray-500" : "bg-gray-100 text-gray-400 cursor-not-allowed")
-                                    }`}
+                                    } disabled:opacity-50`}
                             >
-                                <Save size={16} /> {loading ? "Guardando..." : "Guardar Cambios"}
+                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
+                                {loading ? "Guardando..." : "Guardar Cambios"}
                             </button>
 
                             <div className={`p-6 bg-gradient-to-br rounded-3xl mt-auto ${isClassic ? "from-zinc-900 to-black border border-white/5" : "from-gray-50 to-gray-200 border border-gray-200"}`}>
@@ -245,10 +247,11 @@ const Settings = () => {
                         </div>
                         <div className="flex items-center gap-3">
                             <button
+                                disabled={loading}
                                 onClick={handleGlobalSave}
-                                className={`p-2 rounded-lg transition-all ${hasUnsavedChanges() ? "bg-yellow-500 text-black animate-pulse" : "bg-zinc-800 text-gray-600"}`}
+                                className={`p-2 rounded-lg transition-all flex items-center justify-center min-w-[40px] ${hasUnsavedChanges() ? "bg-yellow-500 text-black animate-pulse" : "bg-zinc-800 text-gray-600"} disabled:opacity-50`}
                             >
-                                <Save size={20} />
+                                {loading ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
                             </button>
                             <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-yellow-400 rounded-lg text-black">
                                 <Menu />

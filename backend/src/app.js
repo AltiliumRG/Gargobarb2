@@ -36,6 +36,7 @@ const shoppingCartRoutes = require("./routes/shoppingCart.routes");
 const statsRoutes = require("./routes/stats.routes");
 const orderRoutes = require("./routes/order.routes");
 const notificationRoutes = require("./routes/notification.routes");
+const analyticsRoutes = require("./routes/analytics.routes");
 
 
 const app = express();
@@ -123,6 +124,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/shopping-carts", shoppingCartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/stats", statsRoutes);
 
 // --- Global Error Handling ---

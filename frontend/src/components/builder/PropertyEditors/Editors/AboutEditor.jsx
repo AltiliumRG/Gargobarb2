@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { InputPro } from "../Shared/InputPro";
 import { TextareaPro } from "../Shared/TextareaPro";
+import { Loader2 } from "lucide-react";
+import { uploadSiteImage } from "../../../../api/upload.api";
 
 export default function AboutEditor({
   content,
@@ -41,21 +43,9 @@ export default function AboutEditor({
 
     setUploadingIndex(index);
 
-    const formData = new FormData();
-    formData.append("avatar", file);
-
     try {
-      // Usamos ruta relativa para aprovechar el proxy de Vite
-      const res = await fetch("/api/uploads/avatar", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      updateBarber(index, "image", data.avatar_url);
-
+      const res = await uploadSiteImage(file);
+      updateBarber(index, "image", res.data.url);
     } catch (err) {
       console.error("Error subiendo imagen", err);
     } finally {
@@ -248,18 +238,22 @@ export default function AboutEditor({
             />
 
             {/* 📤 UPLOAD */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleUpload(e.target.files[0], i)}
-              className="text-xs"
-            />
-
-            {uploadingIndex === i && (
-              <p className="text-yellow-400 text-xs">
-                Subiendo...
-              </p>
-            )}
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleUpload(e.target.files[0], i)}
+                className="text-xs w-full text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-yellow-500/10 file:text-yellow-500 hover:file:bg-yellow-500/20 transition cursor-pointer"
+                disabled={uploadingIndex === i}
+              />
+              
+              {uploadingIndex === i && (
+                <div className="absolute inset-0 bg-black/60 rounded flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 text-yellow-500 animate-spin" />
+                  <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-tighter">Subiendo...</span>
+                </div>
+              )}
+            </div>
 
             {barber.image && (
               <img

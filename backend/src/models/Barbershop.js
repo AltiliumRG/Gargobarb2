@@ -59,6 +59,10 @@ const Barbershop = sequelize.define(
     longitude: {
       type: DataTypes.DECIMAL(11, 8),
     },
+    logo_url: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

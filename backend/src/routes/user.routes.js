@@ -47,7 +47,8 @@ router.post('/avatar', verifyToken, upload.single('avatar'), async (req, res) =>
     if (!req.file) return res.status(400).json({ error: 'No se recibió imagen' });
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
-    const avatar_url = `/uploads/${req.file.filename}`;
+    const emailFolder = user.email.replace(/[^a-zA-Z0-9.@_-]/g, "_");
+    const avatar_url = `/uploads/${emailFolder}/${req.file.filename}`;
     await user.update({ avatar_url });
     const safe = user.toJSON();
     delete safe.password_hash;

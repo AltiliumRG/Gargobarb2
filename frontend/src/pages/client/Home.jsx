@@ -45,66 +45,6 @@ const Home = () => {
     <div className={`min-h-screen transition-colors duration-500 ${isClassic ? "text-white" : "text-[#1C1C1C]"
       }`}>
 
-      {/* NAVBAR */}
-      <motion.nav
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className={`px-6 py-4 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md border-b transition-all duration-500 ${isClassic
-          ? "bg-[#0b0b0b]/80 border-[#D4AF37]/30"
-          : "bg-white/80 border-gray-200 shadow-sm"
-          }`}
-      >
-        <motion.div
-          className="flex items-center gap-2 cursor-pointer"
-          whileHover={{ scale: 1.05 }}
-          onClick={() => navigate("/client/home")}
-        >
-          <img src="/GargobarbLogo.png" alt="GargoBarb Logo" className="w-10 h-10 drop-shadow-[0_0_8px_#FFD700]" />
-          <h1 className={`text-xl font-bold bg-gradient-to-r ${isClassic ? "from-[#D4AF37] to-[#B8860B]" : "from-[#C6A75E] to-[#A8842F]"} bg-clip-text text-transparent hidden sm:block`}>
-            GargoBarb
-          </h1>
-        </motion.div>
-
-        <div className="flex items-center gap-6 text-sm">
-          <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/about-us")}>
-            <Info size={16} /> Sobre Nosotros
-          </button>
-          <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/support")}>
-            <HelpCircle size={16} /> Soporte
-          </button>
-          <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/contact-us")}>
-            <Phone size={16} /> Contacto
-          </button>
-          <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/appointments")}>
-            <Calendar size={16} /> Mis Citas
-          </button>
-          <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/orders")}>
-            <Package size={16} /> Mis Órdenes
-          </button>
-          <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/settings")}>
-            <Settings size={16} /> Configuración
-          </button>
-
-          <div className={`border-l pl-4 flex items-center gap-3 ${isClassic ? "border-[#D4AF37]/30" : "border-gray-200"}`}>
-            <span className={`font-medium ${isClassic ? "text-gray-300" : "text-gray-700"}`}>
-              {user?.full_name || "Invitado"}
-            </span>
-
-            <motion.button
-              onClick={logout}
-              whileTap={{ scale: 0.9 }}
-              className={`px-3 py-1 rounded-md transition shadow-sm ${isClassic
-                ? "bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-black hover:shadow-[#D4AF37]/30"
-                : "bg-[#1C1C1C] text-white hover:bg-black"
-                }`}
-            >
-              <LogOut size={16} />
-            </motion.button>
-          </div>
-        </div>
-      </motion.nav>
-
       {/* CONTENIDO PRINCIPAL */}
       <div className="px-6 py-10 max-w-7xl mx-auto">
         <motion.h2
@@ -144,23 +84,45 @@ const Home = () => {
                     navigate(`/client/barbershop/${shop.id}`);
                   }
                 }}
-                className="cursor-pointer bg-gray-900/70 border border-yellow-500/20 rounded-2xl p-5 hover:border-yellow-500/50 transition-all duration-300"
+                className="cursor-pointer bg-gray-900/70 border border-yellow-500/20 rounded-3xl p-6 hover:border-yellow-500/50 transition-all duration-300 flex flex-col items-center text-center"
               >
-                <h3 className="text-xl font-semibold text-yellow-400 mb-2">
-                  {shop.name}
-                </h3>
-                <p className="text-gray-300">{shop.address}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  {shop.city} · Propietario:{" "}
-                  <span className="text-yellow-500">
-                    {shop.owner?.full_name || "Desconocido"}
-                  </span>
-                </p>
-                {shop.site && (
-                  <span className={`text-[9px] font-bold uppercase tracking-[0.2em] block mt-4 ${isClassic ? "text-[#D4AF37]/40" : "text-gray-300"}`}>
-                    Sitio {shop.site.status === 'published' ? 'Premium' : 'Borrador'}
-                  </span>
-                )}
+                {/* LOGO / IMAGE */}
+                <div className="w-24 h-24 mb-6 rounded-2xl overflow-hidden bg-zinc-800 border-2 border-white/5 shadow-2xl flex items-center justify-center shrink-0">
+                  {shop.logo_url ? (
+                    <img 
+                      src={shop.logo_url} 
+                      alt={shop.name} 
+                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="text-4xl font-black text-yellow-500 uppercase tracking-tighter">
+                      {shop.name?.charAt(0)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight group-hover:text-yellow-500 transition-colors">
+                    {shop.name}
+                  </h3>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">{shop.address}</p>
+                    <p className="text-xs text-gray-500 font-medium">
+                      {shop.city} · Propietario:{" "}
+                      <span className="text-yellow-500 font-bold uppercase">
+                        {shop.owner?.full_name || "Desconocido"}
+                      </span>
+                    </p>
+                  </div>
+                  
+                  {shop.site && (
+                    <div className="mt-6 pt-4 border-t border-white/5">
+                      <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isClassic ? "text-[#D4AF37]" : "text-yellow-500"} opacity-70`}>
+                        Sitio {shop.site.status === 'published' ? 'Premium 🚀' : 'Borrador 📝'}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </motion.div>
             ))}
           </motion.div>

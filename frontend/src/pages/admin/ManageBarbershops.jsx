@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../api/axios";
 import { useAuth } from "../../auth/AuthContext";
-import { Pencil, Trash2, Save, PlusCircle, Search, Scissors } from "lucide-react";
+import { Pencil, Trash2, Save, PlusCircle, Search, Scissors, Loader2 } from "lucide-react";
+import axios from "axios";
 
 const ManageBarbershops = () => {
   const { token, user } = useAuth();
@@ -11,6 +12,8 @@ const ManageBarbershops = () => {
   const [editingId, setEditingId] = useState(null);
   const [owners, setOwners] = useState([]);
   const [search, setSearch] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   // Usamos rutas relativas para aprovechar el proxy de Vite
   const API = "/api/barbershops";
@@ -64,6 +67,7 @@ const ManageBarbershops = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const headers = { Authorization: `Bearer ${token}` };
 
@@ -87,6 +91,8 @@ const ManageBarbershops = () => {
     } catch (err) {
       console.error("❌ Error al guardar barbería:", err.response?.data || err.message);
       if (err.response?.status === 403) alert("No tienes permiso para esta acción.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -105,6 +111,7 @@ const ManageBarbershops = () => {
   // ✅ Eliminar barbería
   const handleDelete = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta barbería?")) return;
+    setDeletingId(id);
     try {
       await axios.delete(`${API}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -113,6 +120,8 @@ const ManageBarbershops = () => {
     } catch (err) {
       console.error("❌ Error al eliminar barbería:", err.response?.data || err.message);
       if (err.response?.status === 403) alert("No tienes permiso para eliminar barberías.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -175,18 +184,19 @@ const ManageBarbershops = () => {
           )}
 
           <motion.button
+            type="submit"
+            disabled={isSubmitting}
             whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-[#c9a227] to-yellow-600 text-black font-semibold py-2 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:brightness-110 transition-all"
+            className="bg-gradient-to-r from-[#c9a227] to-yellow-600 text-black font-semibold py-2 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:brightness-110 transition-all disabled:opacity-50"
           >
-            {editingId ? (
-              <>
-                <Save size={18} /> Guardar
-              </>
+            {isSubmitting ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : editingId ? (
+              <Save size={18} />
             ) : (
-              <>
-                <PlusCircle size={18} /> Crear
-              </>
+              <PlusCircle size={18} />
             )}
+            {isSubmitting ? "Procesando..." : (editingId ? "Guardar" : "Crear")}
           </motion.button>
         </form>
 
@@ -241,11 +251,12 @@ const ManageBarbershops = () => {
                         <Pencil size={18} />
                       </motion.button>
                       <motion.button
+                        disabled={deletingId === b.id}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleDelete(b.id)}
-                        className="text-red-500 hover:text-red-400"
+                        className="text-red-500 hover:text-red-400 min-w-[20px] flex items-center justify-center"
                       >
-                        <Trash2 size={18} />
+                        {deletingId === b.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
                       </motion.button>
                     </td>
                   </motion.tr>

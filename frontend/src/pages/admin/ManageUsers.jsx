@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { getAllUsers } from "../../api/admin.api";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, Edit, Trash2, Search, Users, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { UserPlus, Edit, Trash2, Search, Users, ChevronLeft, ChevronRight, Sparkles, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -18,6 +18,8 @@ const ManageUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const itemsPerPage = 15;
 
   // 🔹 Obtener usuarios con paginación
@@ -47,6 +49,7 @@ const ManageUsers = () => {
   // 🔹 Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       if (!form.username || !form.email) {
         alert("Por favor completa todos los campos");
@@ -71,18 +74,23 @@ const ManageUsers = () => {
     } catch (err) {
       console.error("❌ Error al guardar usuario:", err);
       alert("Error al guardar usuario: " + (err.response?.data?.message || err.message));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // 🔹 Eliminar usuario
   const handleDelete = async (id, username) => {
     if (confirm(`¿Seguro que deseas eliminar al usuario "${username}"?`)) {
+      setDeletingId(id);
       try {
         await api.delete(`/users/${id}`);
         fetchUsers(currentPage);
       } catch (err) {
         console.error("❌ Error al eliminar:", err);
         alert("Error al eliminar usuario: " + (err.response?.data?.message || err.message));
+      } finally {
+        setDeletingId(null);
       }
     }
   };
@@ -206,11 +214,12 @@ const ManageUsers = () => {
           <div className="flex gap-2">
             <motion.button
               type="submit"
+              disabled={isSubmitting}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex-1 bg-amber-500 text-black py-3 px-4 rounded-lg font-semibold shadow-md hover:bg-amber-400 transition"
+              className="flex-1 bg-amber-500 text-black py-3 px-4 rounded-lg font-semibold shadow-md hover:bg-amber-400 transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {editingId ? "Actualizar" : "Crear"}
+              {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : (editingId ? "Actualizar" : "Crear")}
             </motion.button>
             {editingId && (
               <motion.button
@@ -289,8 +298,12 @@ const ManageUsers = () => {
                       <button onClick={() => handleEditRole(u)} className="text-amber-400 p-2">
                         <Edit size={20} />
                       </button>
-                      <button onClick={() => handleDelete(u.id, u.username)} className="text-red-500 p-2">
-                        <Trash2 size={20} />
+                      <button 
+                        disabled={deletingId === u.id}
+                        onClick={() => handleDelete(u.id, u.username)} 
+                        className="text-red-500 p-2 min-w-[40px] flex items-center justify-center"
+                      >
+                        {deletingId === u.id ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
                       </button>
                     </div>
                   </div>
@@ -336,7 +349,13 @@ const ManageUsers = () => {
                       </td>
                       <td className="px-6 py-5 flex justify-center gap-3">
                         <button onClick={() => handleEditRole(u)} className="text-amber-400 hover:scale-110 transition"><Edit size={18} /></button>
-                        <button onClick={() => handleDelete(u.id, u.username)} className="text-red-500 hover:scale-110 transition"><Trash2 size={18} /></button>
+                        <button 
+                          disabled={deletingId === u.id}
+                          onClick={() => handleDelete(u.id, u.username)} 
+                          className="text-red-500 hover:scale-110 transition min-w-[24px] flex items-center justify-center"
+                        >
+                          {deletingId === u.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+                        </button>
                       </td>
                     </motion.tr>
                   ))}

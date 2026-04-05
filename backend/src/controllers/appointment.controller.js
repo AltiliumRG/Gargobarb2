@@ -94,10 +94,11 @@ const day = dayMap[daySpanish];
     try {
       const bshop = await Barbershop.findByPk(barbershop_id);
       const service = await Service.findByPk(service_id);
-      
+      const { notify } = require("../services/notification.service");
+
       if (bshop && bshop.user_id) {
-        await Notification.create({
-          user_id: bshop.user_id,
+        await notify({
+          userId: bshop.user_id,
           type: "appointment_new",
           title: "Nueva Cita Reservada",
           message: `Tienes una nueva cita para el ${date} a las ${time}. Servicio: ${service?.name || "No especificado"}.`,
@@ -158,12 +159,33 @@ exports.updateStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const appointment = await Appointment.findByPk(id);
+    const appointment = await Appointment.findByPk(id, {
+      include: [{ model: Barbershop, as: "barbershop" }]
+    });
     if (!appointment) {
       return res.status(404).json({ error: "Cita no encontrada" });
     }
 
+    // Security check: If client, verify ownership
+    if (req.user.role === 3 && appointment.user_id !== req.user.id) {
+       return res.status(403).json({ error: "No tienes permiso para modificar esta cita" });
+    }
+
     await appointment.update({ status });
+
+    // 🔔 Notificar al cliente sobre el cambio de estado
+    try {
+      const { notify } = require("../services/notification.service");
+      await notify({
+        userId: appointment.user_id,
+        type: "appointment_update",
+        title: "Actualización de tu Cita",
+        message: `El estado de tu cita para el ${appointment.date} ha cambiado a: ${status.toUpperCase()}.`,
+        metadata: { appointment_id: appointment.id }
+      });
+    } catch (notifyError) {
+      console.warn("⚠️ Error al notificar actualización de cita:", notifyError);
+    }
 
     res.json({
       message: "Estado actualizado correctamente",
@@ -424,6 +446,27 @@ exports.rescheduleAppointment = async (req, res) => {
     }
 
     await appointment.update({ date, time });
+
+    // 🔔 Notificar al barbero sobre la reprogramación
+    try {
+      const { notify } = require("../services/notification.service");
+      // Recargar cita con barbero para asegurar el user_id
+      const apptWithBshop = await Appointment.findByPk(appointment.id, {
+        include: [{ model: Barbershop, as: "barbershop" }]
+      });
+
+      if (apptWithBshop?.barbershop?.user_id) {
+        await notify({
+          userId: apptWithBshop.barbershop.user_id,
+          type: "appointment_reschedule",
+          title: "Cita Reprogramada",
+          message: `Un cliente ha reprogramado su cita para el ${date} a las ${time}.`,
+          metadata: { appointment_id: appointment.id }
+        });
+      }
+    } catch (notifyError) {
+      console.warn("⚠️ Error al notificar reprogramación de cita:", notifyError);
+    }
 
     res.json({
       message: "Cita reprogramada correctamente",

@@ -21,8 +21,11 @@ exports.getBarberStats = async (req, res) => {
       });
     }
 
+    const { range = "7d" } = req.query;
+
     const stats = await statsRepository.getStatsByBarbershop(
-      shop.id
+      shop.id,
+      range
     );
 
     res.json(stats);
