@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Appointment, Service, Barbershop, User, BarberSchedule } = require("../models");
+const { Appointment, Service, Barbershop, User, BarberSchedule, Notification } = require("../models");
 
 /* ============================================================
    📅 CREAR CITA (Cliente)
@@ -90,6 +90,24 @@ const day = dayMap[daySpanish];
       status: "pendiente",
     });
 
+    // 🔔 Notificar al dueño de la barbería
+    try {
+      const bshop = await Barbershop.findByPk(barbershop_id);
+      const service = await Service.findByPk(service_id);
+      
+      if (bshop && bshop.user_id) {
+        await Notification.create({
+          user_id: bshop.user_id,
+          type: "appointment_new",
+          title: "Nueva Cita Reservada",
+          message: `Tienes una nueva cita para el ${date} a las ${time}. Servicio: ${service?.name || "No especificado"}.`,
+          metadata: { appointment_id: appointment.id }
+        });
+      }
+    } catch (notifyError) {
+      console.warn("⚠️ Error al crear notificación de cita:", notifyError);
+    }
+
     res.status(201).json(appointment);
 
   } catch (error) {
@@ -111,13 +129,13 @@ exports.getAppointmentsByBarbershop = async (req, res) => {
       include: [
         {
           model: User,
-          as: "client", // 🔥 ESTE ES TU ALIAS REAL
+          as: "client",
           attributes: ["id", "username", "email"],
         },
         {
           model: Service,
           as: "service",
-          attributes: ["id", "name", "price"],
+          attributes: ["id", "name", "price", "duration_minutes"],
         },
       ],
       order: [["date", "DESC"]],
@@ -285,5 +303,135 @@ exports.getStatsByBarbershop = async (req, res) => {
   } catch (error) {
     console.error("❌ Error obteniendo estadísticas:", error);
     res.status(500).json({ error: "Error obteniendo estadísticas" });
+  }
+};
+
+/* ============================================================
+   📋 LISTAR CITAS POR CLIENTE (Cliente)
+============================================================ */
+exports.getAppointmentsByClient = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+
+    const appointments = await Appointment.findAll({
+      where: { user_id },
+      include: [
+        {
+          model: Barbershop,
+          as: "barbershop",
+          attributes: ["id", "name", "address", "city"],
+        },
+        {
+          model: Service,
+          as: "service",
+          attributes: ["id", "name", "price", "duration_minutes"],
+        },
+      ],
+      order: [["date", "DESC"], ["time", "DESC"]],
+    });
+
+    res.json(appointments);
+
+  } catch (error) {
+    console.error("❌ Error getAppointmentsByClient:", error);
+    res.status(500).json({ error: "Error obteniendo citas del cliente" });
+  }
+};
+
+/* ============================================================
+   🔄 POSPONER CITA (Reschedule)
+============================================================ */
+exports.rescheduleAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date, time } = req.body;
+    
+    if (!date || !time) {
+      return res.status(400).json({ error: "Faltan campos (fecha y hora) obligatorios" });
+    }
+
+    const appointment = await Appointment.findByPk(id);
+    if (!appointment) {
+      return res.status(404).json({ error: "Cita no encontrada" });
+    }
+
+    // Verify it belongs to the user or it's a barber
+    if (req.user.role === 3 && appointment.user_id !== req.user.id) {
+       return res.status(403).json({ error: "No tienes permiso para modificar esta cita" });
+    }
+
+    /* -------------------------
+       verificar horario del barbero
+    -------------------------- */
+    const dateObj = new Date(`${date}T00:00:00`);
+    const daySpanish = dateObj.toLocaleDateString("es-CO", {
+      weekday: "long",
+      timeZone: "America/Bogota"
+    });
+
+    const dayMap = {
+      domingo: "sunday",
+      lunes: "monday",
+      martes: "tuesday",
+      miércoles: "wednesday",
+      jueves: "thursday",
+      viernes: "friday",
+      sábado: "saturday"
+    };
+
+    const day = dayMap[daySpanish];
+
+    const schedule = await BarberSchedule.findOne({
+      where: {
+        barbershop_id: appointment.barbershop_id,
+        day,
+      },
+    });
+
+    if (!schedule || schedule.is_closed) {
+      return res.status(400).json({
+        error: "La barbería está cerrada ese día",
+      });
+    }
+
+    if (time < schedule.open_time || time > schedule.close_time) {
+      return res.status(400).json({
+        error: "Horario fuera del horario permitido",
+      });
+    }
+
+    /* -------------------------
+       verificar duplicados
+    -------------------------- */
+    const existing = await Appointment.findOne({
+      where: {
+        barbershop_id: appointment.barbershop_id,
+        date,
+        time,
+        status: {
+          [Op.ne]: "cancelada",
+        },
+        id: {
+          [Op.ne]: id // Excluir la cita actual
+        }
+      },
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        error: "Ese horario ya está reservado",
+      });
+    }
+
+    await appointment.update({ date, time });
+
+    res.json({
+      message: "Cita reprogramada correctamente",
+      appointment,
+    });
+
+  } catch (error) {
+    console.error("❌ Error reprogramando cita:", error);
+    res.status(500).json({ error: "Error al reprogramar cita" });
   }
 };

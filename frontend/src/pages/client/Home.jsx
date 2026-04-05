@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, Settings, HelpCircle, Info, Phone } from "lucide-react";
+import { LogOut, Settings, HelpCircle, Info, Phone, Calendar, Package } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import api from "../../api/axios";
@@ -75,6 +75,12 @@ const Home = () => {
           </button>
           <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/contact-us")}>
             <Phone size={16} /> Contacto
+          </button>
+          <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/appointments")}>
+            <Calendar size={16} /> Mis Citas
+          </button>
+          <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/orders")}>
+            <Package size={16} /> Mis Órdenes
           </button>
           <button className={`hover:text-[#D4AF37] transition flex items-center gap-1 font-medium ${isClassic ? "text-gray-300" : "text-gray-600"}`} onClick={() => navigate("/client/settings")}>
             <Settings size={16} /> Configuración

@@ -1,5 +1,5 @@
 import { Outlet, useParams, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Calendar, Clock, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, Calendar, Clock, BarChart3, Settings, Package } from "lucide-react";
 
 export default function BarberWorkspaceLayout() {
   const { barbershopId } = useParams();
@@ -24,6 +24,12 @@ export default function BarberWorkspaceLayout() {
       icon: Clock,
       path: `/barber/dashboard/${barbershopId}/schedule`,
       color: "text-cyan-400",
+    },
+    {
+      label: "Órdenes",
+      icon: Package,
+      path: `/barber/dashboard/${barbershopId}/orders`,
+      color: "text-amber-400",
     },
     {
       label: "Estadísticas",

@@ -91,6 +91,14 @@
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 16px;
+    border-radius: 16px;
+  }
 }
 
 .title {
@@ -104,6 +112,7 @@
   color: black;
   padding: 8px 16px;
   border-radius: 10px;
+  @apply transition-all active:scale-95;
 }
 
 .btn-green {
@@ -111,4 +120,24 @@
   color: black;
   padding: 8px 16px;
   border-radius: 10px;
+  @apply transition-all active:scale-95;
 }
+
+/* Tipografía Responsiva Global */
+html {
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Utilidades para ocultar scrollbars pero permitir scroll */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

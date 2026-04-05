@@ -22,8 +22,9 @@ const transporter = nodemailer.createTransport({
  * @param {number} data.total - Total numérico
  * @param {Array} data.items - Array con los items comprados
  * @param {string} data.payment_method - Método de pago usado (nequi, transfer, card, efectivo)
+ * @param {string} data.shipping_address - Dirección a despachar
  */
-exports.sendInvoiceEmail = async ({ client_email, client_name, transaction_ref, barbershop_name, total, items, payment_method }) => {
+exports.sendInvoiceEmail = async ({ client_email, client_name, transaction_ref, barbershop_name, total, items, payment_method, shipping_address }) => {
   if (!client_email) return; // Si no dio email, no mandamos nada
 
   const formatPrice = (price) => 
@@ -85,6 +86,14 @@ exports.sendInvoiceEmail = async ({ client_email, client_name, transaction_ref, 
                         
                         <p style="margin: 0; color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Método Seleccionado</p>
                         <p style="margin: 5px 0 0 0; color: #111827; font-size: 14px; font-weight: 600;">${payment_method.toUpperCase()}</p>
+
+                        ${shipping_address ? `
+                        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #d1d5db;">
+                          <p style="margin: 0; color: #d97706; font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Dirección de Destino 🚚</p>
+                          <p style="margin: 5px 0 5px 0; color: #111827; font-size: 14px; font-weight: 600;">${shipping_address}</p>
+                          <p style="margin: 0; color: #4b5563; font-size: 13px;">El tiempo estimado de entrega suele ser de <strong style="color: #059669;">2 a 5 días hábiles</strong>.</p>
+                        </div>
+                        ` : ""}
                       </td>
                     </tr>
                   </table>
@@ -146,6 +155,34 @@ exports.sendInvoiceEmail = async ({ client_email, client_name, transaction_ref, 
     return info;
   } catch (error) {
     console.error("❌ Error enviando el correo:", error);
+    throw error;
+  }
+};
+
+/**
+ * Función genérica para enviar cualquier correo.
+ * Usada por auth.controller.js para enviar el código de recuperación.
+ * @param {Object} options
+ * @param {string} options.to - Email destinatario
+ * @param {string} options.subject - Asunto del correo
+ * @param {string} options.html - Contenido HTML
+ */
+exports.sendMail = async ({ to, subject, html }) => {
+  if (!to) throw new Error("Destinatario requerido");
+
+  const mailOptions = {
+    from: `"GargoBarb" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("📨 Correo genérico enviado a:", to);
+    return info;
+  } catch (error) {
+    console.error("❌ Error enviando correo genérico:", error.message);
     throw error;
   }
 };

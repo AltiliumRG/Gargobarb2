@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import barberPublicApi from "../../api/barberPublic.api";
+import api from "../../api/axios";
 import SectionRendererUniversal from "../../components/renderers/SectionRendererUniversal";
 import { useBarber } from "../../context/BarberContext";
 export default function BarberPublicPage() {
@@ -10,7 +11,7 @@ export default function BarberPublicPage() {
 
   const [site, setSite] = useState(null);
 
-  const { setServices, setActiveBarbershop, setProducts } = useBarber();
+  const { setActiveBarbershop } = useBarber();
 
   /* ===============================
      CARGAR SITIO POR SLUG
@@ -28,38 +29,9 @@ export default function BarberPublicPage() {
 
         setSite(siteData);
 
-        // 🔥 guardar barbería activa
+        // 🔥 guardar barbería activa (activará la carga de servicios/productos en BarberContext)
         if (siteData?.barbershop_id) {
-
-          // guardar barbería activa
           setActiveBarbershop({ id: siteData.barbershop_id });
-
-          try {
-            const servicesRes = await fetch(
-              `/api/services/barbershop/${siteData.barbershop_id}`
-            );
-
-            const servicesData = await servicesRes.json();
-
-            console.log("SERVICES API:", servicesData);
-
-            setServices(servicesData);
-
-          } catch (err) {
-            console.error("Error cargando servicios:", err);
-          }
-
-          try {
-            const productsRes = await fetch(
-              `/api/products/barbershop/${siteData.barbershop_id}`
-            );
-            const productsData = await productsRes.json();
-            console.log("PRODUCTS API:", productsData);
-            setProducts(Array.isArray(productsData) ? productsData : []);
-          } catch (err) {
-            console.error("Error cargando productos:", err);
-          }
-
         }
 
         // registrar visita
@@ -88,17 +60,18 @@ export default function BarberPublicPage() {
      NAV LINKS DINÁMICOS
   =============================== */
   const navLinks = useMemo(() => {
+    const labels = {
+      hero: "Inicio",
+      services: "Servicios",
+      gallery: "Galería",
+      contact: "Contacto",
+      about: "Nosotros",
+      testimonials: "Testimonios",
+      cart: "Tienda",
+      custom: "Info",
+    };
     return sections.map((section) => ({
-      label:
-        section.type === "hero"
-          ? "Inicio"
-          : section.type === "services"
-            ? "Servicios"
-            : section.type === "gallery"
-              ? "Galería"
-              : section.type === "contact"
-                ? "Contacto"
-                : section.type,
+      label: labels[section.type] || section.type,
       id: section.type,
     }));
   }, [sections]);
@@ -116,7 +89,7 @@ export default function BarberPublicPage() {
       className="min-h-screen scroll-smooth"
       style={{
         fontFamily: site.font_family || "sans-serif",
-        background: site.primary_color || "#0b0f14",
+        background: "#0b0f14",
         color: site.text_color || "#ffffff",
       }}
     >
@@ -124,9 +97,9 @@ export default function BarberPublicPage() {
       <nav className="w-full bg-black/80 backdrop-blur text-white py-4 px-8 flex items-center justify-between shadow-lg sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/client/home")}
             className="p-2 rounded-full hover:bg-white/10 transition-all active:scale-90 text-yellow-400 border border-yellow-400/20"
-            title="Volver"
+            title="Volver al inicio"
           >
             <ArrowLeft size={20} />
           </button>
@@ -140,6 +113,10 @@ export default function BarberPublicPage() {
             <a
               key={link.id}
               href={`#${link.id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById(link.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
               className="hover:text-yellow-400 transition"
             >
               {link.label}

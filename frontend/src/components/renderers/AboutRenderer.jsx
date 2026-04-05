@@ -30,8 +30,9 @@ export default function AboutRenderer({
 
   return (
     <section
-      className="relative py-32 px-6 overflow-hidden"
+      className="relative px-6 overflow-hidden"
       style={{
+        padding: styles.padding || "80px 20px",
         color: styles.textColor || "#ffffff",
       }}
     >
@@ -42,7 +43,7 @@ export default function AboutRenderer({
       </div>
 
       {/* 🔥 GRID PRINCIPAL */}
-      <div className="max-w-7xl mx-auto relative z-10 grid md:grid-cols-2 gap-20 items-center">
+      <div className="max-w-7xl mx-auto relative z-10 grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
 
         {/* ✨ TEXTO */}
         <div
@@ -87,7 +88,7 @@ export default function AboutRenderer({
             bg-white/[0.04]
             backdrop-blur-xl
             border border-white/10
-            p-12
+            p-8 md:p-12
             shadow-[0_0_60px_rgba(0,0,0,0.6)]
             hover:shadow-[0_0_80px_rgba(250,204,21,0.2)]
             transition-all duration-500

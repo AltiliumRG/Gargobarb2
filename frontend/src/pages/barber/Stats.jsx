@@ -156,12 +156,18 @@ export default function Stats() {
           <Glass title="Ingresos">
             {stats.revenueByDay.length ? (
               <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={stats.revenueByDay}>
-                  <XAxis dataKey="date" stroke="#888" />
-                  <YAxis stroke="#888" />
-                  <Tooltip />
-                  <Line dataKey="total" stroke="#facc15" />
-                </LineChart>
+                <AreaChart data={stats.revenueByDay}>
+                  <defs>
+                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#facc15" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#facc15" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" stroke="#888" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#888" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+                  <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "rgba(255,255,255,0.1)", borderRadius: "10px", color: "#facc15" }} itemStyle={{ color: "#facc15" }} />
+                  <Area type="monotone" dataKey="total" stroke="#facc15" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
+                </AreaChart>
               </ResponsiveContainer>
             ) : (
               <Empty text="Sin ingresos aún" />
@@ -181,11 +187,12 @@ export default function Stats() {
                       ? stats.servicesTop
                       : stats.cartTopProducts
                   }
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                 >
-                  <XAxis dataKey="name" stroke="#888" />
-                  <YAxis stroke="#888" />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#facc15" />
+                  <XAxis dataKey="name" stroke="#888" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#888" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+                  <Tooltip cursor={{ fill: "rgba(250, 204, 21, 0.1)" }} contentStyle={{ backgroundColor: "#111827", borderColor: "rgba(255,255,255,0.1)", borderRadius: "10px" }} />
+                  <Bar dataKey="count" fill="#facc15" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -198,9 +205,10 @@ export default function Stats() {
             {stats.statusDistribution.length ? (
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie data={stats.statusDistribution} dataKey="value">
+                  <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "rgba(255,255,255,0.1)", borderRadius: "10px", color: "white" }} />
+                  <Pie data={stats.statusDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5}>
                     {stats.statusDistribution.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i]} />
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="transparent" />
                     ))}
                   </Pie>
                 </PieChart>
@@ -215,10 +223,10 @@ export default function Stats() {
             {stats.busyHours.length ? (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={stats.busyHours}>
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#22c55e" />
+                  <XAxis dataKey="hour" stroke="#888" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#22c55e" }} />
+                  <YAxis stroke="#888" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+                  <Tooltip cursor={{ fill: "rgba(34, 197, 94, 0.1)" }} contentStyle={{ backgroundColor: "#111827", borderColor: "rgba(255,255,255,0.1)", borderRadius: "10px", color: "#22c55e" }} />
+                  <Bar dataKey="count" fill="#22c55e" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

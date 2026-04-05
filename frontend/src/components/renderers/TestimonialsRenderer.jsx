@@ -27,11 +27,12 @@ export default function TestimonialsRenderer({
 
   return (
     <section
-      className="relative py-32 px-6 overflow-hidden"
+      className="relative px-6 overflow-hidden"
       style={{
-  background: "transparent",
-  color: styles.textColor || "#ffffff",
-}}
+        padding: styles.padding || "80px 20px",
+        background: "transparent",
+        color: styles.textColor || "#ffffff",
+      }}
     >
       {/* ================= SOFT GLOW ================= */}
       <div className="absolute inset-0 pointer-events-none">
@@ -66,7 +67,7 @@ export default function TestimonialsRenderer({
                 bg-white/5
                 border border-white/10
                 rounded-3xl
-                p-10 md:p-14
+                p-8 md:p-14
                 shadow-2xl
                 transition-all duration-700
                 animate-fadeSlide

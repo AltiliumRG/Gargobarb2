@@ -49,4 +49,22 @@ router.delete(
   appointmentController.deleteAppointment
 );
 
+/* ============================================================
+   LISTAR CITAS POR CLIENTE (Cliente)
+============================================================ */
+router.get(
+  "/client",
+  requireRole(3),
+  appointmentController.getAppointmentsByClient
+);
+
+/* ============================================================
+   POSPONER CITA (Cliente, Dueño o Admin)
+============================================================ */
+router.put(
+  "/:id/reschedule",
+  requireRole(1, 2, 3),
+  appointmentController.rescheduleAppointment
+);
+
 module.exports = router;

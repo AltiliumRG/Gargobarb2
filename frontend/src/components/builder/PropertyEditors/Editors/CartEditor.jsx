@@ -102,48 +102,69 @@ export default function CartEditor({
               {content?.items !== undefined ? content.items.length : 3} items
             </span>
           </div>
-          {(content?.items !== undefined ? content.items : DEFAULT_PRODUCTS).map((p, i) => (
-            <div key={p.id || i} className="bg-[#0b1220] border border-gray-800 rounded-2xl p-4 flex justify-between items-center shadow-sm">
-              <div className="flex flex-1 items-center gap-3">
-                <div className="relative w-10 h-10 shrink-0 group">
-                  {(p.image || DEFAULT_PRODUCTS[i]?.image) ? (
-                    <img src={p.image || DEFAULT_PRODUCTS[i]?.image} className="w-full h-full object-cover rounded-lg" />
-                  ) : (
-                    <div className="w-full h-full bg-gray-800 rounded-lg flex items-center justify-center text-[8px] text-gray-500 text-center leading-tight">Sin<br />Img</div>
-                  )}
-                  <div className="absolute inset-0 bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition cursor-pointer">
-                    <span className="text-[8px] text-white">Subir</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleDefaultImageUpload(e.target.files[0], i)}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          {(content?.items !== undefined ? content.items : DEFAULT_PRODUCTS).map((p, i) => {
+            const currentItems = content?.items !== undefined ? content.items : DEFAULT_PRODUCTS;
+            const updateLocalItem = (field, value) => {
+               const newItems = [...currentItems];
+               newItems[i] = { ...newItems[i], [field]: value };
+               handleContent('items', newItems);
+            };
+            return (
+              <div key={p.id || i} className="bg-[#0b1220] border border-gray-800 rounded-2xl p-4 flex flex-col gap-3 shadow-sm mb-4">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Producto Plantilla</span>
+                  <button
+                    onClick={() => {
+                      handleContent('items', currentItems.filter(item => item.id !== p.id));
+                    }}
+                    className="text-[10px] text-red-500 hover:text-red-400 font-bold uppercase transition"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="relative w-14 h-14 shrink-0 group">
+                    {(p.image || DEFAULT_PRODUCTS[i]?.image) ? (
+                      <img src={p.image || DEFAULT_PRODUCTS[i]?.image} className="w-full h-full object-cover rounded-lg border border-gray-700" alt="product" />
+                    ) : (
+                      <div className="w-full h-full bg-gray-800 rounded-lg flex items-center justify-center text-[8px] text-gray-500 text-center leading-tight">Sin<br />Img</div>
+                    )}
+                    <div className="absolute inset-0 bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition cursor-pointer">
+                      <span className="text-[8px] text-white">Subir</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleDefaultImageUpload(e.target.files[0], i)}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0 flex flex-col gap-2">
+                    <InputPro 
+                      placeholder="Nombre del producto" 
+                      value={p.name} 
+                      onChange={(val) => updateLocalItem("name", val)} 
+                    />
+                    <InputPro 
+                      type="number" 
+                      placeholder="Precio" 
+                      value={p.price} 
+                      onChange={(val) => updateLocalItem("price", Number(val))} 
                     />
                   </div>
                 </div>
-                <div className="flex-1 min-w-0 pr-2">
-                  <h5 className="text-xs font-bold text-white truncate">{p.name}</h5>
-                  <div className="flex gap-2 items-center">
-                    <span className="text-[10px] text-gray-500">Por defecto</span>
-                    <span className="text-[10px] font-black text-yellow-500 line-clamp-1">{formatPrice(p.price)}</span>
-                  </div>
-                </div>
+                <textarea 
+                  rows={2}
+                  placeholder="Descripción corta" 
+                  value={p.description} 
+                  onChange={(e) => updateLocalItem("description", e.target.value)} 
+                  className="w-full bg-gray-900 border border-gray-800 text-white rounded-xl p-3 text-xs outline-none focus:border-yellow-500 transition-colors"
+                />
               </div>
-              <button
-                onClick={() => {
-                  const currentItems = content?.items !== undefined ? content.items : [
-                    { id: 'def1', name: 'Cera Fijadora Profesional', price: 15000, description: 'Cera de alta fijación con acabado mate.', image: '/uploads/Default/product1.jpg' },
-                    { id: 'def2', name: 'Aceite para barba', price: 20000, description: 'Aceite hidratante de argán para suavizar la barba.', image: '/uploads/Default/product1.jpg' },
-                    { id: 'def3', name: 'Loción Aftershave', price: 12500, description: 'Refresca y calma la piel después del afeitado.', image: '/uploads/Default/product1.jpg' }
-                  ];
-                  handleContent('items', currentItems.filter(item => item.id !== p.id));
-                }}
-                className="text-[10px] text-red-500 hover:text-red-400 font-bold uppercase transition"
-              >
-                Eliminar
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="flex items-center justify-between px-2 pt-4 border-t border-gray-800">

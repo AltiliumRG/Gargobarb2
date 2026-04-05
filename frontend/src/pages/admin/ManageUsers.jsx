@@ -258,42 +258,76 @@ const ManageUsers = () => {
         </div>
       )}
 
-      {/* Tabla de usuarios */}
+      {/* Tabla / Tarjetas de usuarios */}
       <motion.div
         className="bg-[#1a1a1a]/80 backdrop-blur-sm border border-zinc-800/60 rounded-2xl shadow-lg flex flex-col flex-1"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left text-sm text-zinc-400">
-            <thead className="text-xs text-zinc-500 uppercase border-b border-zinc-800/80 sticky top-0 bg-[#0f0f0f]">
-              <tr>
-                <th scope="col" className="px-6 py-4 font-bold tracking-widest">ID</th>
-                <th scope="col" className="px-6 py-4 font-bold tracking-widest">Usuario</th>
-                <th scope="col" className="px-6 py-4 font-bold tracking-widest">Email</th>
-                <th scope="col" className="px-6 py-4 font-bold tracking-widest">Nombre Completo</th>
-                <th scope="col" className="px-6 py-4 font-bold tracking-widest text-center">Rol</th>
-                <th scope="col" className="px-6 py-4 font-bold tracking-widest text-right">Fecha de Registro</th>
-                <th scope="col" className="px-6 py-4 font-bold tracking-widest text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/40">
-              <AnimatePresence>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((u) => (
+        <div className="flex-1">
+          {/* MOBILE VIEW (CARDS) */}
+          <div className="md:hidden grid grid-cols-1 gap-4 p-4">
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((u) => (
+                <div key={u.id} className="bg-zinc-900/60 border border-zinc-800 p-5 rounded-xl space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-xs font-mono text-amber-500/80 mb-1">#{u.id}</p>
+                      <h3 className="text-lg font-bold text-zinc-100">{u.username}</h3>
+                      <p className="text-sm text-zinc-400">{u.email}</p>
+                    </div>
+                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getRoleColor(u.role_id)}`}>
+                      {getRoleLabel(u.role_id)}
+                    </span>
+                  </div>
+                  
+                  <div className="pt-2 border-t border-zinc-800/50 flex justify-between items-center text-xs">
+                    <span className="text-zinc-500">
+                      {format(new Date(u.createdAt), "dd/MM/yyyy", { locale: es })}
+                    </span>
+                    <div className="flex gap-4">
+                      <button onClick={() => handleEditRole(u)} className="text-amber-400 p-2">
+                        <Edit size={20} />
+                      </button>
+                      <button onClick={() => handleDelete(u.id, u.username)} className="text-red-500 p-2">
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+               <p className="text-center py-10 text-zinc-500 italic">No hay usuarios</p>
+            )}
+          </div>
+
+          {/* DESKTOP VIEW (TABLE) */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left text-sm text-zinc-400">
+              <thead className="text-xs text-zinc-500 uppercase border-b border-zinc-800/80 sticky top-0 bg-[#0f0f0f]">
+                <tr>
+                  <th scope="col" className="px-6 py-4 font-bold tracking-widest">ID</th>
+                  <th scope="col" className="px-6 py-4 font-bold tracking-widest">Usuario</th>
+                  <th scope="col" className="px-6 py-4 font-bold tracking-widest">Email</th>
+                  <th scope="col" className="px-6 py-4 font-bold tracking-widest text-center">Rol</th>
+                  <th scope="col" className="px-6 py-4 font-bold tracking-widest text-right">Registro</th>
+                  <th scope="col" className="px-6 py-4 font-bold tracking-widest text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/40">
+                <AnimatePresence>
+                  {filteredUsers.map((u) => (
                     <motion.tr
                       key={u.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="hover:bg-zinc-800/20 transition-colors duration-200"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="hover:bg-zinc-800/20 transition-colors"
                     >
                       <td className="px-6 py-5 font-mono text-amber-500/80">#{u.id}</td>
                       <td className="px-6 py-5 text-zinc-100 font-semibold">{u.username}</td>
                       <td className="px-6 py-5 text-zinc-400">{u.email}</td>
-                      <td className="px-6 py-5 text-zinc-300">{u.full_name || "—"}</td>
                       <td className="px-6 py-5 text-center">
-                        <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${getRoleColor(u.role_id)}`}>
+                        <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getRoleColor(u.role_id)}`}>
                           {getRoleLabel(u.role_id)}
                         </span>
                       </td>
@@ -301,35 +335,15 @@ const ManageUsers = () => {
                         {format(new Date(u.createdAt), "dd MMM, yyyy", { locale: es })}
                       </td>
                       <td className="px-6 py-5 flex justify-center gap-3">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          onClick={() => handleEditRole(u)}
-                          className="text-amber-400 hover:text-amber-300 transition"
-                          title="Editar rol"
-                        >
-                          <Edit size={18} />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          onClick={() => handleDelete(u.id, u.username)}
-                          className="text-red-500 hover:text-red-400 transition"
-                          title="Eliminar usuario"
-                        >
-                          <Trash2 size={18} />
-                        </motion.button>
+                        <button onClick={() => handleEditRole(u)} className="text-amber-400 hover:scale-110 transition"><Edit size={18} /></button>
+                        <button onClick={() => handleDelete(u.id, u.username)} className="text-red-500 hover:scale-110 transition"><Trash2 size={18} /></button>
                       </td>
                     </motion.tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="7" className="text-center py-12 text-zinc-500 italic">
-                      No se encontraron usuarios
-                    </td>
-                  </tr>
-                )}
-              </AnimatePresence>
-            </tbody>
-          </table>
+                  ))}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Pagination Controls */}

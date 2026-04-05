@@ -7,7 +7,9 @@ import { WizardProvider } from "../context/WizardContext";
 import { BuilderProvider, useBuilder } from "../context/BuilderContext";
 import { useAuth } from "../auth/AuthContext";
 import { handleVerWeb as verWebAction } from "../features/ver-web/verWebHandler";
-import { Menu, Eye, Bell } from "lucide-react";
+import { Menu, Eye, Bell, X } from "lucide-react";
+import { NotificationProvider, useNotifications } from "../context/NotificationContext";
+import NotificationMenu from "../components/barber/NotificationMenu";
 
 /* ============================================================
    TOPBAR PROFESIONAL VIBRANTE (RESPONSIVE)
@@ -16,6 +18,8 @@ function Topbar({ toggleSidebar }) {
   const { user } = useAuth();
   const location = useLocation();
   const { site, pages } = useBuilder();
+  const { unreadCount } = useNotifications();
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const match = location.pathname.match(/(\d+)/);
   const siteId = match ? match[1] : null;
@@ -54,11 +58,25 @@ function Topbar({ toggleSidebar }) {
       {/* RIGHT */}
       <div className="flex items-center gap-2 sm:gap-3">
 
-        {/* Notificaciones (placeholder visual) */}
-        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/[0.08] hover:border-yellow-500/30 hover:bg-white/[0.08] transition-all text-gray-400 hover:text-yellow-400">
-          <Bell size={17} />
-          <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_6px_rgba(250,204,21,0.8)] border border-[#060910]" />
-        </button>
+        {/* Notificaciones */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className={`
+              relative w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/[0.08] transition-all 
+              ${showNotifications ? "border-yellow-500/50 bg-white/10 text-yellow-400" : "text-gray-400 hover:text-yellow-400 hover:border-yellow-500/30"}
+            `}
+          >
+            {showNotifications ? <X size={17} /> : <Bell size={17} />}
+            {unreadCount > 0 && (
+              <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(250,204,21,0.9)] border border-[#060910]" />
+            )}
+          </button>
+
+          {showNotifications && (
+            <NotificationMenu onClose={() => setShowNotifications(false)} />
+          )}
+        </div>
 
         {/* Botón Ver Web — compañero conecta la lógica */}
         <button
@@ -104,53 +122,55 @@ export default function BarberLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <BarberProvider>
-      <WizardProvider>
-        <BuilderProvider>
+    <NotificationProvider>
+      <BarberProvider>
+        <WizardProvider>
+          <BuilderProvider>
 
-          <div className="h-screen w-full flex text-white overflow-hidden bg-[#06080e] relative">
+            <div className="h-screen w-full flex text-white overflow-hidden bg-[#06080e] relative">
 
-            {/* Radial glow de fondo */}
-            <div className="pointer-events-none fixed inset-0 z-0">
-              <div className="absolute top-0 left-0 w-[600px] h-[400px] bg-yellow-500/[0.03] blur-[120px] rounded-full" />
-              <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/[0.04] blur-[140px] rounded-full" />
+              {/* Radial glow de fondo */}
+              <div className="pointer-events-none fixed inset-0 z-0">
+                <div className="absolute top-0 left-0 w-[600px] h-[400px] bg-yellow-500/[0.03] blur-[120px] rounded-full" />
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/[0.04] blur-[140px] rounded-full" />
+              </div>
+
+              {/* OVERLAY MÓVIL */}
+              {sidebarOpen && (
+                <div
+                  className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[55] lg:hidden"
+                  onClick={() => setSidebarOpen(false)}
+                />
+              )}
+
+              {/* SIDEBAR */}
+              <div className={`
+                fixed lg:static top-0 left-0 h-full
+                transition-transform duration-300 ease-out
+                z-[60] shrink-0
+                ${sidebarOpen ? "translate-x-0 shadow-[8px_0_60px_rgba(0,0,0,0.7)]" : "-translate-x-full lg:translate-x-0"}
+                w-64
+              `}>
+                <BarberSidebar />
+              </div>
+
+              {/* CONTENIDO */}
+              <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden relative z-10">
+
+                <Topbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+
+                <main className="flex-1 overflow-x-hidden overflow-y-auto scroll-smooth custom-scroll">
+                  <div className="w-full max-w-[1600px] mx-auto min-h-full flex flex-col">
+                    <Outlet />
+                  </div>
+                </main>
+
+              </div>
             </div>
 
-            {/* OVERLAY MÓVIL */}
-            {sidebarOpen && (
-              <div
-                className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[55] lg:hidden"
-                onClick={() => setSidebarOpen(false)}
-              />
-            )}
-
-            {/* SIDEBAR */}
-            <div className={`
-              fixed lg:static top-0 left-0 h-full
-              transition-transform duration-300 ease-out
-              z-[60] shrink-0
-              ${sidebarOpen ? "translate-x-0 shadow-[8px_0_60px_rgba(0,0,0,0.7)]" : "-translate-x-full lg:translate-x-0"}
-              w-64
-            `}>
-              <BarberSidebar />
-            </div>
-
-            {/* CONTENIDO */}
-            <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden relative z-10">
-
-              <Topbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-
-              <main className="flex-1 overflow-x-hidden overflow-y-auto scroll-smooth custom-scroll">
-                <div className="w-full max-w-[1600px] mx-auto min-h-full flex flex-col">
-                  <Outlet />
-                </div>
-              </main>
-
-            </div>
-          </div>
-
-        </BuilderProvider>
-      </WizardProvider>
-    </BarberProvider>
+          </BuilderProvider>
+        </WizardProvider>
+      </BarberProvider>
+    </NotificationProvider>
   );
 }

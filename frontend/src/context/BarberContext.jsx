@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { getServicesByBarbershop } from "../api/services.api";
+import { getProductsByBarbershop } from "../api/products.api";
 
 const BarberContext = createContext();
 
@@ -10,18 +11,23 @@ export const BarberProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchData = async () => {
       if (!activeBarbershop?.id) return;
 
       try {
-        const res = await getServicesByBarbershop(activeBarbershop.id);
-        setServices(res.data);
+        const [servRes, prodRes] = await Promise.all([
+          getServicesByBarbershop(activeBarbershop.id),
+          getProductsByBarbershop(activeBarbershop.id)
+        ]);
+
+        setServices(servRes.data || []);
+        setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
       } catch (err) {
-        console.error("Error cargando servicios:", err);
+        console.error("Error cargando servicios/productos:", err);
       }
     };
 
-    fetchServices();
+    fetchData();
   }, [activeBarbershop]);
 
   return (

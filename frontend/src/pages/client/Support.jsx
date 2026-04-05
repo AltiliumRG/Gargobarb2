@@ -1,9 +1,21 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HelpCircle, MessageCircle, FileText, PhoneCall, X, Send, Bot, ExternalLink, Download } from "lucide-react";
+
 import { useTheme } from "../../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { faqs } from "./Faqs";
+import {
+  ArrowLeft,
+  HelpCircle,
+  MessageCircle,
+  FileText,
+  PhoneCall,
+  X,
+  Send,
+  Bot,
+  ExternalLink,
+  Download
+} from "lucide-react";
 
 const Support = () => {
     const { theme } = useTheme();

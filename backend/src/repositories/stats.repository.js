@@ -1,4 +1,4 @@
-const { Appointment, Service } = require("../models");
+const { Appointment, Service, BarbershopSite, Order } = require("../models");
 
 exports.getStatsByBarbershop = async (barbershopId) => {
 
@@ -15,13 +15,25 @@ exports.getStatsByBarbershop = async (barbershopId) => {
 
   console.log("📊 APPOINTMENTS:", appointments.length);
 
-  /* ========================
-     TOTAL INGRESOS
-  ======================== */
-  const totalRevenue = appointments.reduce(
-  (acc, a) => acc + Number(a.service?.price || 0),
-  0
-);
+  const appointmentsRevenue = appointments.reduce(
+    (acc, a) => acc + Number(a.service?.price || 0),
+    0
+  );
+
+  let ordersRevenue = 0;
+  let allOrders = [];
+  try {
+    const site = await BarbershopSite.findOne({ where: { barbershop_id: barbershopId } });
+    if (site) {
+      allOrders = await Order.findAll({ where: { site_id: site.id } });
+      const completedOrders = allOrders.filter(o => o.status === "completed" || o.status === "pending");
+      ordersRevenue = completedOrders.reduce((acc, o) => acc + Number(o.total || 0), 0);
+    }
+  } catch (e) {
+    console.error("Error fetching orders for stats:", e);
+  }
+
+  const totalRevenue = appointmentsRevenue + ordersRevenue;
 
   /* ========================
      TOTAL CITAS
@@ -90,12 +102,73 @@ exports.getStatsByBarbershop = async (barbershopId) => {
     })
   );
 
+  /* ========================
+     TOP PRODUCTOS (Carrito)
+  ======================== */
+  const productMap = {};
+  allOrders.forEach(o => {
+    if (o.status !== "refunded" && o.status !== "cancelled") {
+      const items = o.items || [];
+      items.forEach(item => {
+        const pName = item.name;
+        const qty = item.quantity || 1;
+        if (!productMap[pName]) productMap[pName] = 0;
+        productMap[pName] += qty;
+      });
+    }
+  });
+
+  const cartTopProducts = Object.entries(productMap).map(([name, count]) => ({
+    name,
+    count
+  })).sort((a,b) => b.count - a.count).slice(0, 5);
+
+  /* ========================
+     ESTADOS (Appointments)
+  ======================== */
+  const statusMap = {};
+  let cancelledCount = 0;
+  appointments.forEach(a => {
+    const st = a.status || "pending";
+    if (!statusMap[st]) statusMap[st] = 0;
+    statusMap[st]++;
+    if (st === "cancelled") cancelledCount++;
+  });
+
+  const statusDistribution = Object.entries(statusMap).map(([name, value]) => ({
+    name,
+    value
+  }));
+
+  const cancelRate = appointments.length > 0 ? Math.round((cancelledCount / appointments.length) * 100) : 0;
+
+  /* ========================
+     HORAS PICO (Appointments)
+  ======================== */
+  const hoursMap = {};
+  appointments.forEach(a => {
+    if (a.time) {
+      const hour = a.time.split(":")[0] + ":00";
+      if (!hoursMap[hour]) hoursMap[hour] = 0;
+      hoursMap[hour]++;
+    }
+  });
+
+  const busyHours = Object.entries(hoursMap).map(([hour, count]) => ({
+    hour,
+    count
+  })).sort((a,b) => a.hour.localeCompare(b.hour));
+
   return {
-  totalRevenue: Number(totalRevenue.toFixed(2)),
-  totalAppointments,
-  totalClients,
-  totalServices,
-  revenueByDay,
-  servicesTop,
-};
+    totalRevenue: Number(totalRevenue.toFixed(2)),
+    totalAppointments,
+    totalClients,
+    totalServices,
+    revenueByDay,
+    servicesTop,
+    cartTopProducts,
+    statusDistribution,
+    busyHours,
+    cancelRate
+  };
 };

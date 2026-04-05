@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
+import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import RescheduleModal from "../../components/appointments/RescheduleModal";
 
 export default function Appointments() {
   const { barbershopId } = useParams();
@@ -10,6 +13,10 @@ export default function Appointments() {
   const [stats, setStats] = useState(null);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+
+  // Reschedule State
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [currentAppt, setCurrentAppt] = useState(null);
 
   /* ================= FETCH DATA ================= */
   const fetchData = useCallback(async () => {
@@ -62,6 +69,17 @@ export default function Appointments() {
     }
   };
 
+  /* ================= RESCHEDULE ================= */
+  const openReschedule = (appt) => {
+    setCurrentAppt(appt);
+    setIsRescheduling(true);
+  };
+
+  const closeReschedule = () => {
+    setIsRescheduling(false);
+    setCurrentAppt(null);
+  };
+
   /* ================= FILTER ================= */
   const filteredAppointments =
     filter === "all"
@@ -106,9 +124,45 @@ export default function Appointments() {
         ))}
       </div>
 
-      {/* ================= TABLE ================= */}
+      {/* ================= LIST / TABLE ================= */}
       <div className="bg-zinc-900 rounded-2xl overflow-hidden border border-white/5">
-        <table className="w-full text-sm">
+        
+        {/* MOBILE VIEW (CARDS) */}
+        <div className="md:hidden divide-y divide-white/5">
+          {filteredAppointments.length === 0 ? (
+            <div className="p-10 text-center text-gray-500">No hay citas</div>
+          ) : (
+            filteredAppointments.map((appt) => (
+              <div key={appt.id} className="p-5 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-lg">{appt.client?.username}</h3>
+                    <p className="text-yellow-500 text-sm">{appt.service?.name}</p>
+                  </div>
+                  <StatusBadge status={appt.status} />
+                </div>
+                
+                <div className="flex gap-4 text-xs text-gray-400">
+                  <span>📅 {appt.date}</span>
+                  <span>⏰ {appt.time}</span>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => changeStatus(appt.id, "confirmada")} className="flex-1 py-2 bg-green-600 rounded-lg text-xs font-bold">Confirmar</button>
+                  <button onClick={() => changeStatus(appt.id, "completada")} className="flex-1 py-2 bg-blue-600 rounded-lg text-xs font-bold">Completar</button>
+                  <button onClick={() => changeStatus(appt.id, "cancelada")} className="flex-1 py-2 bg-red-600 rounded-lg text-xs font-bold">Cancelar</button>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => openReschedule(appt)} className="flex-1 py-2 bg-yellow-500 text-black rounded-lg text-xs font-bold">Posponer</button>
+                  <button onClick={() => deleteAppointment(appt.id)} className="px-4 py-2 bg-zinc-800 rounded-lg text-xs font-bold text-red-500">Eliminar</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* DESKTOP VIEW (TABLE) */}
+        <table className="hidden md:table w-full text-sm">
           <thead className="bg-zinc-800 text-gray-400 uppercase text-xs">
             <tr>
               <th className="p-4 text-left">Cliente</th>
@@ -146,24 +200,35 @@ export default function Appointments() {
                   <button
                     onClick={() => changeStatus(appt.id, "confirmada")}
                     className="px-2 py-1 bg-green-600 rounded text-xs hover:scale-105 transition"
+                    title="Confirmar"
                   >
                     ✔
                   </button>
                   <button
                     onClick={() => changeStatus(appt.id, "completada")}
                     className="px-2 py-1 bg-blue-600 rounded text-xs hover:scale-105 transition"
+                    title="Completar"
                   >
                     ✓
                   </button>
                   <button
                     onClick={() => changeStatus(appt.id, "cancelada")}
                     className="px-2 py-1 bg-red-600 rounded text-xs hover:scale-105 transition"
+                    title="Cancelar"
                   >
                     ✖
                   </button>
                   <button
+                    onClick={() => openReschedule(appt)}
+                    className="px-2 py-1 bg-yellow-500 text-black rounded text-xs hover:scale-105 transition"
+                    title="Posponer"
+                  >
+                    📝
+                  </button>
+                  <button
                     onClick={() => deleteAppointment(appt.id)}
                     className="px-2 py-1 bg-gray-700 rounded text-xs hover:scale-105 transition"
+                    title="Eliminar permanentemente"
                   >
                     🗑
                   </button>
@@ -173,6 +238,21 @@ export default function Appointments() {
           </tbody>
         </table>
       </div>
+
+      {/* ================= MODAL POSPONER ================= */}
+      <AnimatePresence>
+        {isRescheduling && currentAppt && (
+          <RescheduleModal
+            appt={currentAppt}
+            onClose={closeReschedule}
+            onSuccess={() => {
+              closeReschedule();
+              fetchData();
+            }}
+          />
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

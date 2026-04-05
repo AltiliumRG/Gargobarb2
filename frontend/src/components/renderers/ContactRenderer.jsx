@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function ContactForm({ primaryColor, email }) {
+function ContactForm({ email }) {
   const [form, setForm] = useState({
     name: "",
     userEmail: "",
@@ -126,13 +126,8 @@ ${form.message}`
       bg-black/30
       border border-white/10
       outline-none transition-all
+      focus:border-yellow-400
     "
-    onFocus={(e) => {
-      e.target.style.borderColor = primaryColor;
-    }}
-    onBlur={(e) => {
-      e.target.style.borderColor = "rgba(255,255,255,0.1)";
-    }}
   />
   <label className="
     absolute left-4 top-2 text-xs text-gray-400 transition-all
@@ -153,9 +148,7 @@ ${form.message}`
     value={form.userEmail}
     onChange={(e) => handleChange("userEmail", e.target.value)}
     placeholder=" "
-    className="peer w-full p-4 pt-6 rounded-xl bg-black/30 border border-white/10 outline-none transition-all"
-    onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
+    className="peer w-full p-4 pt-6 rounded-xl bg-black/30 border border-white/10 outline-none transition-all focus:border-yellow-400"
   />
   <label className="absolute left-4 top-2 text-xs text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs">
     Tu correo electrónico
@@ -169,9 +162,7 @@ ${form.message}`
     value={form.message}
     onChange={(e) => handleChange("message", e.target.value)}
     placeholder=" "
-    className="peer w-full p-4 pt-6 rounded-xl bg-black/30 border border-white/10 outline-none transition-all resize-none"
-    onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
+    className="peer w-full p-4 pt-6 rounded-xl bg-black/30 border border-white/10 outline-none transition-all resize-none focus:border-yellow-400"
   />
   <label className="absolute left-4 top-2 text-xs text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs">
     Escribe tu mensaje
@@ -184,14 +175,14 @@ ${form.message}`
   disabled={loading}
   className="
     relative w-full py-4 rounded-2xl
-    font-bold text-black
+    font-bold text-black uppercase tracking-wide
+    bg-gradient-to-r from-yellow-400 to-yellow-500
     transition-all duration-300
-    hover:scale-[1.03]
+    hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(250,204,21,0.4)]
     active:scale-95
     disabled:opacity-50
     overflow-hidden
   "
-  style={{ background: primaryColor }}
 >
   <span className="relative z-10">
     {loading ? "Preparando mensaje..." : "Enviar mensaje"}
@@ -199,8 +190,7 @@ ${form.message}`
 
   {/* glow */}
   <div
-    className="absolute inset-0 blur-2xl opacity-40 animate-pulse"
-    style={{ background: primaryColor }}
+    className="absolute inset-0 bg-yellow-400 blur-2xl opacity-40 animate-pulse"
   />
 
   {/* shine */}
@@ -232,25 +222,22 @@ export default function ContactRenderer({
     textAlign: styles.align || "center",
     background: styles.backgroundColor || "TRANSPARENT",
     color: styles.textColor || "#fff",
-    padding: styles.padding || "80px 20px",
+    padding: styles.padding || "60px 20px md:80px 40px",
   };
 
-  const primaryColor =
-    site?.primary_color || styles.primaryColor || "#facc15";
-
   return (
-  <section
-    style={{
-      ...baseStyle,
-      background: "transparent",
-    }}
-    className="relative overflow-hidden"
-  >
+    <section
+      style={{
+        ...baseStyle,
+        padding: styles.padding || "80px 20px",
+        background: "transparent",
+      }}
+      className="relative overflow-hidden px-6"
+    >
     {/* 🔥 GLOW GLOBAL */}
     <div className="absolute inset-0 pointer-events-none">
       <div
-        className="w-[700px] h-[700px] blur-[140px] rounded-full absolute left-1/2 -translate-x-1/2 top-10 opacity-20"
-        style={{ background: primaryColor }}
+        className="w-[700px] h-[700px] blur-[140px] rounded-full absolute left-1/2 -translate-x-1/2 top-10 bg-yellow-400/20"
       />
     </div>
 
@@ -304,14 +291,11 @@ export default function ContactRenderer({
             target="_blank"
             rel="noreferrer"
             className="
-              inline-block mt-8 px-6 py-3 rounded-xl font-semibold
+              inline-block mt-8 px-6 py-3 rounded-xl font-bold bg-yellow-400 text-black
               transition-all duration-300
-              hover:scale-105 active:scale-95
+              hover:scale-105 hover:bg-yellow-300 hover:shadow-[0_0_15px_rgba(250,204,21,0.4)]
+              active:scale-95
             "
-            style={{
-              background: primaryColor,
-              color: "#000",
-            }}
           >
             Contactar por WhatsApp
           </a>
@@ -333,7 +317,6 @@ export default function ContactRenderer({
         ">
           {formEnabled && (
             <ContactForm
-              primaryColor={primaryColor}
               email={email}
             />
           )}

@@ -53,6 +53,22 @@ const Order = sequelize.define(
       type: DataTypes.ENUM("pending", "completed", "cancelled", "refunded"),
       defaultValue: "completed",
     },
+    shipping_address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    shipping_status: {
+      type: DataTypes.ENUM("pending", "processing", "shipped", "delivered"),
+      defaultValue: "pending",
+    },
+    customer_report: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    report_status: {
+      type: DataTypes.ENUM("none", "reported", "resolved"),
+      defaultValue: "none",
+    },
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,

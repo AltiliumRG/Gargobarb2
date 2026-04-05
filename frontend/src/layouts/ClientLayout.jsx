@@ -8,6 +8,8 @@ import ContactUs from "../pages/client/ContactUs";
 import MyBarbershop from "../pages/client/MyBarbershop";
 import Settings from "../pages/client/Settings";
 import Faqs from "../pages/client/Faqs";
+import MyAppointments from "../pages/client/MyAppointments";
+import MyOrders from "../pages/client/MyOrders";
 
 const ClientLayout = () => {
   const { theme } = useTheme();
@@ -28,6 +30,8 @@ const ClientLayout = () => {
           <Route path="my-barbershop" element={<MyBarbershop />} />
           <Route path="settings" element={<Settings />} />
           <Route path="faqs" element={<Faqs />} />
+          <Route path="appointments" element={<MyAppointments />} />
+          <Route path="orders" element={<MyOrders />} />
           <Route path="/" element={<Home />} />
           <Route path="*" element={<Navigate to="home" replace />} />
         </Routes>

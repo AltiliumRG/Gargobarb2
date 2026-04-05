@@ -21,7 +21,7 @@ export default function CartRenderer({ section, content, styles, site, preview }
 
   const displayProducts = useMemo(() => {
     // If we have content.items (from DB), map over them and enforce an image fallback.
-const rawDefaultItems = Array.isArray(safeContent.items) && safeContent.items.length > 0
+const rawDefaultItems = Array.isArray(safeContent.items)
   ? safeContent.items
   : DEFAULT_PRODUCTS;    const defaultItems = rawDefaultItems.map((item, idx) => ({
       ...item,

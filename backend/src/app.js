@@ -35,6 +35,7 @@ const productRoutes = require("./routes/product.routes");
 const shoppingCartRoutes = require("./routes/shoppingCart.routes");
 const statsRoutes = require("./routes/stats.routes");
 const orderRoutes = require("./routes/order.routes");
+const notificationRoutes = require("./routes/notification.routes");
 
 
 const app = express();
@@ -73,8 +74,8 @@ app.use(
 app.use("/api/stats", statsRoutes);
 // --- Rate Limiting Strategy ---
 const globalLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 100,            // Limit each IP to 100 requests per window
+  windowMs: 60 * 1000, 
+  max: 1500, // Augmented limit to prevent 429 locally temporarily
   message: { error: "Demasiadas peticiones. Por favor, intenta de nuevo más tarde." },
 });
 
@@ -121,6 +122,8 @@ app.use("/api/templates", require("./routes/template.routes"));
 app.use("/api/products", productRoutes);
 app.use("/api/shopping-carts", shoppingCartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/stats", statsRoutes);
 
 // --- Global Error Handling ---
 app.use(errorHandler);

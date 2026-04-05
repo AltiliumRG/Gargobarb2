@@ -36,6 +36,7 @@ import BarberWorkspaceLayout from "./pages/barber/BarberWorkspaceLayout";
 import Dashboard from "./pages/barber/Dashboard";
 import Schedule from "./pages/barber/Schedule";
 import Appointments from "./pages/barber/Appointments";
+import Orders from "./pages/barber/Orders";
 
 const App = () => {
   return (
@@ -133,6 +134,7 @@ const App = () => {
           >
             <Route index element={<Dashboard />} />
             <Route path="appointments" element={<Appointments />} />
+            <Route path="orders" element={<Orders />} />
             <Route path="schedule" element={<Schedule />} />
             <Route path="stats" element={<Stats />} />
             <Route path="settings" element={<Settings />} />

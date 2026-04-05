@@ -26,6 +26,7 @@ export default function CheckoutPage() {
   const [clientName,  setClientName]  = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
   const [reference,   setReference]   = useState("");   // para transferencia
   const [cardNumber,  setCardNumber]  = useState("");
   const [cardHolder,  setCardHolder]  = useState("");
@@ -102,6 +103,11 @@ export default function CheckoutPage() {
       }
     }
 
+    if (!shippingAddress.trim() || shippingAddress.trim().length < 5) {
+      setError("Por favor ingresa una dirección de envío válida para entregar tu producto.");
+      return;
+    }
+
     setError("");
     setShowConfirm(true);
   };
@@ -116,6 +122,7 @@ export default function CheckoutPage() {
         client_name:    clientName.trim(),
         client_email:   clientEmail.trim() || null,
         client_phone:   clientPhone.replace(/\D/g, ""),
+        shipping_address: shippingAddress.trim(),
         items,
         total,
         payment_method: method || "efectivo",
@@ -451,6 +458,16 @@ export default function CheckoutPage() {
                 type="email" placeholder="Ej. juan@correo.com"
                 value={clientEmail} onChange={(e) => setClientEmail(e.target.value)}
                 className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 transition text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-1.5 flex items-center gap-1">
+                Dirección de Destino <span className="text-yellow-500">🚚</span> *
+              </label>
+              <input
+                type="text" placeholder="Ej. Cl 10 # 50-20, Medellín"
+                value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)}
+                className="w-full p-3 rounded-xl bg-gradient-to-r from-black/20 to-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 transition text-sm shadow-inner"
               />
             </div>
 

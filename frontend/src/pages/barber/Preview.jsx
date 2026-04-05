@@ -2,10 +2,12 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { getSiteByBarbershop } from "../../api/site.api";
 import SectionRendererUniversal from "../../components/renderers/SectionRendererUniversal";
+import { useBarber } from "../../context/BarberContext";
 
 export default function Preview() {
   const { siteId } = useParams();
   const [site, setSite] = useState(null);
+  const { setActiveBarbershop } = useBarber();
 
   useEffect(() => {
     if (!siteId) return;
@@ -21,6 +23,10 @@ export default function Preview() {
           pages: parsed.pages
         });
 
+        if (parsed.site?.barbershop_id) {
+          setActiveBarbershop({ id: parsed.site.barbershop_id });
+        }
+
         // Limpiar para que la próxima vez cargue lo nuevo
         localStorage.removeItem(`gargobarb_preview_${siteId}`);
         return;
@@ -32,6 +38,12 @@ export default function Preview() {
     // 2. Fallback: Cargar desde API (Versión Guardada)
     getSiteByBarbershop(siteId).then(res => {
       setSite(res.data);
+      if (res.data?.site?.barbershop_id) {
+        setActiveBarbershop({ id: res.data.site.barbershop_id });
+      } else if (res.data?.barbershop_id) {
+        // Fallback depending on API structure
+        setActiveBarbershop({ id: res.data.barbershop_id });
+      }
     });
   }, [siteId]);
 
@@ -70,7 +82,7 @@ export default function Preview() {
       className="min-h-screen scroll-smooth"
       style={{
         fontFamily: site.font_family || "sans-serif",
-        background: site.primary_color || "#0b0f14",
+        background: "#0b0f14",
         color: site.text_color || "#ffffff"
       }}
     >

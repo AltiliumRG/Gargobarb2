@@ -1,7 +1,10 @@
 import { useBuilder } from "../../context/BuilderContext";
 import { useEffect, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function HeroRenderer({ section, preview }) {
+  const navigate = useNavigate();
+  const { slug } = useParams();
   const builder = useBuilder?.();
 
   const selectedSectionId = builder?.selectedSectionId;
@@ -142,7 +145,13 @@ export default function HeroRenderer({ section, preview }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (preview) console.log("Reservar");
+              if (preview) {
+                if (slug) {
+                  navigate(`/b/${slug}/book`);
+                } else {
+                  console.log("Reservar clickeado en modo preview interno");
+                }
+              }
             }}
             className="
               relative

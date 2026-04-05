@@ -39,31 +39,7 @@ export default function GlobalSettings({ site, updateSiteSettings }) {
           </div>
         </div>
 
-        <div className="bg-[#0b1220] border border-gray-800 rounded-2xl p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-yellow-400 tracking-wide">
-            Colores de Marca
-          </h3>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-300">Color Primario</span>
-            <input
-              type="color"
-              value={site?.primary_color || "#0b0f14"}
-              onChange={(e) => updateSiteSettings({ primary_color: e.target.value })}
-              className="w-12 h-8 rounded cursor-pointer border border-gray-700 bg-transparent"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-300">Color Secundario</span>
-            <input
-              type="color"
-              value={site?.secondary_color || "#facc15"}
-              onChange={(e) => updateSiteSettings({ secondary_color: e.target.value })}
-              className="w-12 h-8 rounded cursor-pointer border border-gray-700 bg-transparent"
-            />
-          </div>
-        </div>
       </div>
     </aside>
   );

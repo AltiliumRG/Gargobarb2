@@ -10,7 +10,7 @@ import Canvas from "../../components/builder/Canvas";
 import Toolbar from "../../components/builder/Toolbar";
 import PropertiesPanel from "../../components/builder/PropertiesPanel";
 
-import { useBarber } from "../../context/BarberContext";
+import { useBarber, BarberProvider } from "../../context/BarberContext";
 
 /* ============================================================
    CONTENIDO INTERNO
@@ -59,40 +59,50 @@ function BuilderContent() {
   }
 
   return (
-    <div className="h-screen w-full flex bg-transparent overflow-hidden">
+    <div className="h-[calc(100vh-68px)] w-full flex bg-[#060910] overflow-hidden relative">
 
-      {/* ================= LEFT PANEL ================= */}
+      {/* ================= MODAL BACKDROP (Mobile only) ================= */}
+      {!loadingPage && (leftOpen || rightOpen) && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
+          onClick={() => {
+            setLeftOpen(false);
+            setRightOpen(false);
+          }}
+        />
+      )}
+
+      {/* ================= LEFT PANEL (Toolbar) ================= */}
       <aside
         className={`
-          relative
+          fixed md:relative top-0 left-0 h-full z-40
           flex flex-col
-          transition-all duration-300 ease-in-out
-          ${leftOpen ? "w-[320px]" : "w-[60px]"}
-          border-r border-gray-800
-          bg-[#0f141a]
+          transition-all duration-500 ease-in-out
+          ${leftOpen ? "w-[320px] translate-x-0" : "w-[60px] -translate-x-full md:translate-x-0"}
+          border-r border-white/5
+          bg-[#0f141a]/95 backdrop-blur-xl
         `}
       >
-
         {/* TOGGLE */}
         <button
           onClick={() => setLeftOpen(!leftOpen)}
           className="
-            absolute -right-3 top-6
-            bg-gray-800 border border-gray-700
+            absolute -right-3 top-20 md:top-6
+            bg-yellow-500/80 hover:bg-yellow-500 border border-yellow-400/50
             w-6 h-6 rounded-full
             flex items-center justify-center
-            text-xs hover:bg-gray-700
-            transition z-20
+            text-black text-[10px] hover:scale-110
+            transition z-50 shadow-lg shadow-yellow-500/10
           "
         >
           {leftOpen ? "◀" : "▶"}
         </button>
 
-        {/* SCROLL INTERNO REAL */}
-        <div className="flex-1 overflow-y-auto">
+        {/* SCROLL INTERNO */}
+        <div className="flex-1 overflow-y-auto hide-scrollbar">
           <div className={`
-            h-full
-            transition-opacity duration-200
+            h-full p-2
+            transition-opacity duration-300
             ${!leftOpen && "opacity-0 pointer-events-none"}
           `}>
             <Toolbar />
@@ -100,43 +110,42 @@ function BuilderContent() {
         </div>
       </aside>
 
-      {/* ================= CANVAS ================= */}
-      <main className="flex-1 h-full overflow-auto bg-transparent">
-        <Canvas />
+      {/* ================= CANVAS (Center) ================= */}
+      <main className="flex-1 h-full overflow-y-auto relative z-10 bg-[#060910] custom-scroll">
+         <Canvas />
       </main>
 
-      {/* ================= RIGHT PANEL ================= */}
+      {/* ================= RIGHT PANEL (Properties) ================= */}
       <aside
         className={`
-          relative
+          fixed md:relative top-0 right-0 h-full z-40
           flex flex-col
-          transition-all duration-300 ease-in-out
-          ${rightOpen ? "w-[380px]" : "w-[60px]"}
-          border-l border-gray-800
-          bg-[#0f141a]
+          transition-all duration-500 ease-in-out
+          ${rightOpen ? "w-full sm:w-[380px] translate-x-0" : "w-[60px] translate-x-full md:translate-x-0"}
+          border-l border-white/5
+          bg-[#0f141a]/95 backdrop-blur-xl
         `}
       >
-
         {/* TOGGLE */}
         <button
           onClick={() => setRightOpen(!rightOpen)}
           className="
-            absolute -left-3 top-6
-            bg-gray-800 border border-gray-700
+            absolute -left-3 top-20 md:top-6
+            bg-yellow-500/80 hover:bg-yellow-500 border border-yellow-400/50
             w-6 h-6 rounded-full
             flex items-center justify-center
-            text-xs hover:bg-gray-700
-            transition z-20
+            text-black text-[10px] hover:scale-110
+            transition z-50 shadow-lg shadow-yellow-500/10
           "
         >
           {rightOpen ? "▶" : "◀"}
         </button>
 
-        {/* SCROLL INTERNO REAL */}
-        <div className="flex-1 overflow-y-auto">
+        {/* SCROLL INTERNO */}
+        <div className="flex-1 overflow-y-auto hide-scrollbar">
           <div className={`
-            h-full
-            transition-opacity duration-200
+            h-full p-2
+            transition-opacity duration-300
             ${!rightOpen && "opacity-0 pointer-events-none"}
           `}>
             <PropertiesPanel />

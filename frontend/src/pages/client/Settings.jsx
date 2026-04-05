@@ -134,7 +134,8 @@ const Settings = () => {
                         {...commonProps} 
                         user={user} 
                         accountData={accountData} 
-                        setAccountData={setAccountData} 
+                        setAccountData={setAccountData}
+                        onAvatarUpdate={(updatedUser) => login(updatedUser)}
                     />
                 );
             case "seguridad":

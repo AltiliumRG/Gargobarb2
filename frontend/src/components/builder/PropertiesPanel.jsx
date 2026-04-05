@@ -4,6 +4,7 @@ import { useBarber } from "../../context/BarberContext";
 import { getServicesByBarbershop } from "../../api/services.api";
 import { getProductsByBarbershop } from "../../api/products.api";
 
+
 // Sub-components (Property Editors)
 import GlobalSettings from "./PropertyEditors/Editors/GlobalSettings";
 import HeroEditor from "./PropertyEditors/Editors/HeroEditor";
@@ -34,6 +35,8 @@ export default function PropertiesPanel() {
   const [loadingServices, setLoadingServices] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
+  const [savingId, setSavingId] = useState(null);
+  
   // Load services if a barbershop is active
   useEffect(() => {
     if (!activeBarbershop?.id) return;

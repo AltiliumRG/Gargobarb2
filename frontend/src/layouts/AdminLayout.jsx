@@ -38,6 +38,22 @@ const AdminLayout = () => {
 
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col overflow-hidden transition-all duration-300">
+        
+        {/* Mobile Header */}
+        {!isDesktop && (
+          <header className="h-16 flex items-center px-6 bg-black/50 backdrop-blur-md border-b border-zinc-800/50">
+            <button 
+              onClick={toggleSidebar}
+              className="p-2 rounded-lg bg-amber-500 text-black shadow-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h2 className="ml-4 font-bold text-lg text-zinc-100 uppercase tracking-widest">GargoBarb Admin</h2>
+          </header>
+        )}
+
         <main className="flex-1 overflow-y-auto p-6 md:p-10 bg-gradient-to-tr from-gray-950 via-gray-900 to-black">
           <Routes key={location.pathname}>
             <Route path="/" element={<Navigate to="dashboard" />} />

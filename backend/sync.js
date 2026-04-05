@@ -1,14 +1,15 @@
-const { sequelize } = require('./src/models');
+require("dotenv").config();
+const { sequelize } = require("./src/config/db");
+const Order = require("./src/models/Order");
 
-async function syncDb() {
+async function run() {
   try {
-    await sequelize.sync({ alter: true });
-    console.log("Database synced successfully!");
-    process.exit(0);
-  } catch (error) {
-    console.error("Error syncing database:", error);
-    process.exit(1);
+    await Order.sync({ alter: true });
+    console.log("Order table synced successfully.");
+  } catch (err) {
+    console.error(err);
+  } finally {
+    process.exit();
   }
 }
-
-syncDb();
+run();

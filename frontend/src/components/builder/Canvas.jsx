@@ -19,8 +19,8 @@ export default function Canvas() {
   }
 
   return (
-    <div className="flex-1 bg-transparent overflow-y-auto">
-      <div className="max-w-7xl mx-auto min-h-screen">
+    <div className="w-full bg-transparent">
+      <div className="max-w-7xl mx-auto py-10 min-h-screen">
 
         {sections.map((section) => {
           const isSelected = section.id === selectedSectionId;
